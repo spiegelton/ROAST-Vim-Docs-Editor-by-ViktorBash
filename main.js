@@ -1,5 +1,6 @@
 import { docs } from "./docs.js";
-console.log("Test");
+
+console.log("Vim Docs Editor Loaded");
 
 const useQWERTY = false;
 const directionalKeys = useQWERTY ? "hjkl" : "dhtn";
