@@ -1,11 +1,4 @@
-var docs = docs || {
-    // The document's unique ID that appears in the address bar.
-    id: window.location.href.split("/document/d/")[1].split("/")[0],
-    // The document's user-specified name (may change over time).
-    get name() {
-        return $(".docs-title-input-label-inner").text().trim();
-    },
-};
+var docs = {}
 
 /*********** UTILITIES ***********/
 // Helper method to observe changes to a DOM element. Used in the getSelection

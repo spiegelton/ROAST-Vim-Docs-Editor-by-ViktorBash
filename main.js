@@ -2,14 +2,13 @@ import { docs } from "./docs.js";
 
 console.log("Vim Docs Editor Loaded");
 
-const useQWERTY = false;
-const directionalKeys = useQWERTY ? "hjkl" : "dhtn";
+const directionalKeys = "hjkl";
 
 var vim = {
     "mode": "insert", // Keep track of current mode
     "num": "", // Keep track of number keys pressed by the user
     "currentSequence": "", // Keep track of key sequences
-    "escapeSequence": useQWERTY ? "jk" : "hn",
+    "escapeSequence": "hn",
     "keyMaps" : {
         "Backspace": [["ArrowLeft"]],
         "x": [["Delete"]],
