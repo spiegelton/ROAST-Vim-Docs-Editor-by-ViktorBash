@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Vim Docs Editor",
+  "version": "1.0",
+  "description": "Pain",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.google.com/*document/d/*/edit*"
+      ],
+      "js": [
+        "dist/bundle.js"
+      ]
+    }
+  ]
+}
+
