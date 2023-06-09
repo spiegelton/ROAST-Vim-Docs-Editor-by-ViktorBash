@@ -1,10 +1,6 @@
 import { docs } from "./docs.js";
 
-console.log("Vim Docs Editor Loaded");
-
-const directionalKeys = "hjkl";
-
-var vim = {
+let vim = {
     "mode": "insert", // Keep track of current mode
     "num": "", // Keep track of number keys pressed by the user
     "currentSequence": "", // Keep track of key sequences
@@ -13,24 +9,28 @@ var vim = {
         "Backspace": [["ArrowLeft"]],
         "x": [["Delete"]],
         "b": [["ArrowLeft", true]], // ctrl + <-
+        "B": [["ArrowLeft", true]], // ctrl + <-
         "e": [["ArrowRight", true]], // ctrl + ->
-        // w is same behavior as eeb
-        "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],
+        "E": [["ArrowRight", true]], // ctrl + ->
+        "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
+        "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
         "a": [["ArrowRight"]],
-        "A": [["ArrowDown", true]],
+        "A": [["ArrowDown", true], ["ArrowLeft"]],
         "I": [["ArrowUp", true]],
         "$": [["ArrowDown", true]],
         "0": [["ArrowUp", true]],
         "o": [["ArrowDown", true], ["Enter"]],
-        "O": [["ArrowUp", true], ["ArrowLeft"], ["Enter"]]
+        "O": [["ArrowUp", true], ["ArrowLeft"], ["Enter"]],
+        "h": [["ArrowLeft"]],
+        "j": [["ArrowDown"]],
+        "k": [["ArrowUp"]],
+        "l": [["ArrowRight"]],
+        "H": [["Home", true]],
+        "gg": [["home", true]],
+        "G": [["End", true]]
     },
     "needsInsert": ["a", "A", "I", "o", "O"]
 };
-
-vim.keyMaps[directionalKeys[0]] = [["ArrowLeft"]];
-vim.keyMaps[directionalKeys[1]] = [["ArrowDown"]];
-vim.keyMaps[directionalKeys[2]] = [["ArrowUp"]];
-vim.keyMaps[directionalKeys[3]] = [["ArrowRight"]];
 
 vim.addKeyMappings = function (baseMap) {
     baseMap[vim.keys.move[0]] = "ArrowLeft";
@@ -186,3 +186,5 @@ docs.keydown = function (e) {
         return vim.visual_keydown(e);
     }
 };
+
+console.log("Vim Docs Editor Loaded");

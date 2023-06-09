@@ -22,10 +22,23 @@ docs.observe = function (el, config, callback, observeOnce) {
 // Helper method to translate keys (including a few special/command keys) to
 // keyCodes for use with docs.pressKey(keyCode, ...).
 docs.codeFromKey = function(key) {
-    var specialKeys = {
-        "/": 191, "Escape": 27, "Shift": 16, "Control": 17, "Alt": 18,
-        "Backspace": 8, " ": 32, "Enter": 13, "Tab": 9, "ArrowLeft": 37,
-        "ArrowUp": 38, "ArrowRight": 39, "ArrowDown": 40, "Delete": 46
+    const specialKeys = {
+        "Backspace": 8,
+        "Tab": 9,
+        "Enter": 13,
+        "Shift": 16,
+        "Control": 17,
+        "Alt": 18,
+        "Escape": 27,
+        " ": 32,
+        "End": 35,
+        "Home": 36,
+        "ArrowLeft": 37,
+        "ArrowUp": 38,
+        "ArrowRight": 39,
+        "ArrowDown": 40,
+        "Delete": 46,
+        "/": 191
     };
     if (key in specialKeys) {
         return specialKeys[key];
