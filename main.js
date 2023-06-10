@@ -1,7 +1,7 @@
 import { docs } from "./docs.js";
 
 let vim = {
-    "mode": "insert", // Keep track of current mode
+    "mode": "insert", // Keep track of current mode, options: ["insert", "normal", "visual"]
     "num": "", // Keep track of number keys pressed by the user
     "currentSequence": "", // Keep track of key sequences
     "escapeSequence": "hn",
@@ -19,8 +19,8 @@ let vim = {
         "I": [["ArrowUp", true]],
         "$": [["ArrowDown", true]],
         "0": [["ArrowUp", true]],
-        "o": [["ArrowDown", true], ["Enter"]],
-        "O": [["ArrowUp", true], ["ArrowLeft"], ["Enter"]],
+        "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
+        "O": [["ArrowUp", true], ["ArrowLeft"], ["Enter"], ["ArrowLeft"]],
         "h": [["ArrowLeft"]],
         "j": [["ArrowDown"]],
         "k": [["ArrowUp"]],
@@ -63,7 +63,7 @@ vim.switchToInsertMode = function () {
 // Called in normal mode.
 vim.normal_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
-        // Pass through any function keys.
+        // Let function keys (F1 to F12), go through normally
         return true;
     }
 
@@ -81,7 +81,17 @@ vim.normal_keydown = function (e) {
     }
 
     if (e.key.match(/\d+/)) {
-        vim.num += e.key.toString();
+        if (e.key === "0" && vim.num.length !== 0) {
+            // 0 is part of the number being typed (ex: "100")
+            vim.num += e.key
+            return true;
+        }
+        else if (e.key !== "0") {
+            // We have any digit besides 0 being typed (ex: "1" or "11")
+            vim.num += e.key
+            return true;
+        }
+        // else, 0 is the actual command (ex: "0"), so continue to down below
     }
 
     vim.keyMaps[e.key]?.forEach(([key, ...args]) => {
