@@ -142,26 +142,6 @@ docs.setColor = function (color) {
     el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
 };
 
-// Toggles whether inserted (selected) text is superscripted or not. Note that
-// entering newlines, etc. may disrupt this setting. TODO(matthewsot):
-// isSuperscript() method.
-docs.toggleSuperscript = function () {
-    docs.pressKey(190, true, false);
-};
-
-// Toggles whether inserted (selected) text is subscripted or not. Note that
-// entering newlines, etc. may disrupt this setting. TODO(matthewsot):
-// isSubscript() method.
-docs.toggleSubscript = function () {
-    docs.pressKey(188, true, false);
-};
-
-// Toggles whether inserted (selected) text is bolded or not. TODO(matthewsot):
-// isBold() method.
-docs.toggleBold = function () {
-    docs.pressKey(66, true, false);
-};
-
 /*********** USER SELECTIONS ***********/
 // Gets the raw DOM element corresponding to the user's selection, used by
 // docs.hasSelection and docs.getSelection.
