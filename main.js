@@ -66,13 +66,7 @@ vim.normal_keydown = function (e) {
         // Let function keys (F1 to F12), go through normally
         return true;
     }
-
-    // if (e.key == "p") {
-    //     docs.getCursorCoordinates();
-    //     docs.pressKey(docs.codeFromKey("ArrowRight"));
-    //     docs.getCursorCoordinates();
-    //     docs.pressKey(docs.codeFromKey("ArrowLeft"));
-    // }
+    
 
     e.preventDefault();
     e.stopPropagation();

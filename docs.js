@@ -80,11 +80,8 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
     el.dispatchEvent(key_event);
 };
 
-// Helper to simulate pressing the backspace key.
-docs.backspace = function (counts) {
-    docs.pressKey(8);
-};
 
+// UNUSED AND UNTESTED FUNCTION
 // Pastes a block of plaintext into the document. Note that spaces before/after
 // @text don't seem to work. Also note that repeated pastes can cause serious
 // problems --- please give each paste a few hunderd milliseconds to finish
@@ -105,37 +102,13 @@ docs.pasteText = function (text) {
     el.dispatchEvent(paste);
 };
 
-/*********** USER CURSOR ***********/
-// Gets the DOM element corresponding to the user's insertion point marker.
-docs.getUserCursor = function () {
-    var myCursor = null;
-
-    $(".kix-cursor").each(function () {
-        var caretColor = $(this).find(".kix-cursor-caret");
-        caretColor = caretColor.css("border-left-color").replace(/,/g, "");
-        caretColor = caretColor.replace(/\s/g, "").toLowerCase();
-        var isCaretBlack = (caretColor.indexOf("(000)") !== -1 ||
-                            caretColor.indexOf("#000") !== -1 ||
-                            caretColor.indexOf("black") !== -1);
-        var cursor_name = $(this).find(".kix-cursor-name").text().trim();
-        
-        if (cursor_name.length <= 0 && isCaretBlack) {
-            myCursor = $(this);
-        }
-    });
-
-    if (myCursor !== null) {
-        return myCursor;
-    }
-
-    console.log("Couldn't locate the cursor!");
-    return $(".kix-cursor").first();
-};
+docs.userCursor = document.querySelector(".kix-cursor");
+docs.cursorCaret = document.querySelector(".kix-cursor-caret");
 
 // Sets the width of the user's insertion point marker. @width should be a
 // width value compatible with CSS border-width: @width;
 docs.setCursorWidth = function(width) {
-    docs.getUserCursor().find(".kix-cursor-caret").css("border-width", width);
+    docs.cursorCaret.style.borderWidth = width;
 };
 
 // docs.cursorText = document.querySelector(".kix-cursor").style.transform.slice(10);
