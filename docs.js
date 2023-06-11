@@ -105,31 +105,6 @@ docs.pasteText = function (text) {
     el.dispatchEvent(paste);
 };
 
-/*********** TEXT FORMATTING ***********/
-docs.colors = {
-    "black": "#docs-material-colorpalette-cell-0 > div:nth-child(1)",
-    "gray": "#docs-material-colorpalette-cell-5 > div:nth-child(1)",
-    "white": "#docs-material-colorpalette-cell-9 > div:nth-child(1)",
-};
-
-// Sets the color of inserted (or selected) text. @color can either be a
-// color-palatte DOM element selector or one of the supported color names in
-// docs.colors.
-docs.setColor = function (color) {
-    if (color in docs.colors) {
-        color = docs.colors[color];
-    }
-    var sel = $("#textColorButton > div:nth-child(1) > div:nth-child(1)")[0];
-    sel.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-
-    var el = $(color)[0];
-    el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-    el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    el.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
-};
-
 /*********** USER SELECTIONS ***********/
 // Gets the raw DOM element corresponding to the user's selection, used by
 // docs.hasSelection and docs.getSelection.
