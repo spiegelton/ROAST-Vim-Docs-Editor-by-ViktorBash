@@ -120,7 +120,7 @@ docs.getFontSize = function() {
     return docs.fontSizeInput.value;
 }
 
-// Edge case: Your view may scroll up a line if you're view is of the cursor at the very top
+// Edge case: Your view may scroll up or down a line if you're view is of the cursor at the very top
 docs.atStartOfLine = function() {
     // We are going to get the initial Y Coordinate, move one character left, get the y coord (move back), and compare the two
     // If they are different, we are at the start of the line
@@ -139,15 +139,56 @@ docs.atStartOfLine = function() {
     return false; // Not at start of line
 }
 
-// docs.getDocLocations = function() {
-//     // The point of coupling so many functions together is to reduce the number of times we have to move the cursor
-//     result = [false, false, false]; // [are we at the start of a line, are we at the start of a file, are we at the end of a file]
-//     let coords = docs.userCursor.style.transform;
-//     docs.pressKey(docs.codeFromKey("ArrowLeft"));
-//     let newCoords = docs.userCursor.style.transform;
-//     if (coords ==)
+// Returns an array of booleans representing the cursor's location [atStartOfLine, atEndOfLine, atStartOfFile, atEndOfFile]
+// The point of coupling so many functions together is to reduce the number of times we have to move the cursor
+docs.getCursorLocations = function() {
+    let result = [false, false, false, false];
+    let initialCoords = docs.userCursor.style.transform;
+    let initialXIndex = initialCoords.indexOf("px");
+    let initialYCoord = initialCoords.slice(initialXIndex + 4, initialCoords.length - 3);
+    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    let newCoords = docs.userCursor.style.transform;
+    let newXIndex = newCoords.indexOf("px");
+    let newYCoord = newCoords.slice(newXIndex + 4, newCoords.length - 3);
+    if (initialCoords === newCoords) {
+        // We are the start of the file since going left did nothing
+        // This also means we shouldn't ArrowRight, since our ArrowLeft didn't do anything
+        result[2] = true;
+        result[0] = true;
+    }
+    else if (initialYCoord !== newYCoord) {
+        // We are at the start of a line since our Y (height), changed
+        result[0] = true;
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
 
-// }
+    }
+    else {
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+    }
+
+    // Now we need to check end of line/end of file
+    docs.pressKey(docs.codeFromKey("ArrowRight"));
+    newCoords = docs.userCursor.style.transform;
+    newXIndex = newCoords.indexOf("px");
+    newYCoord = newCoords.slice(newXIndex + 4, newCoords.length - 3);
+
+    if (initialCoords === newCoords) {
+        // We are at the end of the file since going right did nothing
+        // This also means we shouldn't ArrowLeft, since our ArrowRight didn't do anything
+        result[3] = true;
+        result[1] = true;
+    }
+    else if (newYCoord !== initialYCoord) {
+        // We are at the end of a line since our Y (height), changed
+        result[1] = true;
+        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    }
+    else {
+        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    }
+
+    return result;
+}
 
 
 export { docs }
