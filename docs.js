@@ -111,18 +111,33 @@ docs.setCursorWidth = function(width) {
     docs.cursorCaret.style.borderWidth = width;
 };
 
-// docs.cursorText = document.querySelector(".kix-cursor").style.transform.slice(10);
+
+docs.fontSizeInput = document.querySelector(".jfk-textinput.goog-toolbar-combo-button-input[aria-label=\"Font size\"]");
 
 
-// docs.getCursorCoordinates = function() {
-//     // let cursorText = document.querySelector(".kix-cursor").style.transform.slice(10);
-//     let x_end_index = docs.cursorText.indexOf("p");
-//     let x_value = docs.cursorText.slice(0, x_end_index)
-//     let y_value = docs.cursorText.slice(x_end_index + 4, -3);
-//     console.log(docs.cursorText);
-//     console.log(x_value, y_value);
-    
-// }
+// Get the current font size (where the cursor is)
+docs.getFontSize = function() {
+    return docs.fontSizeInput.value;
+}
+
+// Edge case: Your view may scroll up a line if you're view is of the cursor at the very top
+docs.atStartOfLine = function() {
+    // We are going to get the initial Y Coordinate, move one character left, get the y coord (move back), and compare the two
+    // If they are different, we are at the start of the line
+    let coords = docs.userCursor.style.transform;
+    let xIndex = coords.indexOf("px");
+    let initialYCoord = coords.slice(xIndex + 4, coords.length - 3);
+    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    coords = docs.userCursor.style.transform;
+    xIndex = coords.indexOf("px");
+    let finalYCoord = coords.slice(xIndex + 4, coords.length - 3);
+    docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our key action
+
+    if (initialYCoord !== finalYCoord) { // Y Coords different --> At start of line
+        return true;
+    }
+    return false; // Not at start of line
+}
 
 
 export { docs }

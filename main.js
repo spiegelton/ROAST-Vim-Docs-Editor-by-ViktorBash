@@ -20,7 +20,6 @@ let vim = {
         "$": [["ArrowDown", true]],
         "0": [["ArrowUp", true]],
         "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
-        "O": [["ArrowUp", true], ["ArrowLeft"], ["Enter"], ["ArrowLeft"]],
         "h": [["ArrowLeft"]],
         "j": [["ArrowDown"]],
         "k": [["ArrowUp"]],
@@ -71,12 +70,12 @@ vim.normal_keydown = function (e) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (e.key == "i") {
+    if (e.key === "i") {
         vim.switchToInsertMode();
         return true;
     }
 
-    if (e.key == "v") {
+    if (e.key === "v") {
         vim.switchToVisualMode();
         return true;
     }
@@ -93,6 +92,35 @@ vim.normal_keydown = function (e) {
             return true;
         }
         // else, 0 is the actual command (ex: "0"), so continue to down below
+    }
+
+    if (e.key === "O") {
+        // The edge cases here that we handle: If we are at the start of a line and start of a paragraph 
+        // (which is different than just being at the start of a line)
+        // Also if we are on an empty line
+        if (docs.atStartOfLine()) {
+            docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
+            if (docs.atStartOfLine()) {
+                // We are on an empty line, so reverse and insert a new line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("Enter"));
+            }
+            else {
+                // We are at the start of a line but not the start of the paragraph, so business as usual
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("Enter"));
+            }
+        }
+        else {
+            // We are not at the start of a line, so just insert a new line
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            docs.pressKey(docs.codeFromKey("Enter"));
+        }
+        vim.switchToInsertMode();
+        return true;
     }
 
     vim.keyMaps[e.key]?.forEach(([key, ...args]) => {
