@@ -4,7 +4,6 @@ module.exports = {
   mode: 'production',
   entry: {
     main: [
-      "./jquery_min.js",
       "./docs.js",
       "./main.js"
     ]
