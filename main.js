@@ -16,8 +16,7 @@ let vim = {
         "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
         "a": [["ArrowRight"]],
         "A": [["ArrowDown", true], ["ArrowLeft"]],
-        "$": [["ArrowDown", true]],
-        "0": [["ArrowUp", true]],
+        "$": [["ArrowDown", true], ["ArrowLeft"]],
         "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
         "h": [["ArrowLeft"]],
         "j": [["ArrowDown"]],
@@ -90,7 +89,26 @@ vim.normal_keydown = function (e) {
             vim.num += e.key
             return true;
         }
-        // else, 0 is the actual command (ex: "0"), so continue to down below
+        else {
+            // else, 0 is the actual command (ex: "0"), so continue to down below
+            if (docs.atStartOfLine()) {
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
+                if (docs.atStartOfLine()) {
+                    // We are on an empty line, so reverse, and that's it
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+                else {
+                    // We are at the start of a line but not the start of the paragraph, so business as usual
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                }
+            }
+            else {
+                // We are not at the start of a line, so go to the start
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            }
+            return true;
+        }
+
     }
 
     if (e.key === "O") {
