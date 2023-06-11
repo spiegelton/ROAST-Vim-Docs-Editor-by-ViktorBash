@@ -67,6 +67,13 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
+    // if (e.key == "p") {
+    //     docs.getCursorCoordinates();
+    //     docs.pressKey(docs.codeFromKey("ArrowRight"));
+    //     docs.getCursorCoordinates();
+    //     docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    // }
+
     e.preventDefault();
     e.stopPropagation();
 
@@ -174,7 +181,7 @@ vim.insert_keydown = function (e) {
         // We need to delete the first character already typed in the escape
         // sequence.
         for (var i = 0; i < (vim.currentSequence.length - 1); i++) {
-            docs.backspace();
+            docs.pressKey(docs.codeFromKey("Backspace")); // changed from original way
         }
 
         vim.switchToNormalMode();

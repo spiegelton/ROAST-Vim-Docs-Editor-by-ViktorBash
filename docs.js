@@ -82,16 +82,6 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
     el.dispatchEvent(key_event);
 };
 
-// Simulates pressing >= 1 *character* keys. Note that this has very limited
-// support, and only really works for letters --- in most cases, you should use
-// docs.pasteText. The imagined use case is to replace the charCodeAt
-// boilerplate in, eg., docs.pressKey("a".charCodeAt(0)).
-docs.pressLetters = function (text, ctrlKey, shiftKey) {
-    for (var i = 0; i < text.length; i++) {
-        docs.pressKey(text.charCodeAt(i), ctrlKey, shiftKey);
-    }
-};
-
 // Helper to simulate pressing the backspace key.
 docs.backspace = function (counts) {
     docs.pressKey(8);
@@ -229,7 +219,7 @@ docs.getCurrentParagraphText = function(callback) {
                     rawText = rawText.replace("__docs_plus__", "");
 
                     for (var i = 0; i < "__docs_plus__".length; i++) {
-                        docs.backspace();
+                        docs.pressKey(docs.codeFromKey("Backspace")); // Changed from original way
                     }
 
                     callback(rawText);
@@ -274,5 +264,19 @@ docs.getUserCursor = function () {
 docs.setCursorWidth = function(width) {
     docs.getUserCursor().find(".kix-cursor-caret").css("border-width", width);
 };
+
+// docs.cursorText = document.querySelector(".kix-cursor").style.transform.slice(10);
+
+
+// docs.getCursorCoordinates = function() {
+//     // let cursorText = document.querySelector(".kix-cursor").style.transform.slice(10);
+//     let x_end_index = docs.cursorText.indexOf("p");
+//     let x_value = docs.cursorText.slice(0, x_end_index)
+//     let y_value = docs.cursorText.slice(x_end_index + 4, -3);
+//     console.log(docs.cursorText);
+//     console.log(x_value, y_value);
+    
+// }
+
 
 export { docs }
