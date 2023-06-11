@@ -105,60 +105,6 @@ docs.pasteText = function (text) {
     el.dispatchEvent(paste);
 };
 
-/*********** USER SELECTIONS ***********/
-// Gets the raw DOM element corresponding to the user's selection, used by
-// docs.hasSelection and docs.getSelection.
-docs.getSelectionEl = function () {
-    var selection = null;
-    $(".kix-selection-overlay").each(function () {
-        if (selection !== null) return;
-        
-        var hasOverriddenColor = $(this).attr("style").indexOf("background-color") !== -1;
-        var isBlack = $(this).css("background-color").replace(/\s/g, "").replace(/,/g, "");
-        isBlack = isBlack.indexOf("000") !== -1;
-        if (!hasOverriddenColor || isBlack) {
-            selection = $(this);
-        }
-    });
-    
-    return selection;
-};
-
-// True iff the user is selecting some text.
-docs.hasSelection = function () {
-    return docs.getSelectionEl() !== null;
-};
-
-// callback(text) is called where text is the contents of the user's selection.
-// If @defaultToParagraph, empty selections are replaced with the paragraph of
-// the user's current selection. getRaw will return the raw HTML selection
-// element instead of processed text.
-docs.getSelection = function (callback, defaultToParagraph, getRaw) {
-    defaultToParagraph = typeof defaultToParagraph !== "undefined" && defaultToParagraph;
-    getRaw = (typeof getRaw !== "undefined" && getRaw);
-
-    var anySelection = $(".kix-selection-overlay").length > 0;
-    if (!anySelection) {
-        if (defaultToParagraph) {
-            //If the caller expects a raw element, we need to give it to them
-            docs.getCurrentParagraphText(getRaw ? function (text) { callback($("<span></span>").text(text)[0]); } : callback);
-        } else {
-            callback(getRaw ? $("<span></span>").text("")[0] : "");
-        }
-        return;
-    }
-
-    docs.observe($(".docs-texteventtarget-iframe").contents().find("[contenteditable=\"true\"]")[0], {
-        childList: true
-    }, function(mutations) {
-        callback(getRaw ? mutations[0].target : $(mutations[0].target).text().trim());
-    }, true);
-
-    //Send a copy event to get it to update the contents of the div with the current selection
-    var e = new CustomEvent("copy");
-    $(".docs-texteventtarget-iframe").contents().find("[contenteditable=\"true\"]")[0].dispatchEvent(e);
-};
-
 // callback(text) is called where text is the contents of the current paragraph
 // that the user's insertion pointer is on. WILL NOT WORK correctly if
 // __docs_plus__ is part of the current paragraph.
