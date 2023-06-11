@@ -13,7 +13,6 @@ let vim = {
         "E": [["ArrowRight", true]], // ctrl + ->
         "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
         "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
-        "a": [["ArrowRight"]],
         "A": [["ArrowDown", true], ["ArrowLeft"]],
         "$": [["ArrowDown", true], ["ArrowLeft"]],
         "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
@@ -25,7 +24,7 @@ let vim = {
         "gg": [["home", true]],
         "G": [["End", true]]
     },
-    "needsInsert": ["a", "A", "o"] // "I" and "O" also need insert, but they are handled manually
+    "needsInsert": ["A", "o"] // "I" and "O" also need insert, but they are handled manually
 };
 
 vim.addKeyMappings = function (baseMap) {
@@ -116,6 +115,16 @@ vim.normal_keydown = function (e) {
             return true;
         }
 
+    }
+
+    if (e.key === "a") {
+        let cursorLocations = docs.getCursorLocations();
+        if (!cursorLocations[1]) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+        }
+
+        vim.switchToInsertMode();
+        return true;
     }
 
     if (e.key === "O") {
