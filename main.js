@@ -101,21 +101,18 @@ vim.normal_keydown = function (e) {
         }
         else {
             // else, 0 is the actual command (ex: "0"), so continue to down below
-            if (docs.atStartOfLine()) {
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-                if (docs.atStartOfLine()) {
-                    // We are on an empty line, so reverse, and that's it
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                }
-                else {
-                    // We are at the start of a line but not the start of the paragraph, so business as usual
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-                }
+            let cursorLocations = docs.getCursorLocations();
+            if (cursorLocations[0] && cursorLocations[1]) {
+                // Do nothing
             }
-            else {
-                // We are not at the start of a line, so go to the start
+            else if (cursorLocations[0]) {
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true);
             }
+            else {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            }
+
             return true;
         }
 
