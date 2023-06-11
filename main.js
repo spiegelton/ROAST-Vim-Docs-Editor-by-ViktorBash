@@ -13,7 +13,6 @@ let vim = {
         "E": [["ArrowRight", true]], // ctrl + ->
         "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
         "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
-        "$": [["ArrowDown", true], ["ArrowLeft"]],
         "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
         "h": [["ArrowLeft"]],
         "j": [["ArrowDown"]],
@@ -178,27 +177,23 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "I") { // (Same logic as "O" above)
-        // The edge cases here that we handle: If we are at the start of a line and start of a paragraph 
-        // (which is different than just being at the start of a line)
-        // Also if we are on an empty line
-        if (docs.atStartOfLine()) {
-            docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-            if (docs.atStartOfLine()) {
-                // We are on an empty line, so reverse and insert a new line
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }
-            else {
-                // We are at the start of a line but not the start of the paragraph, so business as usual
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            }
-        }
-        else {
-            // We are not at the start of a line, so just insert a new line
+    if (e.key === "I") { 
+        let cursorLocations = docs.getCursorLocations();
+        if (!cursorLocations[0]) {
+            // We are not at the start of a line
             docs.pressKey(docs.codeFromKey("ArrowUp"), true);
         }
         vim.switchToInsertMode();
         return true;
+    }
+
+    if (e.key === "$") {
+        let cursorLocations = docs.getCursorLocations();
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        if (!cursorLocations[3]) {
+            // If we're not at the end of a file, move back left
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
     }
 
 
