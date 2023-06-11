@@ -16,7 +16,6 @@ let vim = {
         "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
         "a": [["ArrowRight"]],
         "A": [["ArrowDown", true], ["ArrowLeft"]],
-        "I": [["ArrowUp", true]],
         "$": [["ArrowDown", true]],
         "0": [["ArrowUp", true]],
         "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
@@ -122,6 +121,30 @@ vim.normal_keydown = function (e) {
         vim.switchToInsertMode();
         return true;
     }
+
+    if (e.key === "I") { // (Same logic as "O" above)
+        // The edge cases here that we handle: If we are at the start of a line and start of a paragraph 
+        // (which is different than just being at the start of a line)
+        // Also if we are on an empty line
+        if (docs.atStartOfLine()) {
+            docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
+            if (docs.atStartOfLine()) {
+                // We are on an empty line, so reverse and insert a new line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            }
+            else {
+                // We are at the start of a line but not the start of the paragraph, so business as usual
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            }
+        }
+        else {
+            // We are not at the start of a line, so just insert a new line
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+        }
+        vim.switchToInsertMode();
+        return true;
+    }
+
 
     vim.keyMaps[e.key]?.forEach(([key, ...args]) => {
         const numRepeats = parseInt(vim.num) || 1;
