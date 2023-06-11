@@ -3,8 +3,7 @@ import { docs } from "./docs.js";
 let vim = {
     "mode": "insert", // Keep track of current mode, options: ["insert", "normal", "visual"]
     "num": "", // Keep track of number keys pressed by the user
-    "currentSequence": "", // Keep track of key sequences
-    "escapeSequence": "hn",
+    "currentSequence": "", // Keep track of key sequences (ex: "gg")
     "keyMaps" : {
         "Backspace": [["ArrowLeft"]],
         "x": [["Delete"]],
@@ -26,7 +25,7 @@ let vim = {
         "gg": [["home", true]],
         "G": [["End", true]]
     },
-    "needsInsert": ["a", "A", "I", "o", "O"]
+    "needsInsert": ["a", "A", "o"] // "I" and "O" also need insert, but they are handled manually
 };
 
 vim.addKeyMappings = function (baseMap) {
@@ -198,25 +197,14 @@ vim.visual_keydown = function (e) {
         return true;
     }
 
+    e.preventDefault();
+    e.stopPropagation();
+
     if (e.key == "Escape") {
         // Escape visual mode.
         vim.switchToNormalMode();
+        return true;
     }
-
-    vim.currentSequence += e.key;
-    if (vim.currentSequence == vim.escapeSequence) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        vim.switchToNormalMode();
-        return false;
-    }
-    if (vim.escapeSequence.indexOf(vim.currentSequence) != 0) {
-        vim.currentSequence = e.key;
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
 
     if (e.key.match(/\d+/)) {
         vim.num += e.key.toString();
@@ -243,26 +231,10 @@ vim.visual_keydown = function (e) {
 
 // Called in insert mode.
 vim.insert_keydown = function (e) {
+    // Let all characters flow freely (except for escape)
     if (e.key == "Escape") {
         vim.switchToNormalMode();
-    }
-
-    vim.currentSequence += e.key;
-    if (vim.currentSequence == vim.escapeSequence) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // We need to delete the first character already typed in the escape
-        // sequence.
-        for (var i = 0; i < (vim.currentSequence.length - 1); i++) {
-            docs.pressKey(docs.codeFromKey("Backspace")); // changed from original way
-        }
-
-        vim.switchToNormalMode();
-        return false;
-    }
-    if (vim.escapeSequence.indexOf(vim.currentSequence) != 0) {
-        vim.currentSequence = e.key;
+        return true;
     }
 };
 

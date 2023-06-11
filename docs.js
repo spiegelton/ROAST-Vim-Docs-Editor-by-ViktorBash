@@ -139,5 +139,15 @@ docs.atStartOfLine = function() {
     return false; // Not at start of line
 }
 
+// docs.getDocLocations = function() {
+//     // The point of coupling so many functions together is to reduce the number of times we have to move the cursor
+//     result = [false, false, false]; // [are we at the start of a line, are we at the start of a file, are we at the end of a file]
+//     let coords = docs.userCursor.style.transform;
+//     docs.pressKey(docs.codeFromKey("ArrowLeft"));
+//     let newCoords = docs.userCursor.style.transform;
+//     if (coords ==)
+
+// }
+
 
 export { docs }
