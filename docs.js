@@ -105,52 +105,6 @@ docs.pasteText = function (text) {
     el.dispatchEvent(paste);
 };
 
-// callback(text) is called where text is the contents of the current paragraph
-// that the user's insertion pointer is on. WILL NOT WORK correctly if
-// __docs_plus__ is part of the current paragraph.
-docs.getCurrentParagraphText = function(callback) {
-    //Set up an observer to observe all the paragraphs
-    var calledAlready = false;
-
-    var observer = docs.observe($(".kix-paginateddocumentplugin")[0], {
-        childList: true,
-        subtree: true
-    }, function(mutations) {
-        mutations.forEach(function(mutation) {
-            if($(mutation.target).hasClass("kix-lineview-content")) {
-                observer.disconnect();
-                
-                if (!calledAlready) {
-                    var cloned = $(mutation.target).closest(".kix-paragraphrenderer").clone();
-
-                    cloned.find(".goog-inline-block.kix-lineview-text-block").each(function () {
-                        var text = $(this).text().trim().toLowerCase();
-                        var isSimpleBullet = text.length <= 2;
-                        var isParenthBullet = text.length === 3 && text.indexOf("(") === 0 && text.lastIndexOf(")") === 2;
-                        var isIIBullet = text.indexOf(".") === (text.length - 1) && (text.match(/i/g) || []).length === text.length - 1;
-                        var isNumDotBullet = text.indexOf(".") === (text.length - 1) && (text.match(/\d/g) || []).length === text.length - 1;
-                        if ($(this).parent().css("padding-left") === "0px" && (isSimpleBullet || isParenthBullet || isIIBullet || isNumDotBullet)) {
-                            $(this).remove(); //It's a dot/#/letter bullet for the list
-                        }
-                    });
-
-                    var rawText = cloned.text().replace(/\s/g, " ").trim();
-                    rawText = rawText.replace("__docs_plus__", "");
-
-                    for (var i = 0; i < "__docs_plus__".length; i++) {
-                        docs.pressKey(docs.codeFromKey("Backspace")); // Changed from original way
-                    }
-
-                    callback(rawText);
-                }
-                calledAlready = true;
-            }
-        });
-    });
-
-    docs.pasteText("__docs_plus__");
-};
-
 /*********** USER CURSOR ***********/
 // Gets the DOM element corresponding to the user's insertion point marker.
 docs.getUserCursor = function () {
