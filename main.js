@@ -68,6 +68,12 @@ vim.normal_keydown = function (e) {
     e.preventDefault();
     e.stopPropagation();
 
+    if (e.key == "Escape") {
+        // Remove any saved queries that the user had
+        vim.num = "";
+        vim.currentSequence = "";
+    }
+
     if (e.key === "i") {
         vim.switchToInsertMode();
         return true;
@@ -81,12 +87,17 @@ vim.normal_keydown = function (e) {
     if (e.key.match(/\d+/)) {
         if (e.key === "0" && vim.num.length !== 0) {
             // 0 is part of the number being typed (ex: "100")
-            vim.num += e.key
+            if (vim.num.length < 3) {
+                // We don't want to crash, so max you can type in is a 3 digit number (999)
+                vim.num += e.key
+            }
             return true;
         }
         else if (e.key !== "0") {
             // We have any digit besides 0 being typed (ex: "1" or "11")
-            vim.num += e.key
+            if (vim.num.length < 3) {
+                vim.num += e.key
+            }
             return true;
         }
         else {
