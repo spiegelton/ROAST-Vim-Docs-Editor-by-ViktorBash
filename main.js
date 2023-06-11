@@ -119,30 +119,40 @@ vim.normal_keydown = function (e) {
     }
 
     if (e.key === "O") {
-        // The edge cases here that we handle: If we are at the start of a line and start of a paragraph 
-        // (which is different than just being at the start of a line)
-        // Also if we are on an empty line
-        if (docs.atStartOfLine()) {
+        let cursorLocations = docs.getCursorLocations();
+        if (cursorLocations[2]) {
+            // At start of file
+            docs.pressKey(docs.codeFromKey("Enter"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+        else if (cursorLocations[3] && cursorLocations[0]) {
+            // At end of file on an empty line
+            docs.pressKey(docs.codeFromKey("Enter"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+        else if (cursorLocations[3]) {
+            // At end of file on non-empty line
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            docs.pressKey(docs.codeFromKey("Enter"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        } // Past this point we are guaranteed to not be at the start or end of the file
+        else if (cursorLocations[0] && cursorLocations[1]) {
+            // We are on an empty line
+            docs.pressKey(docs.codeFromKey("Enter"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+        else if (cursorLocations[0]) {
             docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-            if (docs.atStartOfLine()) {
-                // We are on an empty line, so reverse and insert a new line
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                docs.pressKey(docs.codeFromKey("Enter"));
-            }
-            else {
-                // We are at the start of a line but not the start of the paragraph, so business as usual
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                docs.pressKey(docs.codeFromKey("Enter"));
-            }
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            docs.pressKey(docs.codeFromKey("Enter"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
         else {
-            // We are not at the start of a line, so just insert a new line
             docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
             docs.pressKey(docs.codeFromKey("Enter"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
+
         vim.switchToInsertMode();
         return true;
     }
