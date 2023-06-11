@@ -13,7 +13,6 @@ let vim = {
         "E": [["ArrowRight", true]], // ctrl + ->
         "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
         "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
-        "A": [["ArrowDown", true], ["ArrowLeft"]],
         "$": [["ArrowDown", true], ["ArrowLeft"]],
         "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
         "h": [["ArrowLeft"]],
@@ -24,7 +23,7 @@ let vim = {
         "gg": [["home", true]],
         "G": [["End", true]]
     },
-    "needsInsert": ["A", "o"] // "I" and "O" also need insert, but they are handled manually
+    "needsInsert": ["o"] // "I" and "O" also need insert, but they are handled manually
 };
 
 vim.addKeyMappings = function (baseMap) {
@@ -120,7 +119,20 @@ vim.normal_keydown = function (e) {
     if (e.key === "a") {
         let cursorLocations = docs.getCursorLocations();
         if (!cursorLocations[1]) {
+            // If we're not at the end of the line, move right
             docs.pressKey(docs.codeFromKey("ArrowRight"));
+        }
+
+        vim.switchToInsertMode();
+        return true;
+    }
+
+    if (e.key === "A") {
+        let cursorLocations = docs.getCursorLocations();
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        if (!cursorLocations[3]) {
+            // If we're not at the end of the file, move left
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
 
         vim.switchToInsertMode();
