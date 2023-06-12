@@ -1,23 +1,40 @@
 import { docs } from "./docs.js";
 
 const UIDocHead = document.querySelector("#kix-appview")
-const UIContainer = document.createElement("div");
-UIContainer.id = "vim-ui-container";
-UIContainer.style.position = "absolute";
-UIContainer.style.right = "30px";
-UIContainer.style.bottom = "0px";
-UIContainer.style.width = "50px";
-UIContainer.style.height = "30px";
-UIContainer.style.color = "black";
-UIContainer.style.backgroundColor = "white";
-UIContainer.style.borderRadius = "3px";
-UIContainer.style.fontFamily = "Consolas";
-UIContainer.style.fontSize = "16px";
-UIContainer.innerHTML = "<span></span>";
-UIDocHead.appendChild(UIContainer);
+const UISequenceContainer = document.createElement("div");
+UISequenceContainer.style.position = "absolute";
+UISequenceContainer.style.right = "30px";
+UISequenceContainer.style.bottom = "0px";
+UISequenceContainer.style.width = "50px";
+UISequenceContainer.style.height = "30px";
+UISequenceContainer.style.color = "black";
+UISequenceContainer.style.backgroundColor = "white";
+UISequenceContainer.style.borderRadius = "3px";
+UISequenceContainer.style.fontFamily = "Consolas";
+UISequenceContainer.style.fontSize = "16px";
+UISequenceContainer.innerHTML = "<span></span>";
+UIDocHead.appendChild(UISequenceContainer);
 
-const updateUIText = function (text) {
-    UIContainer.innerHTML = "<span>" + text + "</span>";
+const updateUISequenceText = function (text) {
+    UISequenceContainer.innerHTML = "<span>" + text + "</span>";
+}
+
+const UIModeContainer = document.createElement("div");
+UIModeContainer.style.position = "absolute";
+UIModeContainer.style.left = "30px";
+UIModeContainer.style.bottom = "0px";
+UIModeContainer.style.width = "50px";
+UIModeContainer.style.height = "30px";
+UIModeContainer.style.color = "black";
+UIModeContainer.style.backgroundColor = "white";
+UIModeContainer.style.borderRadius = "3px";
+UIModeContainer.style.fontFamily = "Consolas";
+UIModeContainer.style.fontSize = "16px";
+UIModeContainer.innerHTML = "<span></span>";
+UIDocHead.appendChild(UIModeContainer);
+
+const updateUIModeText = function (text) {
+    UIModeContainer.innerHTML = "<span>" + text + "</span>";
 }
 
 
@@ -74,7 +91,7 @@ vim.switchToNormalMode = function () {
     vim.currentSequence = "";
     vim.mode = "normal";
     vim.num = "";
-    updateUIText("");
+    updateUISequenceText("");
     docs.setCursorWidth("7px");
 };
 
@@ -82,7 +99,7 @@ vim.switchToVisualMode = function () {
     vim.currentSequence = "";
     vim.mode = "visual";
     vim.num = "";
-    updateUIText("");
+    updateUISequenceText("");
     docs.setCursorWidth("7px");
 };
 
@@ -90,7 +107,7 @@ vim.switchToInsertMode = function () {
     vim.currentSequence = "";
     vim.mode = "insert";
     vim.num = "";
-    updateUIText("");
+    updateUISequenceText("");
     docs.setCursorWidth("2px");
 };
 
@@ -109,7 +126,7 @@ vim.normal_keydown = function (e) {
         // Remove any saved queries that the user had
         vim.num = "";
         vim.currentSequence = "";
-        updateUIText("");
+        updateUISequenceText("");
         return true;
     }
 
@@ -151,7 +168,7 @@ vim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true);
             }
         }
-        updateUIText(vim.num + vim.currentSequence);
+        updateUISequenceText(vim.num + vim.currentSequence);
         return true;
 
     }
@@ -250,7 +267,7 @@ vim.normal_keydown = function (e) {
         }
         vim.num = "";
         vim.currentSequence = "";
-        updateUIText("");
+        updateUISequenceText("");
         return true;
     }
 
@@ -274,7 +291,7 @@ vim.normal_keydown = function (e) {
         vim.currentSequence = "";
     }
 
-    updateUIText(vim.num + vim.currentSequence);
+    updateUISequenceText(vim.num + vim.currentSequence);
     return true;
 };
 
