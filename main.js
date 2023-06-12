@@ -21,6 +21,25 @@ let vim = {
         "gg": [["Home", true]],
         "G": [["End", true]]
     },
+    // "incompleteKeyMaps": ["g"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+    // "visualKeyMaps": {
+    //     "Backspace": [["ArrowLeft"]],
+    //     "x": [["Delete"]],
+    //     "b": [["ArrowLeft", true]], // ctrl + <-
+    //     "B": [["ArrowLeft", true]], // ctrl + <-
+    //     "e": [["ArrowRight", true]], // ctrl + ->
+    //     "E": [["ArrowRight", true]], // ctrl + ->
+    //     "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
+    //     "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
+    //     "h": [["ArrowLeft"]],
+    //     "j": [["ArrowDown"]],
+    //     "k": [["ArrowUp"]],
+    //     "l": [["ArrowRight"]],
+    //     "H": [["Home", true]],
+    //     "gg": [["Home", true]],
+    //     "G": [["End", true]]
+    // },
+    // "incompleteVisualKeyMaps": ["g"]
 };
 
 vim.addKeyMappings = function (baseMap) {
@@ -209,14 +228,22 @@ vim.normal_keydown = function (e) {
     vim.currentSequence += e.key; // Add the current key to the sequence
 
     // If the current sequence is in the keyMaps, then execute the command
-    vim.keyMaps[vim.currentSequence]?.forEach(([key, ...args]) => {
-        const numRepeats = parseInt(vim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey(key), ...args);
-        }
+    if (vim.currentSequence in vim.keyMaps) {
+        vim.keyMaps[vim.currentSequence].forEach(([key, ...args]) => {
+            const numRepeats = parseInt(vim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey(key), ...args);
+            }
+        });
         vim.num = "";
         vim.currentSequence = "";
-    });
+    }
+
+    if (vim.currentSequence.length !== 0 && !(vim.incompleteKeyMaps.includes(vim.currentSequence))) {
+        // This means that the current sequence is invalid, so we have to reset it
+        vim.num = "";
+        vim.currentSequence = "";
+    }
 
     return true;
 };
@@ -236,28 +263,109 @@ vim.visual_keydown = function (e) {
         vim.switchToNormalMode();
         return true;
     }
+    console.log(e.key);
 
     if (e.key.match(/\d+/)) {
-        vim.num += e.key.toString();
-    }
-
-    vim.keyMaps[e.key]?.forEach(([key, ...args]) => {
-        const numRepeats = parseInt(vim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            if (key.indexOf("Arrow") == 0) {
-                // get the special keys pressed and default to false
-                const keyArgs = [...args, false, false].slice(0, 2);
-                keyArgs[1] = true;
-                docs.pressKey(docs.codeFromKey(key), ...keyArgs);
-            } else {
-                docs.pressKey(docs.codeFromKey(key), ...args);
-                vim.switchToNormalMode();
+        if (e.key === "0" && vim.num.length !== 0) {
+            // 0 is part of the number being typed (ex: "100")
+            if (vim.num.length < 3) {
+                // We don't want to crash, so max you can type in is a 3 digit number (999)
+                vim.num += e.key
             }
         }
-        vim.num = "";
-    });
+        else if (e.key !== "0") {
+            // We have any digit besides 0 being typed (ex: "1" or "11")
+            if (vim.num.length < 3) {
+                vim.num += e.key
+            }
+        }
+        else {
+            // else, 0 is the actual command (ex: "0"), so continue to down below
+            let cursorLocations = docs.getCursorLocations();
+            if (cursorLocations[0] && cursorLocations[1]) {
+                // Do nothing
+            }
+            else if (cursorLocations[0]) {
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            }
+            else {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            }
+        }
+        return true;
+    }
 
-    return false;
+    if (e.key === "a") {
+        let cursorLocations = docs.getCursorLocations();
+        if (!cursorLocations[1]) {
+            // If we're not at the end of the line, move right
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+        }
+
+        vim.switchToInsertMode();
+        return true;
+    }
+
+    if (e.key === "A") {
+        let cursorLocations = docs.getCursorLocations();
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        if (!cursorLocations[3]) {
+            // If we're not at the end of the file, move left
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+
+        vim.switchToInsertMode();
+        return true;
+    }
+
+    if (e.key === "I") { 
+        let cursorLocations = docs.getCursorLocations();
+        if (!cursorLocations[0]) {
+            // We are not at the start of a line
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+        }
+        vim.switchToInsertMode();
+        return true;
+    }
+
+    if (e.key === "$") {
+        let cursorLocations = docs.getCursorLocations();
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        if (!cursorLocations[3]) {
+            // If we're not at the end of a file, move back left
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+        return true;
+    }
+
+    vim.currentSequence += e.key;
+
+    if (vim.currentSequence in vim.keyMaps) {
+        vim.keyMaps[vim.currentSequence].forEach(([key, ...args]) => {
+            const numRepeats = parseInt(vim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                if (key.indexOf("Arrow") == 0) {
+                    // get the special keys pressed and default to false
+                    const keyArgs = [...args, false, false].slice(0, 2);
+                    keyArgs[1] = true;
+                    docs.pressKey(docs.codeFromKey(key), ...keyArgs);
+                } else {
+                    docs.pressKey(docs.codeFromKey(key), ...args);
+                    vim.switchToNormalMode();
+                }
+            }
+        });
+        vim.num = "";
+        vim.currentSequence = "";
+    }
+
+    if (vim.currentSequence.length !== 0 && !(vim.incompleteKeyMaps.includes(vim.currentSequence))) {
+        // This means that the current sequence is invalid, so we have to reset it
+        vim.num = "";
+        vim.currentSequence = "";
+    }
+    return true;
 };
 
 // Called in insert mode.
