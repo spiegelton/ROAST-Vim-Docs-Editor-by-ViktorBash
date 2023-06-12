@@ -8,7 +8,6 @@ UISequenceContainer.style.bottom = "0px";
 UISequenceContainer.style.width = "50px";
 UISequenceContainer.style.height = "30px";
 UISequenceContainer.style.color = "black";
-UISequenceContainer.style.backgroundColor = "white";
 UISequenceContainer.style.borderRadius = "3px";
 UISequenceContainer.style.fontFamily = "Consolas";
 UISequenceContainer.style.fontSize = "16px";
@@ -23,10 +22,9 @@ const UIModeContainer = document.createElement("div");
 UIModeContainer.style.position = "absolute";
 UIModeContainer.style.left = "30px";
 UIModeContainer.style.bottom = "0px";
-UIModeContainer.style.width = "50px";
+UIModeContainer.style.width = "150px";
 UIModeContainer.style.height = "30px";
 UIModeContainer.style.color = "black";
-UIModeContainer.style.backgroundColor = "white";
 UIModeContainer.style.borderRadius = "3px";
 UIModeContainer.style.fontFamily = "Consolas";
 UIModeContainer.style.fontSize = "16px";
@@ -80,18 +78,12 @@ let vim = {
     // "incompleteVisualKeyMaps": ["g"]
 };
 
-vim.addKeyMappings = function (baseMap) {
-    baseMap[vim.keys.move[0]] = "ArrowLeft";
-    baseMap[vim.keys.move[1]] = "ArrowDown";
-    baseMap[vim.keys.move[2]] = "ArrowUp";
-    baseMap[vim.keys.move[3]] = "ArrowRight";
-};
-
 vim.switchToNormalMode = function () {
     vim.currentSequence = "";
     vim.mode = "normal";
     vim.num = "";
     updateUISequenceText("");
+    updateUIModeText("-- NORMAL --");
     docs.setCursorWidth("7px");
 };
 
@@ -100,6 +92,7 @@ vim.switchToVisualMode = function () {
     vim.mode = "visual";
     vim.num = "";
     updateUISequenceText("");
+    updateUIModeText("-- VISUAL --");
     docs.setCursorWidth("7px");
 };
 
@@ -108,6 +101,7 @@ vim.switchToInsertMode = function () {
     vim.mode = "insert";
     vim.num = "";
     updateUISequenceText("");
+    updateUIModeText("-- INSERT --");
     docs.setCursorWidth("2px");
 };
 
