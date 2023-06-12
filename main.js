@@ -1,5 +1,26 @@
 import { docs } from "./docs.js";
 
+const UIDocHead = document.querySelector("#kix-appview")
+const UIContainer = document.createElement("div");
+UIContainer.id = "vim-ui-container";
+UIContainer.style.position = "absolute";
+UIContainer.style.right = "30px";
+UIContainer.style.bottom = "0px";
+UIContainer.style.width = "50px";
+UIContainer.style.height = "30px";
+UIContainer.style.color = "black";
+UIContainer.style.backgroundColor = "white";
+UIContainer.style.borderRadius = "3px";
+UIContainer.style.fontFamily = "Consolas";
+UIContainer.style.fontSize = "16px";
+UIContainer.innerHTML = "<span></span>";
+UIDocHead.appendChild(UIContainer);
+
+const updateUIText = function (text) {
+    UIContainer.innerHTML = "<span>" + text + "</span>";
+}
+
+
 let vim = {
     "mode": "insert", // Keep track of current mode, options: ["insert", "normal", "visual"]
     "num": "", // Keep track of number keys pressed by the user
@@ -21,7 +42,7 @@ let vim = {
         "gg": [["Home", true]],
         "G": [["End", true]]
     },
-    // "incompleteKeyMaps": ["g"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+    "incompleteKeyMaps": ["g"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
     // "visualKeyMaps": {
     //     "Backspace": [["ArrowLeft"]],
     //     "x": [["Delete"]],
@@ -53,6 +74,7 @@ vim.switchToNormalMode = function () {
     vim.currentSequence = "";
     vim.mode = "normal";
     vim.num = "";
+    updateUIText("");
     docs.setCursorWidth("7px");
 };
 
@@ -60,6 +82,7 @@ vim.switchToVisualMode = function () {
     vim.currentSequence = "";
     vim.mode = "visual";
     vim.num = "";
+    updateUIText("");
     docs.setCursorWidth("7px");
 };
 
@@ -67,6 +90,7 @@ vim.switchToInsertMode = function () {
     vim.currentSequence = "";
     vim.mode = "insert";
     vim.num = "";
+    updateUIText("");
     docs.setCursorWidth("2px");
 };
 
@@ -85,6 +109,7 @@ vim.normal_keydown = function (e) {
         // Remove any saved queries that the user had
         vim.num = "";
         vim.currentSequence = "";
+        updateUIText("");
         return true;
     }
 
@@ -126,6 +151,7 @@ vim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true);
             }
         }
+        updateUIText(vim.num + vim.currentSequence);
         return true;
 
     }
@@ -222,6 +248,9 @@ vim.normal_keydown = function (e) {
             // If we're not at the end of a file, move back left
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
+        vim.num = "";
+        vim.currentSequence = "";
+        updateUIText("");
         return true;
     }
 
@@ -245,6 +274,7 @@ vim.normal_keydown = function (e) {
         vim.currentSequence = "";
     }
 
+    updateUIText(vim.num + vim.currentSequence);
     return true;
 };
 
