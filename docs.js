@@ -38,6 +38,7 @@ docs.codeFromKey = function(key) {
         "ArrowRight": 39,
         "ArrowDown": 40,
         "Delete": 46,
+        "Z": 90,
         "/": 191
     };
     if (key in specialKeys) {

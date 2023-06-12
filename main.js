@@ -55,9 +55,11 @@ let vim = {
         "l": [["ArrowRight"]],
         "H": [["Home", true]],
         "gg": [["Home", true]],
-        "G": [["End", true]]
+        "G": [["End", true]],
+        "u": [["Z", true]],
+        "U": [["Z", true]],
     },
-    "incompleteKeyMaps": ["g"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+    "incompleteKeyMaps": ["g", "r"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
     // "visualKeyMaps": {
     //     "Backspace": [["ArrowLeft"]],
     //     "x": [["Delete"]],
@@ -111,10 +113,14 @@ vim.normal_keydown = function (e) {
         // Let function keys (F1 to F12), go through normally
         return true;
     }
-    
 
     e.preventDefault();
     e.stopPropagation();
+
+    if (e.key === "Shift") {
+        // Shift by itself does nothing
+        return true;
+    }
 
     if (e.key == "Escape") {
         // Remove any saved queries that the user had
@@ -124,17 +130,17 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "i") {
+    if (e.key === "i" && vim.currentSequence.length === 0) {
         vim.switchToInsertMode();
         return true;
     }
 
-    if (e.key === "v") {
+    if (e.key === "v" && vim.currentSequence.length === 0) {
         vim.switchToVisualMode();
         return true;
     }
 
-    if (e.key.match(/\d+/)) {
+    if (e.key.match(/\d+/) && vim.currentSequence.length === 0) {
         if (e.key === "0" && vim.num.length !== 0) {
             // 0 is part of the number being typed (ex: "100")
             if (vim.num.length < 3) {
@@ -164,10 +170,9 @@ vim.normal_keydown = function (e) {
         }
         updateUISequenceText(vim.num + vim.currentSequence);
         return true;
-
     }
 
-    if (e.key === "a") {
+    if (e.key === "a" && vim.currentSequence.length === 0) {
         let cursorLocations = docs.getCursorLocations();
         if (!cursorLocations[1]) {
             // If we're not at the end of the line, move right
@@ -178,7 +183,7 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "A") {
+    if (e.key === "A" && vim.currentSequence.length === 0) {
         let cursorLocations = docs.getCursorLocations();
         docs.pressKey(docs.codeFromKey("ArrowDown"), true);
         if (!cursorLocations[3]) {
@@ -190,7 +195,7 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "O") {
+    if (e.key === "O" && vim.currentSequence.length === 0) {
         let cursorLocations = docs.getCursorLocations();
         if (cursorLocations[2]) {
             // At start of file
@@ -229,7 +234,7 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "o") {
+    if (e.key === "o" && vim.currentSequence.length === 0) {
         docs.pressKey(docs.codeFromKey("ArrowDown"), true);
         let cursorLocations = docs.getCursorLocations();
         if (!cursorLocations[3]) {
@@ -242,7 +247,7 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "I") { 
+    if (e.key === "I" && vim.currentSequence.length === 0) { 
         let cursorLocations = docs.getCursorLocations();
         if (!cursorLocations[0]) {
             // We are not at the start of a line
@@ -252,7 +257,7 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "$") {
+    if (e.key === "$" && vim.currentSequence.length === 0) {
         let cursorLocations = docs.getCursorLocations();
         docs.pressKey(docs.codeFromKey("ArrowDown"), true);
         if (!cursorLocations[3]) {
@@ -275,6 +280,18 @@ vim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey(key), ...args);
             }
         });
+        vim.num = "";
+        vim.currentSequence = "";
+    }
+
+    // r for replace command:
+    if (vim.currentSequence[0] === "r" && vim.currentSequence.length === 2) {
+        const numRepeats = parseInt(vim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            docs.pressKey(docs.codeFromKey("Backspace"));
+            docs.pressKey(vim.currentSequence.charCodeAt(1));
+        }
         vim.num = "";
         vim.currentSequence = "";
     }
