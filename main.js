@@ -58,8 +58,9 @@ let vim = {
         "G": [["End", true]],
         "u": [["Z", true]],
         "U": [["Z", true]],
+        "d$": [["ArrowDown", true, true], ["Delete"], ["Enter"], ["ArrowLeft"]],
     },
-    "incompleteKeyMaps": ["g", "r"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+    "incompleteKeyMaps": ["g", "r", "d"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
     // "visualKeyMaps": {
     //     "Backspace": [["ArrowLeft"]],
     //     "x": [["Delete"]],
@@ -86,7 +87,7 @@ vim.switchToNormalMode = function () {
     vim.num = "";
     updateUISequenceText("");
     updateUIModeText("-- NORMAL --");
-    docs.setCursorWidth("7px");
+    docs.setCursorWidth();
 };
 
 vim.switchToVisualMode = function () {
@@ -95,7 +96,7 @@ vim.switchToVisualMode = function () {
     vim.num = "";
     updateUISequenceText("");
     updateUIModeText("-- VISUAL --");
-    docs.setCursorWidth("7px");
+    docs.setCursorWidth();
 };
 
 vim.switchToInsertMode = function () {
@@ -104,7 +105,7 @@ vim.switchToInsertMode = function () {
     vim.num = "";
     updateUISequenceText("");
     updateUIModeText("-- INSERT --");
-    docs.setCursorWidth("2px");
+    docs.setCursorWidth(true);
 };
 
 // Called in normal mode.
@@ -136,6 +137,7 @@ vim.normal_keydown = function (e) {
         docs.pasteClipboard().then(() => docs.pressKey(docs.codeFromKey("ArrowLeft")));
         vim.num = "";
         updateUISequenceText("");
+        docs.setCursorWidth();
         return true;
     }
 
@@ -144,6 +146,7 @@ vim.normal_keydown = function (e) {
         docs.pasteClipboard().then(() => docs.pressKey(docs.codeFromKey("ArrowLeft")));
         vim.num = "";
         updateUISequenceText("");
+        docs.setCursorWidth();
         return true;
     }
 
@@ -187,6 +190,7 @@ vim.normal_keydown = function (e) {
             }
         }
         updateUISequenceText(vim.num + vim.currentSequence);
+        docs.setCursorWidth();
         return true;
     }
 
@@ -285,6 +289,7 @@ vim.normal_keydown = function (e) {
         vim.num = "";
         vim.currentSequence = "";
         updateUISequenceText("");
+        docs.setCursorWidth();
         return true;
     }
 
@@ -321,6 +326,7 @@ vim.normal_keydown = function (e) {
     }
 
     updateUISequenceText(vim.num + vim.currentSequence);
+    docs.setCursorWidth();
     return true;
 };
 
@@ -334,12 +340,13 @@ vim.visual_keydown = function (e) {
     e.preventDefault();
     e.stopPropagation();
 
+    // docs.setCursorWidth();
+
     if (e.key == "Escape") {
         // Escape visual mode.
         vim.switchToNormalMode();
         return true;
     }
-    console.log(e.key);
 
     if (e.key.match(/\d+/)) {
         if (e.key === "0" && vim.num.length !== 0) {

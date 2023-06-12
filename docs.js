@@ -104,8 +104,16 @@ docs.cursorCaret = document.querySelector(".kix-cursor-caret");
 
 // Sets the width of the user's insertion point marker. @width should be a
 // width value compatible with CSS border-width: @width;
-docs.setCursorWidth = function(width) {
-    docs.cursorCaret.style.borderWidth = width;
+docs.setCursorWidth = function(isRegular) {
+    if (isRegular) {
+        // For normal mode, regular width cursor
+        docs.cursorCaret.style.borderWidth = "2px";
+    }
+    else {
+        // The cursor width will be 41.5% the size of the cursor
+        let cursorWidth = parseFloat(docs.cursorCaret.style.height.slice(0, -2) * 0.416);
+        docs.cursorCaret.style.borderWidth = cursorWidth + "px";
+    }
 };
 
 
