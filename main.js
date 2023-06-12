@@ -13,7 +13,6 @@ let vim = {
         "E": [["ArrowRight", true]], // ctrl + ->
         "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
         "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
-        "o": [["ArrowDown", true], ["Enter"], ["ArrowLeft"]],
         "h": [["ArrowLeft"]],
         "j": [["ArrowDown"]],
         "k": [["ArrowUp"]],
@@ -173,6 +172,19 @@ vim.normal_keydown = function (e) {
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
 
+        vim.switchToInsertMode();
+        return true;
+    }
+
+    if (e.key === "o") {
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        let cursorLocations = docs.getCursorLocations();
+        if (!cursorLocations[3]) {
+            // If after going down we are not at the end of the file, go back 1
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+        // Hit enter for the new line
+        docs.pressKey(docs.codeFromKey("Enter"));
         vim.switchToInsertMode();
         return true;
     }
