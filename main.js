@@ -130,6 +130,24 @@ vim.normal_keydown = function (e) {
         return true;
     }
 
+    // Paste (no support for numbers/pasting multiple times yet)
+    if (e.key === "p" && vim.currentSequence.length === 0) {
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        docs.pasteClipboard().then(() => docs.pressKey(docs.codeFromKey("ArrowLeft")));
+        vim.num = "";
+        updateUISequenceText("");
+        return true;
+    }
+
+    // Paste (no support for numbers/pasting multiple times yet)
+    if (e.key === "P" && vim.currentSequence.length === 0) {
+        docs.pasteClipboard().then(() => docs.pressKey(docs.codeFromKey("ArrowLeft")));
+        vim.num = "";
+        updateUISequenceText("");
+        return true;
+    }
+
+
     if (e.key === "i" && vim.currentSequence.length === 0) {
         vim.switchToInsertMode();
         return true;

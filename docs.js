@@ -87,20 +87,16 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 // @text don't seem to work. Also note that repeated pastes can cause serious
 // problems --- please give each paste a few hunderd milliseconds to finish
 // before sending another pasteText. See test.js for an example of this.
-docs.pasteText = function (text) {
-    var el = document.getElementsByClassName("docs-texteventtarget-iframe")[0];
-    el = el.contentDocument.querySelector("[contenteditable=true]");
-
-    var data = new DataTransfer();
-    data.setData("text/plain", text);
+docs.pasteClipboard = async function () {
+    let data = new DataTransfer();
+    data.setData("text/plain", await navigator.clipboard.readText());
     var paste = new ClipboardEvent("paste", {
         "clipboardData": data,
-        "data": text,
         "dataType": "text/plain"
     });
     paste.docs_plus_ = true;
 
-    el.dispatchEvent(paste);
+    docs.texttarget.dispatchEvent(paste);
 };
 
 docs.userCursor = document.querySelector(".kix-cursor");
