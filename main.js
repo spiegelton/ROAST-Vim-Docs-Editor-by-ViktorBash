@@ -18,10 +18,9 @@ let vim = {
         "k": [["ArrowUp"]],
         "l": [["ArrowRight"]],
         "H": [["Home", true]],
-        "gg": [["home", true]],
+        "gg": [["Home", true]],
         "G": [["End", true]]
     },
-    "needsInsert": ["o"] // "I" and "O" also need insert, but they are handled manually
 };
 
 vim.addKeyMappings = function (baseMap) {
@@ -67,6 +66,7 @@ vim.normal_keydown = function (e) {
         // Remove any saved queries that the user had
         vim.num = "";
         vim.currentSequence = "";
+        return true;
     }
 
     if (e.key === "i") {
@@ -86,14 +86,12 @@ vim.normal_keydown = function (e) {
                 // We don't want to crash, so max you can type in is a 3 digit number (999)
                 vim.num += e.key
             }
-            return true;
         }
         else if (e.key !== "0") {
             // We have any digit besides 0 being typed (ex: "1" or "11")
             if (vim.num.length < 3) {
                 vim.num += e.key
             }
-            return true;
         }
         else {
             // else, 0 is the actual command (ex: "0"), so continue to down below
@@ -108,9 +106,8 @@ vim.normal_keydown = function (e) {
             else {
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true);
             }
-
-            return true;
         }
+        return true;
 
     }
 
@@ -206,23 +203,22 @@ vim.normal_keydown = function (e) {
             // If we're not at the end of a file, move back left
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
+        return true;
     }
 
+    vim.currentSequence += e.key; // Add the current key to the sequence
 
-    vim.keyMaps[e.key]?.forEach(([key, ...args]) => {
+    // If the current sequence is in the keyMaps, then execute the command
+    vim.keyMaps[vim.currentSequence]?.forEach(([key, ...args]) => {
         const numRepeats = parseInt(vim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
             docs.pressKey(docs.codeFromKey(key), ...args);
         }
         vim.num = "";
+        vim.currentSequence = "";
     });
 
-    if (vim.needsInsert.includes(e.key)) {
-        vim.switchToInsertMode();
-        return true;
-    }
-
-    return false;
+    return true;
 };
 
 // Called in visual mode.
