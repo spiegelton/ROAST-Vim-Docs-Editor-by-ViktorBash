@@ -17,7 +17,12 @@ let paidUserModal = document.querySelector("#paidUser");
 
 async function start() {
 	let user = await extpay.getUser().catch((err) => {
-		// TODO: Handle error
+		newUserModal.style.display = "none";
+		trialUserModal.style.display = "none";
+		expiredTrialUserModal.style.display = "none";
+		paidUserModal.style.display = "block";
+		paidUserModal.innerHTML = "<p>Error: Network error, no connection</p>"
+
 	});
 
 	if (user.paid) {

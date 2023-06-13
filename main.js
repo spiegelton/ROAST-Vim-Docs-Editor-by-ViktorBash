@@ -2,7 +2,9 @@ import { docs } from "./docs.js";
 let extpay = ExtPay("quantier-2");
 
 // Get the user and only run Vim if they have paid (being on the free trial counts as paying)
-let user = await extpay.getUser();
+let user = await extpay.getUser().catch((err) => {
+	console.log("Error: Network error, no connection");	
+});
 
 	const UIDocHead = document.querySelector("#kix-appview");
 	const UISequenceContainer = document.createElement("div");
