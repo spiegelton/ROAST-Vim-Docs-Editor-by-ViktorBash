@@ -4,29 +4,6 @@ let extpay = ExtPay("quantier-2");
 // Get the user and only run Vim if they have paid (being on the free trial counts as paying)
 let user = await extpay.getUser();
 
-if (user.paid) {
-	runVim();
-} 
-else {
-    // Check if user started or went past their free trial
-    const now = new Date();
-    const oneDay = 1000 * 60 * 60 * 24; // 1 day in milliseconds
-    if (user.trialStartedAt === null ) {
-        // User has not yet started their free trial, so prompt them to do so
-        extpay.openTrialPage();
-    }
-    else if (user.trialStartedAt && (now - user.trialStartedAt) < oneDay) {
-        // User is still in their free trial
-        runVim();
-    }
-    else {
-        // User's free trial ran out and they still haven't paid
-        extpay.openPaymentPage();
-        alert("You need to pay, Vim is disabled until you pay.")
-    }
-}
-
-function runVim() {
 	const UIDocHead = document.querySelector("#kix-appview");
 	const UISequenceContainer = document.createElement("div");
 	UISequenceContainer.style.position = "absolute";
@@ -49,7 +26,7 @@ function runVim() {
 	UIModeContainer.style.position = "absolute";
 	UIModeContainer.style.left = "30px";
 	UIModeContainer.style.bottom = "0px";
-	UIModeContainer.style.width = "150px";
+	UIModeContainer.style.width = "180px";
 	UIModeContainer.style.height = "30px";
 	UIModeContainer.style.color = "black";
 	UIModeContainer.style.borderRadius = "3px";
@@ -62,6 +39,30 @@ function runVim() {
 		UIModeContainer.innerHTML = "<span>" + text + "</span>";
 	};
 
+if (user.paid) {
+	runVim();
+} 
+else {
+    // Check if user started or went past their free trial
+    const now = new Date();
+    const oneDay = 1000 * 60 * 60 * 24; // 1 day in milliseconds
+    if (user.trialStartedAt === null ) {
+        // User has not yet started their free trial, so prompt them to do so
+        extpay.openTrialPage();
+		updateUIModeText("-- ACTIVATE TRIAL --");
+    }
+    else if (user.trialStartedAt && (now - user.trialStartedAt) < oneDay) {
+        // User is still in their free trial
+        runVim();
+    }
+    else {
+        // User's free trial ran out and they still haven't paid
+		updateUIModeText("-- TRIAL EXPIRED --");
+    }
+}
+
+
+function runVim() {
 	let vim = {
 		mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual"]
 		num: "", // Keep track of number keys pressed by the user
