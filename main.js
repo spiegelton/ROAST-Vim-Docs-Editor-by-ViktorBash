@@ -88,7 +88,6 @@ function runVim() {
 			j: [["ArrowDown"]],
 			k: [["ArrowUp"]],
 			l: [["ArrowRight"]],
-			H: [["Home", true]],
 			gg: [["Home", true]],
 			G: [["End", true]],
 			u: [["Z", true]],
