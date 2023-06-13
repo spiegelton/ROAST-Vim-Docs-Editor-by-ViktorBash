@@ -2,6 +2,11 @@ const extpay = ExtPay("quantier-2");
 
 let payButtons = document.querySelectorAll("#payButton");
 let trialButtons = document.querySelectorAll("#trialButton");
+let shortcutButton = document.querySelector("#shortCutButton");
+
+shortcutButton.addEventListener("click", () => {
+	chrome.tabs.create({ url: chrome.runtime.getURL("shortcuts.html")});
+});
 
 for (let i = 0; i < payButtons.length; i++) {
 	payButtons[i].addEventListener("click", extpay.openPaymentPage);
