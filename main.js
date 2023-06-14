@@ -3,66 +3,62 @@ let extpay = ExtPay("quantier-2");
 
 // Get the user and only run Vim if they have paid (being on the free trial counts as paying)
 let user = await extpay.getUser().catch((err) => {
-	console.log("Error: Network error, no connection");	
+	console.log("Error: Network error, no connection");
 });
 
-	const UIDocHead = document.querySelector("#kix-appview");
-	const UISequenceContainer = document.createElement("div");
-	UISequenceContainer.style.position = "absolute";
-	UISequenceContainer.style.right = "30px";
-	UISequenceContainer.style.bottom = "0px";
-	UISequenceContainer.style.width = "50px";
-	UISequenceContainer.style.height = "30px";
-	UISequenceContainer.style.color = "black";
-	UISequenceContainer.style.borderRadius = "3px";
-	UISequenceContainer.style.fontFamily = "Consolas";
-	UISequenceContainer.style.fontSize = "16px";
-	UISequenceContainer.innerHTML = "<span></span>";
-	UIDocHead.appendChild(UISequenceContainer);
+const UIDocHead = document.querySelector("#kix-appview");
+const UISequenceContainer = document.createElement("div");
+UISequenceContainer.style.position = "absolute";
+UISequenceContainer.style.right = "30px";
+UISequenceContainer.style.bottom = "0px";
+UISequenceContainer.style.width = "50px";
+UISequenceContainer.style.height = "30px";
+UISequenceContainer.style.color = "black";
+UISequenceContainer.style.borderRadius = "3px";
+UISequenceContainer.style.fontFamily = "Consolas";
+UISequenceContainer.style.fontSize = "16px";
+UISequenceContainer.innerHTML = "<span></span>";
+UIDocHead.appendChild(UISequenceContainer);
 
-	const updateUISequenceText = function (text) {
-		UISequenceContainer.innerHTML = "<span>" + text + "</span>";
-	};
+const updateUISequenceText = function (text) {
+	UISequenceContainer.innerHTML = "<span>" + text + "</span>";
+};
 
-	const UIModeContainer = document.createElement("div");
-	UIModeContainer.style.position = "absolute";
-	UIModeContainer.style.left = "30px";
-	UIModeContainer.style.bottom = "0px";
-	UIModeContainer.style.width = "180px";
-	UIModeContainer.style.height = "30px";
-	UIModeContainer.style.color = "black";
-	UIModeContainer.style.borderRadius = "3px";
-	UIModeContainer.style.fontFamily = "Consolas";
-	UIModeContainer.style.fontSize = "16px";
-	UIModeContainer.innerHTML = "<span>--INSERT--</span>";
-	UIDocHead.appendChild(UIModeContainer);
+const UIModeContainer = document.createElement("div");
+UIModeContainer.style.position = "absolute";
+UIModeContainer.style.left = "30px";
+UIModeContainer.style.bottom = "0px";
+UIModeContainer.style.width = "180px";
+UIModeContainer.style.height = "30px";
+UIModeContainer.style.color = "black";
+UIModeContainer.style.borderRadius = "3px";
+UIModeContainer.style.fontFamily = "Consolas";
+UIModeContainer.style.fontSize = "16px";
+UIModeContainer.innerHTML = "<span>--INSERT--</span>";
+UIDocHead.appendChild(UIModeContainer);
 
-	const updateUIModeText = function (text) {
-		UIModeContainer.innerHTML = "<span>" + text + "</span>";
-	};
+const updateUIModeText = function (text) {
+	UIModeContainer.innerHTML = "<span>" + text + "</span>";
+};
 
 if (user.paid) {
 	runVim();
-} 
-else {
-    // Check if user started or went past their free trial
-    const now = new Date();
-    const oneDay = 1000 * 60 * 60 * 24; // 1 day in milliseconds
-    if (user.trialStartedAt === null ) {
-        // User has not yet started their free trial, so prompt them to do so
-        extpay.openTrialPage();
+} else {
+	// Check if user started or went past their free trial
+	const now = new Date();
+	const oneDay = 1000 * 60 * 60 * 24; // 1 day in milliseconds
+	if (user.trialStartedAt === null) {
+		// User has not yet started their free trial, so prompt them to do so
+		extpay.openTrialPage();
 		updateUIModeText("-- ACTIVATE TRIAL --");
-    }
-    else if (user.trialStartedAt && (now - user.trialStartedAt) < oneDay) {
-        // User is still in their free trial
-        runVim();
-    }
-    else {
-        // User's free trial ran out and they still haven't paid
+	} else if (user.trialStartedAt && now - user.trialStartedAt < oneDay) {
+		// User is still in their free trial
+		runVim();
+	} else {
+		// User's free trial ran out and they still haven't paid
 		updateUIModeText("-- TRIAL EXPIRED --");
-    }
+	}
 }
-
 
 function runVim() {
 	let vim = {
@@ -71,7 +67,6 @@ function runVim() {
 		currentSequence: "", // Keep track of key sequences (ex: "gg")
 		keyMaps: {
 			Backspace: [["ArrowLeft"]],
-			x: [["Delete"]],
 			b: [["ArrowLeft", true]], // ctrl + <-
 			B: [["ArrowLeft", true]], // ctrl + <-
 			e: [["ArrowRight", true]], // ctrl + ->
@@ -319,6 +314,29 @@ function runVim() {
 			}
 			vim.num = "";
 			vim.currentSequence = "";
+			updateUISequenceText("");
+			docs.setCursorWidth();
+			return true;
+		}
+
+		if (e.key == "x" && vim.currentSequence.length === 0) {
+			const numRepeats = parseInt(vim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				let cursorLocations = docs.getCursorLocations();
+
+				if (cursorLocations[0] && cursorLocations[1]) {
+					// On an empty space, we can break out and end now because 'x' does nothing on an empty line
+					break;
+				} else if (cursorLocations[1]) {
+					// On the end of a non-empty line
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				} else {
+					// On a regular (not edge case) character/place
+					docs.pressKey(docs.codeFromKey("Delete"));
+				}
+			}
+
+			vim.num = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
 			return true;
