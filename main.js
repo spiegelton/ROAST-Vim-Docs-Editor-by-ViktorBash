@@ -34,7 +34,7 @@ let user = await extpay.getUser().catch((err) => {
 	UIModeContainer.style.borderRadius = "3px";
 	UIModeContainer.style.fontFamily = "Consolas";
 	UIModeContainer.style.fontSize = "16px";
-	UIModeContainer.innerHTML = "<span></span>";
+	UIModeContainer.innerHTML = "<span>--INSERT--</span>";
 	UIDocHead.appendChild(UIModeContainer);
 
 	const updateUIModeText = function (text) {
