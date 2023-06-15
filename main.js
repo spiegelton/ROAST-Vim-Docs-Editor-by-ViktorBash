@@ -139,6 +139,41 @@ function runVim() {
 		docs.setCursorWidth(true);
 	};
 
+	vim.copyWholeLine = async function () {
+		// For yy and Y
+
+		// We need to preserve the user's cursor location, 
+		// so we're gonna copy the left half, copy the right half, and then combine them
+		// The logic is similar to y0 and y$, except for y$ we copy the enter key at the end as well
+		let cursorLocations = docs.getCursorLocations();
+		let copiedText = "";
+
+		// Left half
+		if (!cursorLocations[0]) {
+			// We are not at the start of a line, so select text normally
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.contentDocument.execCommand("copy");
+			await navigator.clipboard.readText().then((text) => {
+				copiedText = text;
+			})
+			docs.pressKey(docs.codeFromKey("ArrowRight")); // Move back to original position after
+		}
+
+		// Right half
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		docs.contentDocument.execCommand("copy");
+		await navigator.clipboard.readText().then((text) => {
+			copiedText += text;
+			navigator.clipboard.writeText(copiedText); // inside the promise so it doesn't run before
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		});
+
+		vim.num = "";
+		vim.currentSequence = "";
+		updateUISequenceText("");
+		// Not updating cursor because we're at the same place
+	}
+
 	// Called in normal mode.
 	vim.normal_keydown = function (e) {
 		if (e.key.match(/F\d+/)) {
@@ -479,6 +514,12 @@ function runVim() {
 			vim.currentSequence = "";
 			updateUISequenceText("");
 			// Don't need to set cursor width because we didn't move anywhere
+			return true;
+		}
+
+		// yy 
+		if ((e.key === "y" && vim.currentSequence === "y") || e.key === "Y") {
+			vim.copyWholeLine();
 			return true;
 		}
 
