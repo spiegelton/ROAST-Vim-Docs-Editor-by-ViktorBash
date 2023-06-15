@@ -460,6 +460,28 @@ function runVim() {
 			return true;
 		}
 
+		// y0
+		if (e.key === "0" && vim.currentSequence === "y") {
+			let cursorLocations = docs.getCursorLocations();
+			// Technically vim will move up a line if you're at the start already, but that seems ugly, so we'll implement it
+			// slightly different on purpose.
+			if (cursorLocations[0]) {
+				// If we're at the start, do nothing except copy blankness into the clipboard
+    			navigator.clipboard.writeText("");
+			}
+			else {
+				// We are not at the start of a line, so select text normally
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.contentDocument.execCommand("copy");
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+			vim.num = "";
+			vim.currentSequence = "";
+			updateUISequenceText("");
+			// Don't need to set cursor width because we didn't move anywhere
+			return true;
+		}
+
 
 		vim.currentSequence += e.key; // Add the current key to the sequence
 
