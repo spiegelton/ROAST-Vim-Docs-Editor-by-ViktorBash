@@ -91,7 +91,7 @@ function runVim() {
 			U: [["Z", true]],
 			d$: [["ArrowDown", true, true], ["Delete"], ["Enter"], ["ArrowLeft"]],
 		},
-		incompleteKeyMaps: ["g", "r", "d", "c"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+		incompleteKeyMaps: ["g", "r", "d", "c", "y"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
 		// "visualKeyMaps": {
 		//     "Backspace": [["ArrowLeft"]],
 		//     "x": [["Delete"]],
@@ -440,6 +440,24 @@ function runVim() {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
+		}
+
+
+		// y$
+		if (e.key === "$" && vim.currentSequence === "y") {
+			let cursorLocations = docs.getCursorLocations();
+			if (!cursorLocations[1]) {
+				// IF we're not at the end of a line, select the text
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+				docs.contentDocument.execCommand("copy"); // TODO: Replace deprecated execCommand
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+			vim.num = "";
+			vim.currentSequence = "";
+			updateUISequenceText("");
+			// Don't need to set cursor width because we didn't move anywhere
+			return true;
 		}
 
 
