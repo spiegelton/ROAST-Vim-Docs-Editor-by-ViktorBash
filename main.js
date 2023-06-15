@@ -91,7 +91,7 @@ function runVim() {
 			U: [["Z", true]],
 			d$: [["ArrowDown", true, true], ["Delete"], ["Enter"], ["ArrowLeft"]],
 		},
-		incompleteKeyMaps: ["g", "r", "d"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+		incompleteKeyMaps: ["g", "r", "d", "c"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
 		// "visualKeyMaps": {
 		//     "Backspace": [["ArrowLeft"]],
 		//     "x": [["Delete"]],
@@ -337,6 +337,28 @@ function runVim() {
 			}
 
 			vim.num = "";
+			updateUISequenceText("");
+			docs.setCursorWidth();
+			return true;
+		}
+
+		// ALL Support for d and c multiline commands here
+
+		// D, d$, C, c$
+		if (e.key === "D" && vim.currentSequence.length === 0 || e.key === "$" && vim.currentSequence === "d" || e.key === "C" && vim.currentSequence.length === 0 || e.key === "$" && vim.currentSequence === "c") {
+			let cursorLocations = docs.getCursorLocations();
+			if (!cursorLocations[1]) {
+				// If we're not at the end of the file, delete text
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+			if (e.key === "C" || vim.currentSequence === "c") {
+				vim.switchToInsertMode();
+				return true;
+			}
+			vim.num = "';"
+			vim.currentSequence = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
 			return true;
