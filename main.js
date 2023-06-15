@@ -384,6 +384,65 @@ function runVim() {
 			
 		}
 
+		// dd
+		if (e.key === "d" && vim.currentSequence === "d") {
+			// We are going to select text down, move right one arrow, select text up, and delete
+			const numRepeats = parseInt(vim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				let cursorLocations = docs.getCursorLocations();
+				if (cursorLocations[3] && cursorLocations[0]) {
+					// We are at the end of a file on an empty line
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					break;
+				}
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				if (cursorLocations[3]) {
+					// We are at the end of the file, so backspace again to remove the empty line we're on
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					break; // With dd we finish if we reach the end of the
+				}
+			}
+			vim.num = "";
+			vim.currentSequence = "";
+			updateUISequenceText("");
+			docs.setCursorWidth();
+			return true;
+		}
+
+		// cc
+		if (e.key === "c" && vim.currentSequence === "c") {
+			const numRepeats = parseInt(vim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				let cursorLocations = docs.getCursorLocations();
+
+				if (cursorLocations[3] && cursorLocations[0]) {
+					// We are at the end of a file on an empty line, so we're done completely
+					vim.switchToInsertMode();
+					return true;
+				}
+				if (!cursorLocations[0]) {
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				cursorLocations = docs.getCursorLocations();
+				if (i === numRepeats - 1 || cursorLocations[3]) {
+					// We either reached the end of file or end of sequence,
+					// Don't backspace for the last line we delete, we have to stay on it
+					vim.switchToInsertMode();
+					return true;
+				}
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+		}
+
+
 		vim.currentSequence += e.key; // Add the current key to the sequence
 
 		// If the current sequence is in the keyMaps, then execute the command
