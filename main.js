@@ -345,7 +345,7 @@ function runVim() {
 		// ALL Support for d and c multiline commands here
 
 		// D, d$, C, c$
-		if (e.key === "D" && vim.currentSequence.length === 0 || e.key === "$" && vim.currentSequence === "d" || e.key === "C" && vim.currentSequence.length === 0 || e.key === "$" && vim.currentSequence === "c") {
+		if ((e.key === "D" && vim.currentSequence.length === 0) || (e.key === "$" && vim.currentSequence === "d") || (e.key === "C" && vim.currentSequence.length === 0) || (e.key === "$" && vim.currentSequence === "c")) {
 			let cursorLocations = docs.getCursorLocations();
 			if (!cursorLocations[1]) {
 				// If we're not at the end of the file, delete text
@@ -357,11 +357,31 @@ function runVim() {
 				vim.switchToInsertMode();
 				return true;
 			}
-			vim.num = "';"
+			vim.num = ""
 			vim.currentSequence = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
 			return true;
+		}
+
+		// d0, c0
+		if ((e.key === "0" && vim.currentSequence === "d") || (e.key === "0" && vim.currentSequence === "c")) {
+			let cursorLocations = docs.getCursorLocations();
+			if (!cursorLocations[0]) {
+				// If we're not at the start of the line, delete text
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+			if (e.key === "c") {
+				vim.switchToInsertMode();
+				return true;
+			}
+			vim.num = ""
+			vim.currentSequence = "";
+			updateUISequenceText("");
+			docs.setCursorWidth();
+			return true;
+			
 		}
 
 		vim.currentSequence += e.key; // Add the current key to the sequence
