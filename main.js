@@ -468,9 +468,9 @@ function runVim() {
 
 		// diw
 		if ((e.key === "w" && vim.currentSequence === "di") || (e.key === "w" && vim.currentSequence === "ci")) { 
-			let cursorLocations = docs.getCursorLocations();
 			const numRepeats = parseInt(vim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
+				let cursorLocations = docs.getCursorLocations();
 				if (!cursorLocations[1]) {
 					console.log("E");
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
