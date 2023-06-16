@@ -91,24 +91,12 @@ function runVim() {
 			U: [["Z", true]],
 		},
 		incompleteKeyMaps: ["g", "r", "d", "c", "y"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
-		// "visualKeyMaps": {
-		//     "Backspace": [["ArrowLeft"]],
-		//     "x": [["Delete"]],
-		//     "b": [["ArrowLeft", true]], // ctrl + <-
-		//     "B": [["ArrowLeft", true]], // ctrl + <-
-		//     "e": [["ArrowRight", true]], // ctrl + ->
-		//     "E": [["ArrowRight", true]], // ctrl + ->
-		//     "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
-		//     "W": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],  // w is same behavior as eeb
-		//     "h": [["ArrowLeft"]],
-		//     "j": [["ArrowDown"]],
-		//     "k": [["ArrowUp"]],
-		//     "l": [["ArrowRight"]],
-		//     "H": [["Home", true]],
-		//     "gg": [["Home", true]],
-		//     "G": [["End", true]]
-		// },
-		// "incompleteVisualKeyMaps": ["g"]
+		differentVisualKeyMaps: {
+			u: [],
+			U: [],
+			gg: [["Home", true, true]],
+			G: [["End", true, true]],
+		}
 	};
 
 	vim.switchToNormalMode = function () {
@@ -694,8 +682,8 @@ function runVim() {
 
 		vim.currentSequence += e.key;
 
-		if (vim.currentSequence in vim.keyMaps) {
-			vim.keyMaps[vim.currentSequence].forEach(([key, ...args]) => {
+		if (vim.currentSequence in vim.differentVisualKeyMaps) {
+			vim.differentVisualKeyMaps[vim.currentSequence].forEach(([key, ...args]) => {
 				const numRepeats = parseInt(vim.num) || 1;
 				for (let i = 0; i < numRepeats; i++) {
 					if (key.indexOf("Arrow") == 0) {
@@ -705,8 +693,20 @@ function runVim() {
 						docs.pressKey(docs.codeFromKey(key), ...keyArgs);
 					} else {
 						docs.pressKey(docs.codeFromKey(key), ...args);
-						vim.switchToNormalMode();
 					}
+				}
+			});
+			vim.num = "";
+			vim.currentSequence = "";
+		}
+		else if (vim.currentSequence in vim.keyMaps) {
+			vim.keyMaps[vim.currentSequence].forEach(([key, ...args]) => {
+				const numRepeats = parseInt(vim.num) || 1;
+				for (let i = 0; i < numRepeats; i++) {
+					// get the special keys pressed and default to false
+					const keyArgs = [...args, false, false].slice(0, 2);
+					keyArgs[1] = true;
+					docs.pressKey(docs.codeFromKey(key), ...keyArgs);
 				}
 			});
 			vim.num = "";
