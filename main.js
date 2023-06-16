@@ -89,7 +89,6 @@ function runVim() {
 			G: [["End", true]],
 			u: [["Z", true]],
 			U: [["Z", true]],
-			d$: [["ArrowDown", true, true], ["Delete"], ["Enter"], ["ArrowLeft"]],
 		},
 		incompleteKeyMaps: ["g", "r", "d", "c", "y"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
 		// "visualKeyMaps": {
@@ -127,6 +126,7 @@ function runVim() {
 		vim.num = "";
 		updateUISequenceText("");
 		updateUIModeText("-- VISUAL --");
+		docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 		docs.setCursorWidth();
 	};
 
@@ -574,15 +574,48 @@ function runVim() {
 		e.preventDefault();
 		e.stopPropagation();
 
-		// docs.setCursorWidth();
+		if (e.key === "Shift") {
+			// Shift by itself does nothing
+			return true;
+		}
 
 		if (e.key == "Escape") {
 			// Escape visual mode.
+			docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+			// go to the right side when the left side could be a solution as well
 			vim.switchToNormalMode();
 			return true;
 		}
 
-		if (e.key.match(/\d+/)) {
+		if (e.key === "p" && vim.currentSequence.length === 0) {
+			// We have to first delete the highlighted text, then paste in the clipboard
+			docs.pressKey(docs.codeFromKey("Backspace"));
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pasteClipboard()
+			vim.switchToNormalMode();
+			return true;
+		}
+
+		if (e.key === "P" && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("Backspace"));
+			docs.pasteClipboard()
+			vim.switchToNormalMode();
+			return true;
+		}
+
+		if (e.key === "I" && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			vim.switchToInsertMode();
+			return true;
+		}
+
+		if (e.key === "v" && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("ArrowRight")); 	// TODO: Make this better, right now we blindly
+			vim.switchToNormalMode();
+			return true;
+		}
+
+		if (e.key.match(/\d+/) && vim.currentSequence.length === 0) {
 			if (e.key === "0" && vim.num.length !== 0) {
 				// 0 is part of the number being typed (ex: "100")
 				if (vim.num.length < 3) {
@@ -597,58 +630,65 @@ function runVim() {
 			} else {
 				// else, 0 is the actual command (ex: "0"), so continue to down below
 				let cursorLocations = docs.getCursorLocations();
-				if (cursorLocations[0] && cursorLocations[1]) {
-					// Do nothing
-				} else if (cursorLocations[0]) {
-					docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-					docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-				} else {
-					docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+				if (!cursorLocations[0]) {
+					// If we're not at the start, select everything to line start
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 				}
 			}
+			updateUISequenceText(vim.num + vim.currentSequence);
+			docs.setCursorWidth();
 			return true;
 		}
 
-		if (e.key === "a") {
-			let cursorLocations = docs.getCursorLocations();
-			if (!cursorLocations[1]) {
-				// If we're not at the end of the line, move right
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-			}
-
+		if (e.key === "A" && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			vim.switchToInsertMode();
 			return true;
 		}
 
-		if (e.key === "A") {
-			let cursorLocations = docs.getCursorLocations();
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-			if (!cursorLocations[3]) {
-				// If we're not at the end of the file, move left
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-
-			vim.switchToInsertMode();
+		if (e.key === "$" && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+			vim.num = "";
+			vim.currentSequence = "";
+			updateUISequenceText("");
+			docs.setCursorWidth();
 			return true;
 		}
 
-		if (e.key === "I") {
+		if ((e.key === "x" || e.key === "d")  && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("Backspace"));
+			vim.switchToNormalMode()
+			return true;
+		}
+
+		if (e.key === "c" && vim.currentSequence.length === 0) {
+			return true;
+		}
+
+		if ((e.key === "D" || e.key === "C") && vim.currentSequence.length === 0) {
+			// Delete the whole line(s) that we partially selected
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
 			let cursorLocations = docs.getCursorLocations();
 			if (!cursorLocations[0]) {
-				// We are not at the start of a line
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
 			}
-			vim.switchToInsertMode();
+			if (e.key === "C") {
+				vim.switchToInsertMode();
+				return true;
+			}
+			vim.num = "";
+			vim.updateUISequenceText("");
+			docs.setCursorWidth();
 			return true;
 		}
 
-		if (e.key === "$") {
-			let cursorLocations = docs.getCursorLocations();
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-			if (!cursorLocations[3]) {
-				// If we're not at the end of a file, move back left
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
+		if (e.key === "y" && vim.currentSequence.length === 0) {
+			docs.contentDocument.execCommand("copy");
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			vim.switchToNormalMode();
 			return true;
 		}
 
