@@ -466,7 +466,7 @@ function runVim() {
 			}
 		}
 
-		// diw
+		// diw, ciw
 		if ((e.key === "w" && vim.currentSequence === "di") || (e.key === "w" && vim.currentSequence === "ci")) { 
 			const numRepeats = parseInt(vim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
