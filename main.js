@@ -90,7 +90,8 @@ function runVim() {
 			u: [["Z", true]],
 			U: [["Z", true]],
 		},
-		incompleteKeyMaps: ["g", "r", "d", "c", "y"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+		incompleteKeyMaps: ["g", "r", "d", "c", "y", "di", "ci"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+		// di for diw, ci for ciw
 		differentVisualKeyMaps: {
 			u: [],
 			U: [],
@@ -463,6 +464,33 @@ function runVim() {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
+		}
+
+		// diw
+		if ((e.key === "w" && vim.currentSequence === "di") || (e.key === "w" && vim.currentSequence === "ci")) { 
+			let cursorLocations = docs.getCursorLocations();
+			const numRepeats = parseInt(vim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				if (!cursorLocations[1]) {
+					console.log("E");
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+				if (!cursorLocations[0]) {
+					console.log("B");
+					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+
+			}
+			if (vim.currentSequence === "ci") {
+				vim.switchToInsertMode();
+				return true;
+			}
+			vim.num = "";
+			vim.currentSequence = "";
+			updateUISequenceText("");
+			return true;
 		}
 
 
