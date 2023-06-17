@@ -1,72 +1,78 @@
-const extpay = ExtPay("quantier-2");
+const extpay = ExtPay("vim-for-docs");
 
 let payButtons = document.querySelectorAll("#payButton");
 let trialButtons = document.querySelectorAll("#trialButton");
 let shortcutButton = document.querySelector("#shortCutButton");
 
 shortcutButton.addEventListener("click", () => {
+	// When the user clicks on shortcut button, open the shortcuts page
 	chrome.tabs.create({ url: chrome.runtime.getURL("shortcuts.html")});
 });
 
 for (let i = 0; i < payButtons.length; i++) {
+	// Add event listener to each pay button
 	payButtons[i].addEventListener("click", extpay.openPaymentPage);
 }
 for (let i = 0; i < trialButtons.length; i++) {
-	trialButtons[i].addEventListener("click", extpay.openTrialPage);
+	// Add event listener to each trial button
+	trialButtons[i].addEventListener("click", (event) => {extpay.openTrialPage("7 day")});
 }
 
 let newUserModal = document.querySelector("#newUser");
 let trialUserModal = document.querySelector("#trialUser");
 let expiredTrialUserModal = document.querySelector("#expiredTrialUser");
 let paidUserModal = document.querySelector("#paidUser");
+let pastDueUserModal = document.querySelector("#pastDueUser");
+let cancelledUserModal = document.querySelector("#cancelledUser");
+
+function convertMillisecondsToDaysAndHours(milliseconds) {
+  // Calculate the number of seconds, minutes, and hours
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+
+  // Calculate the number of days and remaining hours
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+
+  return { days, hours: remainingHours };
+}
 
 async function start() {
 	let user = await extpay.getUser().catch((err) => {
-		newUserModal.style.display = "none";
-		trialUserModal.style.display = "none";
-		expiredTrialUserModal.style.display = "none";
 		paidUserModal.style.display = "block";
-		paidUserModal.innerHTML = "<p>Error: Network error, no connection</p>"
-
+		paidUserModal.innerHTML = "<p style=\"font-size: 16px;\">Error: Network error, no connection</p>"
 	});
 
 	if (user.paid) {
 		// User is a paid user
-		newUserModal.style.display = "none";
-		trialUserModal.style.display = "none";
-		expiredTrialUserModal.style.display = "none";
 		paidUserModal.style.display = "block";
-	} else {
+	}
+	else if (user.subscriptionStatus === "past_due" || user.subscriptionStatus === "unpaid") {
+		// User is a past due user
+		pastDueUserModal.style.display = "block";
+	}
+	else if (user.subscriptionStatus === "canceled") {
+		// User is a cancelled user
+		cancelledUserModal.style.display = "block";
+	}
+	else {
 		// Check if user started or went past their free trial
 		const now = new Date();
-		const oneDay = 1000 * 60 * 60 * 24; // 1 day in milliseconds
+		const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 day in milliseconds
 		if (user.trialStartedAt === null) {
 			// User is a new user (no recorded trial)
 			newUserModal.style.display = "block";
-			trialUserModal.style.display = "none";
-			expiredTrialUserModal.style.display = "none";
-			paidUserModal.style.display = "none";
-		} else if (user.trialStartedAt && now - user.trialStartedAt < oneDay) {
+		} else if (user.trialStartedAt && now - user.trialStartedAt < sevenDays) {
 			// User is a trial user
+			let timeLeft = sevenDays - (now - user.trialStartedAt);
+			let {days, hours} = convertMillisecondsToDaysAndHours(timeLeft);
 
-			let dateDifference = oneDay - (now - user.trialStartedAt);
-			if (dateDifference < 0) {
-				dateDifference = 0;
-			}
-
-			let hoursLeft = Math.ceil(dateDifference / (1000 * 60 * 60));
-			document.querySelector("#trialTimeLeft").textContent = hoursLeft + " hours left";
-
-			newUserModal.style.display = "none";
+			document.querySelector("#trialTimeLeft").textContent = `${days} days and ${hours} hours left`;
 			trialUserModal.style.display = "block";
-			expiredTrialUserModal.style.display = "none";
-			paidUserModal.style.display = "none";
 		} else {
 			// User is an expired trial user
-			newUserModal.style.display = "none";
-			trialUserModal.style.display = "none";
 			expiredTrialUserModal.style.display = "block";
-			paidUserModal.style.display = "none";
 		}
 	}
 }

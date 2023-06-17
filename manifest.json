@@ -24,6 +24,6 @@
 	"background": {
 		"service_worker": "background.js"
 	},
-	"permissions": ["storage"],
+	"permissions": ["storage", "tabs"],
 	"action": { "default_popup": "popup.html" }
 }

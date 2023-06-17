@@ -1,7 +1,31 @@
 importScripts('dist/ExtPay.js');
 
-var extpay = ExtPay('quantier-2'); // Extension ID
+var extpay = ExtPay('vim-for-docs'); // Extension ID
 extpay.startBackground();  // Required, have extpay running in the background
+
+// When user pays, refresh google docs so they can use the extension
+extpay.onPaid.addListener(() => {
+	// Reload the google doc after a user just paid
+    chrome.tabs.query({
+        url: "*://*.google.com/*document/d/*/edit*" 
+    }, function(tabs) {
+        for (let i = 0; i < tabs.length; i++) {
+            chrome.tabs.reload(tabs[i].id);
+        }
+    })
+});
+
+// When user pays, refresh google docs so they can use the extension
+extpay.onTrialStarted.addListener(() => {
+	// Reload the google doc after a user just started their trial
+    chrome.tabs.query({
+        url: "*://*.google.com/*document/d/*/edit*" 
+    }, function(tabs) {
+        for (let i = 0; i < tabs.length; i++) {
+            chrome.tabs.reload(tabs[i].id);
+        }
+    })
+});
 
 chrome.runtime.onInstalled.addListener(function(details){
     if(details.reason == "install"){

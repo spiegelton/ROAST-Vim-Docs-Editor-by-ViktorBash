@@ -1,9 +1,9 @@
 import { docs } from "./docs.js";
-let extpay = ExtPay("quantier-2");
+let extpay = ExtPay("vim-for-docs");
 
 // Get the user and only run Vim if they have paid (being on the free trial counts as paying)
 let user = await extpay.getUser().catch((err) => {
-	console.log("Error: Network error, no connection");
+	console.error("Vim for Docs Error: Network error, no connection");
 });
 
 const UIDocHead = document.querySelector("#kix-appview");
@@ -43,15 +43,26 @@ const updateUIModeText = function (text) {
 
 if (user.paid) {
 	runVim();
-} else {
+} 
+else if (user.subscriptionStatus === "past_due") {
+	updateUIModeText("-- PAST DUE --");
+}
+else if (user.subscriptionStatus === "unpaid") {
+	updateUIModeText("-- UNPAID --");
+}
+else if (user.subscriptionStatus === "canceled") {
+	updateUIModeText("-- CANCELLED --");
+
+}
+else {
 	// Check if user started or went past their free trial
 	const now = new Date();
-	const oneDay = 1000 * 60 * 60 * 24; // 1 day in milliseconds
+	const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 day in milliseconds
 	if (user.trialStartedAt === null) {
 		// User has not yet started their free trial, so prompt them to do so
 		extpay.openTrialPage();
 		updateUIModeText("-- ACTIVATE TRIAL --");
-	} else if (user.trialStartedAt && now - user.trialStartedAt < oneDay) {
+	} else if (user.trialStartedAt && now - user.trialStartedAt < sevenDays) {
 		// User is still in their free trial
 		runVim();
 	} else {
