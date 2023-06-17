@@ -7,7 +7,7 @@ extpay.startBackground();  // Required, have extpay running in the background
 extpay.onPaid.addListener(() => {
 	// Reload the google doc after a user just paid
     chrome.tabs.query({
-        url: "*://*.google.com/*document/d/*/edit*" 
+        url: "https://docs.google.com/*" 
     }, function(tabs) {
         for (let i = 0; i < tabs.length; i++) {
             chrome.tabs.reload(tabs[i].id);
@@ -19,7 +19,7 @@ extpay.onPaid.addListener(() => {
 extpay.onTrialStarted.addListener(() => {
 	// Reload the google doc after a user just started their trial
     chrome.tabs.query({
-        url: "*://*.google.com/*document/d/*/edit*" 
+        url: "https://docs.google.com/*" 
     }, function(tabs) {
         for (let i = 0; i < tabs.length; i++) {
             chrome.tabs.reload(tabs[i].id);
