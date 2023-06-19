@@ -4,5 +4,4 @@ https://github.com/matthewsot/docs-plus
 https://github.com/matthewsot/docs-vim
 
 
-### How the dependencies work:
-- TODO
+- webpack --watch to have the dist/bundle.js update automatically
