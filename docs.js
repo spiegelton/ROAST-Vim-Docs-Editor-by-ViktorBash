@@ -59,8 +59,8 @@ if (!docs.isMac) {
 			Shift: 16,
 			Control: 18, // Critical
 			Escape: 27,
-			End: 93,
-			Home: 93,
+			End: 35,
+			Home: 36,
 			ArrowLeft: 37,
 			ArrowUp: 38,
 			ArrowRight: 39,
@@ -100,11 +100,12 @@ docs.keydown_ = function (e) {
 docs.texttarget.addEventListener("keydown", docs.keydown_);
 
 // Simulate a key press.
+// keyCode, ctrlKey (or altKey on Mac), shiftKey, commandKey(Mac only)
 docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 	var el = document.getElementsByClassName("docs-texteventtarget-iframe")[0];
 	el = el.contentDocument;
 
-	var is_command = keyCode <= 46 || ctrlKey;
+    let is_command = keyCode <= 46 || ctrlKey;
 
 	let data;
 	if (!docs.isMac) {
@@ -112,6 +113,21 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 	} else {
 		data = { keyCode: keyCode, altKey: ctrlKey, shiftKey: shiftKey };
 	}
+    
+    // Now we have to check for Mac-Specific modifications that may need to be done
+    if (keyCode === docs.codeFromKey("Z") && ctrlKey === true) {
+        // Undo
+        data = {keyCode: keyCode, metaKey: true};
+    }
+    else if (keyCode === docs.codeFromKey("Home") && ctrlKey === true) {
+        // Home  (to go up)
+        data = {keyCode: docs.codeFromKey("ArrowUp"), shiftKey: shiftKey, metaKey: true};
+    }
+    else if (keyCode === docs.codeFromKey("End") && ctrlKey === true) {
+        // End (to go down)
+        data = {keyCode: docs.codeFromKey("ArrowDown"), shiftKey: shiftKey, metaKey: true};
+    }
+
 
 	var key_event;
 	if (is_command) {
