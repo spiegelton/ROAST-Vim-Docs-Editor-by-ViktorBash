@@ -15,7 +15,7 @@ UISequenceContainer.style.width = "50px";
 UISequenceContainer.style.height = "30px";
 UISequenceContainer.style.color = "black";
 UISequenceContainer.style.borderRadius = "3px";
-UISequenceContainer.style.fontFamily = "Consolas";
+UISequenceContainer.style.fontFamily = "Google Sans, Roboto, sans-serif";
 UISequenceContainer.style.fontSize = "16px";
 UISequenceContainer.innerHTML = "<span></span>";
 UIDocHead.appendChild(UISequenceContainer);
@@ -32,9 +32,9 @@ UIModeContainer.style.width = "180px";
 UIModeContainer.style.height = "30px";
 UIModeContainer.style.color = "black";
 UIModeContainer.style.borderRadius = "3px";
-UIModeContainer.style.fontFamily = "Consolas";
+UIModeContainer.style.fontFamily = "Google Sans, Roboto, sans-serif";
 UIModeContainer.style.fontSize = "16px";
-UIModeContainer.innerHTML = "<span>--INSERT--</span>";
+UIModeContainer.innerHTML = "<span>-- INSERT --</span>";
 UIDocHead.appendChild(UIModeContainer);
 
 const updateUIModeText = function (text) {
