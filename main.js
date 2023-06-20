@@ -71,6 +71,7 @@ function runVim() {
 		mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual"]
 		num: "", // Keep track of number keys pressed by the user
 		currentSequence: "", // Keep track of key sequences (ex: "gg")
+		visualModeIsLinedBased: false, // Whether visual mode is line based (V) or regular (v)
 		keyMaps: {
 			Backspace: [["ArrowLeft"]],
 			b: [["ArrowLeft", true]], // ctrl + <-
@@ -234,6 +235,19 @@ function runVim() {
 		}
 
 		if (e.key === "v" && vim.currentSequence.length === 0) {
+			vim.visualModeIsLinedBased = false;
+			vim.switchToVisualMode();
+			return true;
+		}
+		
+		if (e.key === "V" && vim.currentSequence.length === 0) {
+			let cursorLocations = docs.getCursorLocations();
+			if (!cursorLocations[0]) {
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			}
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+			vim.visualModeIsLinedBased = true;
 			vim.switchToVisualMode();
 			return true;
 		}
@@ -650,7 +664,7 @@ function runVim() {
 			return true;
 		}
 
-		if (e.key === "v" && vim.currentSequence.length === 0) {
+		if ((e.key === "v" || e.key === "V") && vim.currentSequence.length === 0) {
 			docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
 			vim.switchToNormalMode();
 			return true;
@@ -732,6 +746,39 @@ function runVim() {
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			vim.switchToNormalMode();
 			return true;
+		}
+
+		// Now we do checks that only apply to line-based visual mode, where we do not follow the norm
+		if (vim.visualModeIsLinedBased) {
+			// Left and right traversal now do nothing
+			let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W"];
+			if (doNothingKeys.includes(e.key) && vim.currentSequence.length === 0) {
+				vim.num = "";
+				updateUISequenceText("");
+				return true;
+			}
+
+			if (e.key === "k" && vim.currentSequence.length === 0) {
+				const numRepeats = parseInt(vim.num) || 1;
+				for (let i = 0; i < numRepeats; i++) {
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				}
+				vim.num = "";
+				updateUISequenceText("");
+				return true;
+			}
+
+			if (e.key === "j" && vim.currentSequence.length === 0) {
+				console.log("Hey");
+				const numRepeats = parseInt(vim.num) || 1;
+				for (let i = 0; i < numRepeats; i++) {
+					docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				}
+				vim.num = "";
+				updateUISequenceText("");
+				return true;
+			}
+
 		}
 
 		vim.currentSequence += e.key;
