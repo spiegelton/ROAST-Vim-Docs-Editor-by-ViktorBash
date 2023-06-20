@@ -692,7 +692,8 @@ function runVim() {
 		}
 
 		if ((e.key === "x" || e.key === "d") && vim.currentSequence.length === 0) {
-			docs.pressKey(docs.codeFromKey("Backspace"));
+			docs.contentDocument.execCommand("cut");
+			// docs.pressKey(docs.codeFromKey("Backspace"));
 			vim.switchToNormalMode();
 			return true;
 		}
