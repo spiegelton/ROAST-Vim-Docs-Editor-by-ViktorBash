@@ -43,18 +43,13 @@ const updateUIModeText = function (text) {
 
 if (user.paid) {
 	runVim();
-} 
-else if (user.subscriptionStatus === "past_due") {
+} else if (user.subscriptionStatus === "past_due") {
 	updateUIModeText("-- PAST DUE --");
-}
-else if (user.subscriptionStatus === "unpaid") {
+} else if (user.subscriptionStatus === "unpaid") {
 	updateUIModeText("-- UNPAID --");
-}
-else if (user.subscriptionStatus === "canceled") {
+} else if (user.subscriptionStatus === "canceled") {
 	updateUIModeText("-- CANCELLED --");
-
-}
-else {
+} else {
 	// Check if user started or went past their free trial
 	const now = new Date();
 	const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 day in milliseconds
@@ -108,7 +103,7 @@ function runVim() {
 			U: [],
 			gg: [["Home", true, true]],
 			G: [["End", true, true]],
-		}
+		},
 	};
 
 	vim.switchToNormalMode = function () {
@@ -142,7 +137,7 @@ function runVim() {
 	vim.copyWholeLine = async function () {
 		// For yy and Y
 
-		// We need to preserve the user's cursor location, 
+		// We need to preserve the user's cursor location,
 		// so we're gonna copy the left half, copy the right half, and then combine them
 		// The logic is similar to y0 and y$, except for y$ we copy the enter key at the end as well
 		let cursorLocations = docs.getCursorLocations();
@@ -155,7 +150,7 @@ function runVim() {
 			docs.contentDocument.execCommand("copy");
 			await navigator.clipboard.readText().then((text) => {
 				copiedText = text;
-			})
+			});
 			docs.pressKey(docs.codeFromKey("ArrowRight")); // Move back to original position after
 		}
 
@@ -172,7 +167,7 @@ function runVim() {
 		vim.currentSequence = "";
 		updateUISequenceText("");
 		// Not updating cursor because we're at the same place
-	}
+	};
 
 	// Called in normal mode.
 	vim.normal_keydown = function (e) {
@@ -200,9 +195,14 @@ function runVim() {
 		// Paste (no support for numbers/pasting multiple times yet)
 		if (e.key === "p" && vim.currentSequence.length === 0) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			docs
-				.pasteClipboard()
-				.then(() => docs.pressKey(docs.codeFromKey("ArrowLeft")));
+			// This set time out is ugly but doesn't work without it on my mac laptop
+			// In reality doesn't matter because it is 1 millisecond later so user won't notice at all
+			docs.pasteClipboard().then(() => {
+				setTimeout(() => {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}, 1);
+			});
+
 			vim.num = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
@@ -211,9 +211,11 @@ function runVim() {
 
 		// Paste (no support for numbers/pasting multiple times yet)
 		if (e.key === "P" && vim.currentSequence.length === 0) {
-			docs
-				.pasteClipboard()
-				.then(() => docs.pressKey(docs.codeFromKey("ArrowLeft")));
+			docs.pasteClipboard().then(() => {
+				setTimeout(() => {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}, 1);
+			});
 			vim.num = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
@@ -380,7 +382,12 @@ function runVim() {
 		// ALL Support for d and c multiline commands here
 
 		// D, d$, C, c$
-		if ((e.key === "D" && vim.currentSequence.length === 0) || (e.key === "$" && vim.currentSequence === "d") || (e.key === "C" && vim.currentSequence.length === 0) || (e.key === "$" && vim.currentSequence === "c")) {
+		if (
+			(e.key === "D" && vim.currentSequence.length === 0) ||
+			(e.key === "$" && vim.currentSequence === "d") ||
+			(e.key === "C" && vim.currentSequence.length === 0) ||
+			(e.key === "$" && vim.currentSequence === "c")
+		) {
 			let cursorLocations = docs.getCursorLocations();
 			if (!cursorLocations[1]) {
 				// If we're not at the end of the file, delete text
@@ -392,7 +399,7 @@ function runVim() {
 				vim.switchToInsertMode();
 				return true;
 			}
-			vim.num = ""
+			vim.num = "";
 			vim.currentSequence = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
@@ -400,7 +407,10 @@ function runVim() {
 		}
 
 		// d0, c0
-		if ((e.key === "0" && vim.currentSequence === "d") || (e.key === "0" && vim.currentSequence === "c")) {
+		if (
+			(e.key === "0" && vim.currentSequence === "d") ||
+			(e.key === "0" && vim.currentSequence === "c")
+		) {
 			let cursorLocations = docs.getCursorLocations();
 			if (!cursorLocations[0]) {
 				// If we're not at the start of the line, delete text
@@ -411,12 +421,11 @@ function runVim() {
 				vim.switchToInsertMode();
 				return true;
 			}
-			vim.num = ""
+			vim.num = "";
 			vim.currentSequence = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
 			return true;
-			
 		}
 
 		// dd
@@ -478,7 +487,10 @@ function runVim() {
 		}
 
 		// diw, ciw
-		if ((e.key === "w" && vim.currentSequence === "di") || (e.key === "w" && vim.currentSequence === "ci")) { 
+		if (
+			(e.key === "w" && vim.currentSequence === "di") ||
+			(e.key === "w" && vim.currentSequence === "ci")
+		) {
 			const numRepeats = parseInt(vim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
 				let cursorLocations = docs.getCursorLocations();
@@ -492,7 +504,6 @@ function runVim() {
 					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
 					docs.pressKey(docs.codeFromKey("Backspace"));
 				}
-
 			}
 			if (vim.currentSequence === "ci") {
 				vim.switchToInsertMode();
@@ -503,7 +514,6 @@ function runVim() {
 			updateUISequenceText("");
 			return true;
 		}
-
 
 		// y$
 		if (e.key === "$" && vim.currentSequence === "y") {
@@ -529,9 +539,8 @@ function runVim() {
 			// slightly different on purpose.
 			if (cursorLocations[0]) {
 				// If we're at the start, do nothing except copy blankness into the clipboard
-    			navigator.clipboard.writeText("");
-			}
-			else {
+				navigator.clipboard.writeText("");
+			} else {
 				// We are not at the start of a line, so select text normally
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 				docs.contentDocument.execCommand("copy");
@@ -544,12 +553,11 @@ function runVim() {
 			return true;
 		}
 
-		// yy 
+		// yy
 		if ((e.key === "y" && vim.currentSequence === "y") || e.key === "Y") {
 			vim.copyWholeLine();
 			return true;
 		}
-
 
 		vim.currentSequence += e.key; // Add the current key to the sequence
 
@@ -618,14 +626,14 @@ function runVim() {
 			// We have to first delete the highlighted text, then paste in the clipboard
 			docs.pressKey(docs.codeFromKey("Backspace"));
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			docs.pasteClipboard()
+			docs.pasteClipboard();
 			vim.switchToNormalMode();
 			return true;
 		}
 
 		if (e.key === "P" && vim.currentSequence.length === 0) {
 			docs.pressKey(docs.codeFromKey("Backspace"));
-			docs.pasteClipboard()
+			docs.pasteClipboard();
 			vim.switchToNormalMode();
 			return true;
 		}
@@ -637,7 +645,7 @@ function runVim() {
 		}
 
 		if (e.key === "v" && vim.currentSequence.length === 0) {
-			docs.pressKey(docs.codeFromKey("ArrowRight")); 	// TODO: Make this better, right now we blindly
+			docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
 			vim.switchToNormalMode();
 			return true;
 		}
@@ -683,9 +691,9 @@ function runVim() {
 			return true;
 		}
 
-		if ((e.key === "x" || e.key === "d")  && vim.currentSequence.length === 0) {
+		if ((e.key === "x" || e.key === "d") && vim.currentSequence.length === 0) {
 			docs.pressKey(docs.codeFromKey("Backspace"));
-			vim.switchToNormalMode()
+			vim.switchToNormalMode();
 			return true;
 		}
 
@@ -722,23 +730,24 @@ function runVim() {
 		vim.currentSequence += e.key;
 
 		if (vim.currentSequence in vim.differentVisualKeyMaps) {
-			vim.differentVisualKeyMaps[vim.currentSequence].forEach(([key, ...args]) => {
-				const numRepeats = parseInt(vim.num) || 1;
-				for (let i = 0; i < numRepeats; i++) {
-					if (key.indexOf("Arrow") == 0) {
-						// get the special keys pressed and default to false
-						const keyArgs = [...args, false, false].slice(0, 2);
-						keyArgs[1] = true;
-						docs.pressKey(docs.codeFromKey(key), ...keyArgs);
-					} else {
-						docs.pressKey(docs.codeFromKey(key), ...args);
+			vim.differentVisualKeyMaps[vim.currentSequence].forEach(
+				([key, ...args]) => {
+					const numRepeats = parseInt(vim.num) || 1;
+					for (let i = 0; i < numRepeats; i++) {
+						if (key.indexOf("Arrow") == 0) {
+							// get the special keys pressed and default to false
+							const keyArgs = [...args, false, false].slice(0, 2);
+							keyArgs[1] = true;
+							docs.pressKey(docs.codeFromKey(key), ...keyArgs);
+						} else {
+							docs.pressKey(docs.codeFromKey(key), ...args);
+						}
 					}
 				}
-			});
+			);
 			vim.num = "";
 			vim.currentSequence = "";
-		}
-		else if (vim.currentSequence in vim.keyMaps) {
+		} else if (vim.currentSequence in vim.keyMaps) {
 			vim.keyMaps[vim.currentSequence].forEach(([key, ...args]) => {
 				const numRepeats = parseInt(vim.num) || 1;
 				for (let i = 0; i < numRepeats; i++) {
