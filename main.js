@@ -697,6 +697,14 @@ function runVim() {
 
 		if (e.key === "A" && vim.currentSequence.length === 0) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			if (vim.visualModeIsLinedBased) {
+				let cursorLocations = docs.getCursorLocations();
+				console.log(cursorLocations);
+				if (!cursorLocations[3]) {
+					// If we're not at the end of a file, move left
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+			}
 			vim.switchToInsertMode();
 			return true;
 		}
@@ -711,9 +719,14 @@ function runVim() {
 			return true;
 		}
 
-		if ((e.key === "x" || e.key === "d") && vim.currentSequence.length === 0) {
+		if (e.key === "x" && vim.currentSequence.length === 0) {
 			docs.contentDocument.execCommand("cut");
-			// docs.pressKey(docs.codeFromKey("Backspace"));
+			vim.switchToNormalMode();
+			return true;
+		}
+
+		if (e.key === "d" && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("Backspace"));
 			vim.switchToNormalMode();
 			return true;
 		}
