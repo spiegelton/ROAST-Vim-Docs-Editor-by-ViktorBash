@@ -683,12 +683,9 @@ function runVim() {
 					vim.num += e.key;
 				}
 			} else {
-				// else, 0 is the actual command (ex: "0"), so continue to down below
-				let cursorLocations = docs.getCursorLocations();
-				if (!cursorLocations[0]) {
-					// If we're not at the start, select everything to line start
-					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-				}
+				docs.pressKey(docs.codeFromKey("Home"), false, true);
+				docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			}
 			updateUISequenceText(vim.num + vim.currentSequence);
 			docs.setCursorWidth();
