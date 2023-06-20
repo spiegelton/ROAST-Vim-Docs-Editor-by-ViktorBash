@@ -194,7 +194,11 @@ function runVim() {
 
 		// Paste (no support for numbers/pasting multiple times yet)
 		if (e.key === "p" && vim.currentSequence.length === 0) {
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let cursorLocations = docs.getCursorLocations();
+			if (!cursorLocations[0] || !cursorLocations[1]) {
+				// If we're on an empty line, don't go to the right
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
 			// This set time out is ugly but doesn't work without it on my mac laptop
 			// In reality doesn't matter because it is 1 millisecond later so user won't notice at all
 			docs.pasteClipboard().then(() => {
