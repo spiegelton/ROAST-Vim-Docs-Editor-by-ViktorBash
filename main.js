@@ -195,8 +195,10 @@ function runVim() {
 		// Paste (no support for numbers/pasting multiple times yet)
 		if (e.key === "p" && vim.currentSequence.length === 0) {
 			let cursorLocations = docs.getCursorLocations();
-			if (!cursorLocations[0] || !cursorLocations[1]) {
-				// If we're on an empty line, don't go to the right
+			if ((cursorLocations[0] && cursorLocations[1]) || cursorLocations[1]) {
+				// If we're on an empty line or at the end of a line, do not move right
+			}
+			else {
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
 			// This set time out is ugly but doesn't work without it on my mac laptop
