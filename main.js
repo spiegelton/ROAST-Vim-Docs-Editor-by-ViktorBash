@@ -41,7 +41,7 @@ const updateUIModeText = function (text) {
 	UIModeContainer.innerHTML = "<span>" + text + "</span>";
 };
 
-if (user.paid || user.email === "jaredebenstein@gmail.com") {
+if (user.paid) {
 	runVim();
 } else if (user.subscriptionStatus === "past_due") {
 	updateUIModeText("-- PAST DUE --");
