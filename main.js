@@ -121,7 +121,12 @@ function runVim() {
 		vim.mode = "visual";
 		vim.num = "";
 		updateUISequenceText("");
-		updateUIModeText("-- VISUAL --");
+		if (!vim.visualModeIsLinedBased) {
+			updateUIModeText("-- VISUAL --");
+		}
+		else {
+			updateUIModeText("-- VISUAL LINE --");
+		}
 		docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 		docs.setCursorWidth();
 	};
@@ -778,11 +783,21 @@ function runVim() {
 				return true;
 			}
 
-			if (e.key === "j" && vim.currentSequence.length === 0) {
-				console.log("Hey");
+			if (e.key === "j" && vim.currentSequence.length === 0 && !docs.isMac) {
 				const numRepeats = parseInt(vim.num) || 1;
 				for (let i = 0; i < numRepeats; i++) {
 					docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				}
+				vim.num = "";
+				updateUISequenceText("");
+				return true;
+			}
+			if (e.key === "j" && vim.currentSequence.length === 0 && docs.isMac) {
+				// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
+				const numRepeats = parseInt(vim.num) || 1;
+				for (let i = 0; i < numRepeats; i++) {
+					docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+					docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 				}
 				vim.num = "";
 				updateUISequenceText("");
