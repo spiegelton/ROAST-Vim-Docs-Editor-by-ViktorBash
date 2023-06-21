@@ -519,14 +519,25 @@ function runVim() {
 			const numRepeats = parseInt(vim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
 				let cursorLocations = docs.getCursorLocations();
-				if (!cursorLocations[1]) {
-					console.log("E");
+				if (cursorLocations[0] && cursorLocations[1]) {
+					// Do nothing, we're on an empty line
+				}
+				else if(cursorLocations[0])  {
+					// We're at the start of a line, so select right and delete
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
 					docs.pressKey(docs.codeFromKey("Backspace"));
 				}
-				if (!cursorLocations[0]) {
-					console.log("B");
+				else if (cursorLocations[0]) {
+					// We're at the end of a line, so select left and delete
 					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+				else {
+					// We're in the middle somewhere, move right and then all the way to the start of the word
+					// then all the way to the right with highlighting, then delete
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, false);
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
 					docs.pressKey(docs.codeFromKey("Backspace"));
 				}
 			}
@@ -633,6 +644,22 @@ function runVim() {
 
 		e.preventDefault();
 		e.stopPropagation();
+
+		document.querySelector(".docs-domreader-iframe").contentDocument	
+
+
+
+		// let txt;
+		// console.log(docs.contentDocument.getSelection().toString());
+		// console.log(docs.contentDocument.hasFocus());
+		// if (window.getSelection) {
+		// 		txt = window.getSelection();
+		// 	} else if (window.document.getSelection) {
+		// 		txt =window.document.getSelection();
+		// 	} else if (window.document.selection) {
+			
+		// 		txt = window.document.selection.createRange().text;
+		// d	}
 
 		if (e.key === "Shift") {
 			// Shift by itself does nothing
