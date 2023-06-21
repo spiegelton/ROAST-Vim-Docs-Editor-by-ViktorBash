@@ -76,8 +76,6 @@ function runVim() {
 			Backspace: [["ArrowLeft"]],
 			b: [["ArrowLeft", true]], // ctrl + <-
 			B: [["ArrowLeft", true]], // ctrl + <-
-			e: [["ArrowRight", true]], // ctrl + ->
-			E: [["ArrowRight", true]], // ctrl + ->
 			w: [
 				["ArrowRight", true],
 				["ArrowRight", true],
@@ -104,6 +102,8 @@ function runVim() {
 			U: [],
 			gg: [["Home", true, true]],
 			G: [["End", true, true]],
+			e: [["ArrowRight", true, true]], // ctrl + ->
+			E: [["ArrowRight", true, true]], // ctrl + ->
 		},
 	};
 
@@ -365,6 +365,27 @@ function runVim() {
 			}
 			vim.switchToInsertMode();
 			return true;
+		}
+
+		if ((e.key === "E" || e.key === "e") && vim.currentSequence.length === 0) { 
+			const numRepeats = parseInt(vim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				let cursorPosition = docs.userCursor.style.transform;
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				let newCursorPosition = docs.userCursor.style.transform;
+				if (cursorPosition === newCursorPosition) {
+					// We are stuck in a loop because of punctuation or something, move forward
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				}
+			}
+			vim.num = "";
+			updateUISequenceText("");
+			docs.setCursorWidth();
+			return true;
+			
 		}
 
 		if (e.key === "$" && vim.currentSequence.length === 0) {
@@ -645,22 +666,6 @@ function runVim() {
 		e.preventDefault();
 		e.stopPropagation();
 
-		document.querySelector(".docs-domreader-iframe").contentDocument	
-
-
-
-		// let txt;
-		// console.log(docs.contentDocument.getSelection().toString());
-		// console.log(docs.contentDocument.hasFocus());
-		// if (window.getSelection) {
-		// 		txt = window.getSelection();
-		// 	} else if (window.document.getSelection) {
-		// 		txt =window.document.getSelection();
-		// 	} else if (window.document.selection) {
-			
-		// 		txt = window.document.selection.createRange().text;
-		// d	}
-
 		if (e.key === "Shift") {
 			// Shift by itself does nothing
 			return true;
@@ -728,7 +733,6 @@ function runVim() {
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			if (vim.visualModeIsLinedBased) {
 				let cursorLocations = docs.getCursorLocations();
-				console.log(cursorLocations);
 				if (!cursorLocations[3]) {
 					// If we're not at the end of a file, move left
 					docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -899,5 +903,5 @@ function runVim() {
 		}
 	};
 
-	console.log("Vim Docs Editor Loaded");
+	// console.log("Vim Docs Editor Loaded");
 }
