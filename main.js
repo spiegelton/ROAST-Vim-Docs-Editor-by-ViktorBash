@@ -175,6 +175,24 @@ function runVim() {
 		// Not updating cursor because we're at the same place
 	};
 
+	vim.copyWholeLineVisualMode = async function () {
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		docs.contentDocument.execCommand("copy");
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let copiedText = await navigator.clipboard.readText();
+
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[0]) {
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.contentDocument.execCommand("copy");
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			copiedText = await navigator.clipboard.readText() + copiedText;
+		}
+		navigator.clipboard.writeText(copiedText);
+		vim.switchToNormalMode();
+		return true;
+	}
+
 	// Called in normal mode.
 	vim.normal_keydown = function (e) {
 		if (e.key.match(/F\d+/)) {
@@ -786,6 +804,11 @@ function runVim() {
 			vim.num = "";
 			vim.updateUISequenceText("");
 			docs.setCursorWidth();
+			return true;
+		}
+
+		if (e.key === "Y" && vim.currentSequence.length === 0) {
+			vim.copyWholeLineVisualMode();
 			return true;
 		}
 
