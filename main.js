@@ -481,7 +481,7 @@ function runVim() {
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 				docs.pressKey(docs.codeFromKey("Backspace"));
 			}
-			if (e.key === "c") {
+			if (vim.currentSequence === "c") {
 				vim.switchToInsertMode();
 				return true;
 			}
