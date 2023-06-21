@@ -765,6 +765,8 @@ function runVim() {
 		}
 
 		if (e.key === "c" && vim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("Backspace"));
+			vim.switchToInsertMode();
 			return true;
 		}
 
