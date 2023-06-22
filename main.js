@@ -317,9 +317,9 @@ function runVim() {
 
 		if (e.key === "A" && vim.currentSequence.length === 0) {
 			let cursorLocations = docs.getCursorLocations();
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
 			if (!cursorLocations[3]) {
-				// If we're not at the end of the file, move left
+				// If we're not at the end of the file, move down and left
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true);
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 
