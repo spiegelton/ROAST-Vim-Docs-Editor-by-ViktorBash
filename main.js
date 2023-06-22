@@ -76,7 +76,7 @@ function runVim() {
 			Backspace: [["ArrowLeft"]],
 			b: [["ArrowLeft", true]], // ctrl + <-
 			B: [["ArrowLeft", true]], // ctrl + <-
-			w: [
+			w: [ // w and W only for visual mode used, TODO: fix in visual mode
 				["ArrowRight", true],
 				["ArrowRight", true],
 				["ArrowLeft", true],
@@ -409,7 +409,26 @@ function runVim() {
 			updateUISequenceText("");
 			docs.setCursorWidth();
 			return true;
-			
+		}
+
+		if ((e.key === "w" || e.key === "W") && vim.currentSequence.length === 0) {
+			const numRepeats = parseInt(vim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				let cursorPosition = docs.userCursor.style.transform;
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				let newCursorPosition = docs.userCursor.style.transform;
+				console.log(cursorPosition, newCursorPosition);
+				if (cursorPosition === newCursorPosition) {
+					// We've reached end of the file
+					break;
+				}
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			}
+			vim.num = "";
+			updateUISequenceText("");
+			docs.setCursorWidth();
+			return true;
 		}
 
 		if (e.key === "$" && vim.currentSequence.length === 0) {
