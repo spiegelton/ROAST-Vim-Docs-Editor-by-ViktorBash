@@ -391,6 +391,12 @@ function runVim() {
 				let cursorPosition = docs.userCursor.style.transform;
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				let cursorLocations = docs.getCursorLocations();
+				if (cursorLocations[3]) {
+					// We reached end of the file
+					break;
+				}
+
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 				let newCursorPosition = docs.userCursor.style.transform;
