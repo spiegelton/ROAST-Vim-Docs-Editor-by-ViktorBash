@@ -377,9 +377,10 @@ function runVim() {
 
 		if (e.key === "I" && vim.currentSequence.length === 0) {
 			let cursorLocations = docs.getCursorLocations();
-			if (!cursorLocations[0]) {
-				// We are not at the start of a line
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			if (!cursorLocations[2] && !cursorLocations[3]) {
+				// Technically don't need to check for start of file, but we'll avoid extra work
+				docs.pressKey(docs.codeFromKey("ArrowRight"))
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true)
 			}
 			vim.switchToInsertMode();
 			return true;
