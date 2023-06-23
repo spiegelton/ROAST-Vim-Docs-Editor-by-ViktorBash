@@ -549,6 +549,26 @@ function runVim() {
 		// cc
 		if (e.key === "c" && vim.currentSequence === "c") {
 			const numRepeats = parseInt(vim.num) || 1;
+			if (numRepeats === 1) {
+				// Handle case for 1
+				let cursorLocations = docs.getCursorLocations();
+				if (cursorLocations[0] && cursorLocations[1]) {
+					vim.switchToInsertMode();
+					return true;
+				}
+
+				if (!cursorLocations[0]) {
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				vim.switchToInsertMode();
+				return true;
+				
+			}
+			else {
 			for (let i = 0; i < numRepeats; i++) {
 				let cursorLocations = docs.getCursorLocations();
 
@@ -574,6 +594,7 @@ function runVim() {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
+		}
 		}
 
 		// diw, ciw
@@ -678,9 +699,15 @@ function runVim() {
 		if (vim.currentSequence[0] === "r" && vim.currentSequence.length === 2) {
 			const numRepeats = parseInt(vim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				docs.pressKey(vim.currentSequence.charCodeAt(1));
+				let cursorLocations = docs.getCursorLocations();
+				if (cursorLocations[1]) {
+					docs.pressKey(vim.currentSequence.charCodeAt(1));
+				}
+				else {
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					docs.pressKey(vim.currentSequence.charCodeAt(1));
+				}
 			}
 			vim.num = "";
 			vim.currentSequence = "";

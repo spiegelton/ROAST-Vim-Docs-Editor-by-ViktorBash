@@ -217,6 +217,8 @@ docs.atStartOfLine = function () {
 // Returns an array of booleans representing the cursor's location [atStartOfLine, atEndOfLine, atStartOfFile, atEndOfFile]
 // The point of coupling so many functions together is to reduce the number of times we have to move the cursor
 // This function moves the cursor 3 times
+// atStartofLine and atEndofLine include multi line statements and will return "true" for them too
+// Additionally, once you have highlighted text, this function is completely inaccurate and useless
 docs.getCursorLocations = function () {
 	let result = [false, false, false, false];
 	let initialCoords = docs.userCursor.style.transform;
