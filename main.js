@@ -204,6 +204,9 @@ function runVim() {
 		e.preventDefault();
 		e.stopPropagation();
 
+		console.log(e.key);
+		console.log(e);
+
 		if (e.key === "Shift") {
 			// Shift by itself does nothing
 			return true;
@@ -321,7 +324,10 @@ function runVim() {
 			if (!cursorLocations[3]) {
 				// If we're not at the end of the file, move down and left
 				docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				let newCursorLocations = docs.getCursorLocations();
+				if (!newCursorLocations[3]) {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
 			}
 
 			vim.switchToInsertMode();
