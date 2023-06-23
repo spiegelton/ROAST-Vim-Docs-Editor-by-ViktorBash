@@ -154,6 +154,7 @@ function runVim() {
 			// We are not at the start of a line, so select text normally
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			docs.contentDocument.execCommand("copy");
+			console.log(await navigator.clipboard.read());
 			await navigator.clipboard.readText().then((text) => {
 				copiedText = text;
 			});
