@@ -204,9 +204,6 @@ function runVim() {
 		e.preventDefault();
 		e.stopPropagation();
 
-		console.log(e.key);
-		console.log(e);
-
 		if (e.key === "Shift") {
 			// Shift by itself does nothing
 			return true;
