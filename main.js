@@ -204,6 +204,8 @@ function runVim() {
 		e.preventDefault();
 		e.stopPropagation();
 
+		// console.log(docs.atEndOfLine());
+
 		if (e.key === "Shift") {
 			// Shift by itself does nothing
 			return true;
@@ -306,10 +308,34 @@ function runVim() {
 		}
 
 		if (e.key === "a" && vim.currentSequence.length === 0) {
-			let cursorLocations = docs.getCursorLocations();
-			if (!cursorLocations[1]) {
-				// If we're not at the end of the line, move right
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let initialCoords = docs.userCursor.style.transform;
+			let initialXIndex = initialCoords.indexOf("px");
+			let initialYCoord = initialCoords.slice(
+				initialXIndex + 4,
+				initialCoords.length - 3
+			);
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let newCoords = docs.userCursor.style.transform;
+			let newXIndex = newCoords.indexOf("px");
+			let newYCoord = newCoords.slice(
+				newXIndex + 4,
+				newCoords.length - 3
+			);
+			if (initialYCoord !== newYCoord) {
+				// We're either on a new multiline or a real new line, check which scenario and adjust accordingly
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+				let finalCoords = docs.userCursor.style.transform;
+				let finalXIndex = finalCoords.indexOf("px");
+				let finalYCoord = finalCoords.slice(
+					finalXIndex + 4,
+					finalCoords.length - 3
+				);
+				if (finalCoords === initialCoords) {
+					// We've encountered a new line, we don't need to move the cursor anymore
+				} else {
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				}
+
 			}
 
 			vim.switchToInsertMode();
