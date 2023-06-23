@@ -406,10 +406,29 @@ function runVim() {
 		}
 
 		if (e.key === "I" && vim.currentSequence.length === 0) {
-			let cursorLocations = docs.getCursorLocations();
-			if (!cursorLocations[2] && !cursorLocations[3]) {
-				// Technically don't need to check for start of file, but we'll avoid extra work
-				docs.pressKey(docs.codeFromKey("ArrowRight"))
+			console.log("Yo");
+			let oldCoords = docs.userCursor.style.transform;
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let newCoords = docs.userCursor.style.transform;
+			if (oldCoords === newCoords) {
+				// We are at the end of a file (which may be an empty line, so we have to test for that)
+				let initialYCoord = docs.getYCoord();
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				let finalYCoord = docs.getYCoord();
+
+				// We we are going to check Y-Values, if the y-value didn't change, hit arrow up
+				// If the y value did change, hit arrow right
+				if (initialYCoord === finalYCoord) {
+					// Y Coord didn't change, so we should get to the start of a line with arrow up
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+				}
+				else {
+					// Y Coord changed, so we were at the start of a line (so just go back)
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				}
+			}
+			else {
+				// We can just arrow up from here in all scenarios
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true)
 			}
 			vim.switchToInsertMode();
