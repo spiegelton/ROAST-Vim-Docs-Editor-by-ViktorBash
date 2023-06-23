@@ -315,21 +315,11 @@ function runVim() {
 				initialCoords.length - 3
 			);
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			let newCoords = docs.userCursor.style.transform;
-			let newXIndex = newCoords.indexOf("px");
-			let newYCoord = newCoords.slice(
-				newXIndex + 4,
-				newCoords.length - 3
-			);
+			let newYCoord = docs.getYCoord();
 			if (initialYCoord !== newYCoord) {
 				// We're either on a new multiline or a real new line, check which scenario and adjust accordingly
 				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
 				let finalCoords = docs.userCursor.style.transform;
-				let finalXIndex = finalCoords.indexOf("px");
-				let finalYCoord = finalCoords.slice(
-					finalXIndex + 4,
-					finalCoords.length - 3
-				);
 				if (finalCoords === initialCoords) {
 					// We've encountered a new line, we don't need to move the cursor anymore
 				} else {
