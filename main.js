@@ -76,7 +76,8 @@ function runVim() {
 			Backspace: [["ArrowLeft"]],
 			b: [["ArrowLeft", true]], // ctrl + <-
 			B: [["ArrowLeft", true]], // ctrl + <-
-			w: [ // w and W only for visual mode used, TODO: fix in visual mode
+			w: [
+				// w and W only for visual mode used, TODO: fix in visual mode
 				["ArrowRight", true],
 				["ArrowRight", true],
 				["ArrowLeft", true],
@@ -123,8 +124,7 @@ function runVim() {
 		updateUISequenceText("");
 		if (!vim.visualModeIsLinedBased) {
 			updateUIModeText("-- VISUAL --");
-		}
-		else {
+		} else {
 			updateUIModeText("-- VISUAL LINE --");
 		}
 		docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
@@ -141,35 +141,59 @@ function runVim() {
 	};
 
 	vim.copyWholeLine = async function () {
-		// For yy and Y
-
-		// We need to preserve the user's cursor location,
-		// so we're gonna copy the left half, copy the right half, and then combine them
-		// The logic is similar to y0 and y$, except for y$ we copy the enter key at the end as well
 		let cursorLocations = docs.getCursorLocations();
-		let copiedText = "";
-
-		// Left half
-		if (!cursorLocations[0]) {
-			// We are not at the start of a line, so select text normally
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+		if (cursorLocations[0] && cursorLocations[3]) {
+			// We are at the start of a line and at the end of the file, there's nothing
+			// really to copy besides a blank line
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
 			docs.contentDocument.execCommand("copy");
-			console.log(await navigator.clipboard.read());
-			await navigator.clipboard.readText().then((text) => {
-				copiedText = text;
-			});
-			docs.pressKey(docs.codeFromKey("ArrowRight")); // Move back to original position after
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+		} else {
+			let [xCoord, yCoord] = docs.getCoords(); // This is how we will know our original location
+			xCoord = parseInt(xCoord);
+			yCoord = parseInt(yCoord);
+
+			if (cursorLocations[0]) {
+				// We are at the start of a line, so move to the right so that going up works properly
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+
+			// Here we traverse up and select the whole section we were on and copy it
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.contentDocument.execCommand("copy");
+			docs.pressKey(docs.codeFromKey("ArrowRight"));  // We are at the end, now we have to get back to our original location
+
+			let [newXCoord, newYCoord] = docs.getCoords();
+			newXCoord = parseInt(newXCoord);
+			newYCoord = parseInt(newYCoord);
+
+			let startTime = Date.now();
+			while (newXCoord !== xCoord || newYCoord !== yCoord) {
+				let curTime = Date.now();
+
+				if (curTime - startTime > 1500) {
+					// This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
+					// (1.5 seconds), we break out
+					break;
+				}
+				if (newYCoord < yCoord) {
+					docs.pressKey(docs.codeFromKey("ArrowDown"));
+				} else if (newYCoord > yCoord) {
+					docs.pressKey(docs.codeFromKey("ArrowUp"));
+				}
+
+				if (newXCoord < xCoord) {
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				} else if (newXCoord > xCoord) {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+
+				[newXCoord, newYCoord] = docs.getCoords();
+				newXCoord = parseInt(newXCoord);
+				newYCoord = parseInt(newYCoord);
+			}
 		}
-
-		// Right half
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-		docs.contentDocument.execCommand("copy");
-		await navigator.clipboard.readText().then((text) => {
-			copiedText += text;
-			navigator.clipboard.writeText(copiedText); // inside the promise so it doesn't run before
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		});
-
 		vim.num = "";
 		vim.currentSequence = "";
 		updateUISequenceText("");
@@ -187,12 +211,12 @@ function runVim() {
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			docs.contentDocument.execCommand("copy");
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			copiedText = await navigator.clipboard.readText() + copiedText;
+			copiedText = (await navigator.clipboard.readText()) + copiedText;
 		}
 		navigator.clipboard.writeText(copiedText);
 		vim.switchToNormalMode();
 		return true;
-	}
+	};
 
 	// Called in normal mode.
 	vim.normal_keydown = function (e) {
@@ -224,8 +248,7 @@ function runVim() {
 			let cursorLocations = docs.getCursorLocations();
 			if ((cursorLocations[0] && cursorLocations[1]) || cursorLocations[1]) {
 				// If we're on an empty line or at the end of a line, do not move right
-			}
-			else {
+			} else {
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
 			// This set time out is ugly but doesn't work without it on my mac laptop
@@ -265,7 +288,7 @@ function runVim() {
 			vim.switchToVisualMode();
 			return true;
 		}
-		
+
 		if (e.key === "V" && vim.currentSequence.length === 0) {
 			let cursorLocations = docs.getCursorLocations();
 			if (!cursorLocations[0]) {
@@ -325,7 +348,6 @@ function runVim() {
 				} else {
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 				}
-
 			}
 
 			vim.switchToInsertMode();
@@ -411,21 +433,19 @@ function runVim() {
 				if (initialYCoord === finalYCoord) {
 					// Y Coord didn't change, so we should get to the start of a line with arrow up
 					docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-				}
-				else {
+				} else {
 					// Y Coord changed, so we were at the start of a line (so just go back)
 					docs.pressKey(docs.codeFromKey("ArrowRight"));
 				}
-			}
-			else {
+			} else {
 				// We can just arrow up from here in all scenarios
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true)
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
 			}
 			vim.switchToInsertMode();
 			return true;
 		}
 
-		if ((e.key === "E" || e.key === "e") && vim.currentSequence.length === 0) { 
+		if ((e.key === "E" || e.key === "e") && vim.currentSequence.length === 0) {
 			const numRepeats = parseInt(vim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
 				let cursorPosition = docs.userCursor.style.transform;
@@ -605,35 +625,33 @@ function runVim() {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 				vim.switchToInsertMode();
 				return true;
-				
-			}
-			else {
-			for (let i = 0; i < numRepeats; i++) {
-				let cursorLocations = docs.getCursorLocations();
+			} else {
+				for (let i = 0; i < numRepeats; i++) {
+					let cursorLocations = docs.getCursorLocations();
 
-				if (cursorLocations[3] && cursorLocations[0]) {
-					// We are at the end of a file on an empty line, so we're done completely
-					vim.switchToInsertMode();
-					return true;
+					if (cursorLocations[3] && cursorLocations[0]) {
+						// We are at the end of a file on an empty line, so we're done completely
+						vim.switchToInsertMode();
+						return true;
+					}
+					if (!cursorLocations[0]) {
+						docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+						docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					}
+					docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+					docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					cursorLocations = docs.getCursorLocations();
+					if (i === numRepeats - 1 || cursorLocations[3]) {
+						// We either reached the end of file or end of sequence,
+						// Don't backspace for the last line we delete, we have to stay on it
+						vim.switchToInsertMode();
+						return true;
+					}
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
 				}
-				if (!cursorLocations[0]) {
-					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				}
-				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				cursorLocations = docs.getCursorLocations();
-				if (i === numRepeats - 1 || cursorLocations[3]) {
-					// We either reached the end of file or end of sequence,
-					// Don't backspace for the last line we delete, we have to stay on it
-					vim.switchToInsertMode();
-					return true;
-				}
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
-		}
 		}
 
 		// diw, ciw
@@ -646,18 +664,15 @@ function runVim() {
 				let cursorLocations = docs.getCursorLocations();
 				if (cursorLocations[0] && cursorLocations[1]) {
 					// Do nothing, we're on an empty line
-				}
-				else if(cursorLocations[0])  {
+				} else if (cursorLocations[0]) {
 					// We're at the start of a line, so select right and delete
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
 					docs.pressKey(docs.codeFromKey("Backspace"));
-				}
-				else if (cursorLocations[0]) {
+				} else if (cursorLocations[0]) {
 					// We're at the end of a line, so select left and delete
 					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
 					docs.pressKey(docs.codeFromKey("Backspace"));
-				}
-				else {
+				} else {
 					// We're in the middle somewhere, move right and then all the way to the start of the word
 					// then all the way to the right with highlighting, then delete
 					docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -714,7 +729,7 @@ function runVim() {
 			return true;
 		}
 
-		// yy
+		// yy or Y
 		if ((e.key === "y" && vim.currentSequence === "y") || e.key === "Y") {
 			vim.copyWholeLine();
 			return true;
@@ -744,7 +759,6 @@ function runVim() {
 				docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
 				let [leftXCoord, leftYCoord] = docs.getCoords();
 
-
 				// IF: We are not at the start of the file, undo our arrow left with an arrow right
 				if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
 					// We are not at the beginning of the file, so undo our arrow right
@@ -752,15 +766,17 @@ function runVim() {
 				}
 				// IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
 				// about line ending stuff
-				if (leftYCoord !== yCoord || (leftYCoord === yCoord && leftXCoord === xCoord)) {
+				if (
+					leftYCoord !== yCoord ||
+					(leftYCoord === yCoord && leftXCoord === xCoord)
+				) {
 					// At the beginning of a line or multiline, no need for checking if we're at the end
 					docs.pressKey(vim.currentSequence.charCodeAt(1));
-					docs.pressKey(docs.codeFromKey("ArrowRight"));;
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
 					let rightYCoord = docs.getYCoord();
 					if (rightYCoord !== yCoord) {
 						docs.pressKey(docs.codeFromKey("ArrowLeft"));
-					}
-					else {
+					} else {
 						docs.pressKey(docs.codeFromKey("Backspace"));
 					}
 					continue;
@@ -774,13 +790,11 @@ function runVim() {
 				if (xCoord === newXCoord && yCoord === newYCoord) {
 					// We are at the end of the file, just add our word and chill
 					docs.pressKey(vim.currentSequence.charCodeAt(1));
-				}
-				else if (yCoord === newYCoord) {
+				} else if (yCoord === newYCoord) {
 					// We are in the middle of the line somewhere or something, standard procedure
 					docs.pressKey(docs.codeFromKey("Backspace"));
 					docs.pressKey(vim.currentSequence.charCodeAt(1));
-				}
-				else {
+				} else {
 					// We've either passed a space or a return that has put us one multiline or line down
 					docs.pressKey(docs.codeFromKey("ArrowLeft"));
 					docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -789,8 +803,7 @@ function runVim() {
 					if (finalXCoord === xCoord && finalYCoord === yCoord) {
 						// We are dealing with a "Return" and actual new line
 						docs.pressKey(vim.currentSequence.charCodeAt(1));
-					}
-					else {
+					} else {
 						// We are dealing with a space and just a multiline
 						docs.pressKey(docs.codeFromKey("Backspace"));
 						docs.pressKey(vim.currentSequence.charCodeAt(1));
@@ -1000,7 +1013,6 @@ function runVim() {
 				updateUISequenceText("");
 				return true;
 			}
-
 		}
 
 		vim.currentSequence += e.key;
