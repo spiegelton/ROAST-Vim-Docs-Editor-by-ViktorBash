@@ -273,12 +273,12 @@ docs.getYCoord = function () {
 	return yCoord;
 }
 
-// docs.getCoords = function () {
-// 	let coords = docs.userCursor.style.transform;
-// 	let xIndex = coords.indexOf("px");
-// 	let xCoord = coords.slice(10, xIndex);
-// 	let yCoord = coords.slice(xIndex + 4, coords.length - 3);
-// 	return [xCoord, yCoord];
-// }
+docs.getCoords = function () {
+	let coords = docs.userCursor.style.transform;
+	let xIndex = coords.indexOf("px");
+	let xCoord = coords.slice(10, xIndex);
+	let yCoord = coords.slice(xIndex + 4, coords.length - 3);
+	return [xCoord, yCoord];
+}
 
 export { docs };

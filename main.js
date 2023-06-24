@@ -736,16 +736,65 @@ function runVim() {
 
 		// r for replace command:
 		if (vim.currentSequence[0] === "r" && vim.currentSequence.length === 2) {
+			// if we're at the end of a line, r should go on the current line
+			// if we're at the end of a multiline (fake) line, r can move to next multiline
 			const numRepeats = parseInt(vim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
-				let cursorLocations = docs.getCursorLocations();
-				if (cursorLocations[1]) {
+				let [xCoord, yCoord] = docs.getCoords();
+				docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+				let [leftXCoord, leftYCoord] = docs.getCoords();
+
+
+				// IF: We are not at the start of the file, undo our arrow left with an arrow right
+				if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
+					// We are not at the beginning of the file, so undo our arrow right
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				}
+				// IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
+				// about line ending stuff
+				if (leftYCoord !== yCoord || (leftYCoord === yCoord && leftXCoord === xCoord)) {
+					// At the beginning of a line or multiline, no need for checking if we're at the end
+					docs.pressKey(vim.currentSequence.charCodeAt(1));
+					docs.pressKey(docs.codeFromKey("ArrowRight"));;
+					let rightYCoord = docs.getYCoord();
+					if (rightYCoord !== yCoord) {
+						docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					}
+					else {
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+					continue;
+				}
+
+				// We are not at the start of a file or line, so we have to check if we're at the end of a line,
+				// middle of a line, or end of a file
+
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				let [newXCoord, newYCoord] = docs.getCoords();
+				if (xCoord === newXCoord && yCoord === newYCoord) {
+					// We are at the end of the file, just add our word and chill
+					docs.pressKey(vim.currentSequence.charCodeAt(1));
+				}
+				else if (yCoord === newYCoord) {
+					// We are in the middle of the line somewhere or something, standard procedure
+					docs.pressKey(docs.codeFromKey("Backspace"));
 					docs.pressKey(vim.currentSequence.charCodeAt(1));
 				}
 				else {
-					docs.pressKey(docs.codeFromKey("ArrowRight"));
-					docs.pressKey(docs.codeFromKey("Backspace"));
-					docs.pressKey(vim.currentSequence.charCodeAt(1));
+					// We've either passed a space or a return that has put us one multiline or line down
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+					let [finalXCoord, finalYCoord] = docs.getCoords();
+					if (finalXCoord === xCoord && finalYCoord === yCoord) {
+						// We are dealing with a "Return" and actual new line
+						docs.pressKey(vim.currentSequence.charCodeAt(1));
+					}
+					else {
+						// We are dealing with a space and just a multiline
+						docs.pressKey(docs.codeFromKey("Backspace"));
+						docs.pressKey(vim.currentSequence.charCodeAt(1));
+					}
 				}
 			}
 			vim.num = "";
