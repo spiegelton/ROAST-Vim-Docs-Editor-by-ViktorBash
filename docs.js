@@ -150,11 +150,8 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 	el.dispatchEvent(key_event);
 };
 
-// Pastes a block of plaintext into the document. Note that spaces before/after
-// @text don't seem to work. Also note that repeated pastes can cause serious
-// problems --- please give each paste a few hunderd milliseconds to finish
-// before sending another pasteText.
-docs.pasteClipboard = async function () {
+// Pastes plain text into the document
+docs.pasteClipboardPlainText = async function () {
 	let data = new DataTransfer();
 	data.setData("text/plain", await navigator.clipboard.readText());
 	var paste = new ClipboardEvent("paste", {
@@ -164,7 +161,6 @@ docs.pasteClipboard = async function () {
 	paste.docs_plus_ = true;
 
 	await docs.texttarget.dispatchEvent(paste);
-    return;
 };
 
 docs.userCursor = document.querySelector(".kix-cursor");

@@ -162,7 +162,7 @@ function runVim() {
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 			docs.contentDocument.execCommand("copy");
-			docs.pressKey(docs.codeFromKey("ArrowRight"));  // We are at the end, now we have to get back to our original location
+			docs.pressKey(docs.codeFromKey("ArrowRight")); // We are at the end, now we have to get back to our original location
 
 			let [newXCoord, newYCoord] = docs.getCoords();
 			newXCoord = parseInt(newXCoord);
@@ -218,6 +218,62 @@ function runVim() {
 		return true;
 	};
 
+	vim.paste = async function (e) {
+		// The main thing is to check that if we're at the end, are we at the end of a multiline or real line
+		let [xCoord, yCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+		let [leftXCoord, leftYCoord] = docs.getCoords();
+		if (leftXCoord === xCoord && leftYCoord === yCoord) {
+			// We are the start of a file
+			let startYCoord = docs.getYCoord();
+			docs.pressKey(docs.codeFromKey("ArrowRight")); 
+			let endYCoord = docs.getYCoord();
+			if (startYCoord !== endYCoord) {
+				// We are at the start of an empty line, so don't move right actually
+				docs.pressKey(docs.codeFromKey("ArrowLeft")); 
+			}
+		} else {
+			docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our ArrowLeft because we're not at the start of the file
+			let yCoord = docs.getYCoord();
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let newYCoord = docs.getYCoord();
+			if (yCoord === newYCoord) {
+				// Either we are in the middle of a line or at the end of a file, good to go
+			} else {
+				// We are at the end of a multiline (fake line) or a real line,
+				// Even though we do the same thing for both scenarios, the below key movements are still necessary
+				// to either put us at the right position for either scenario
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+			}
+		}
+
+		// Now that we're in the right position, we can paste
+		let startCursorPosition = docs.userCursor.style.transform;
+		if (e.ctrlKey === false) {
+			await docs.contentDocument.execCommand("paste");
+			setTimeout(() => {
+				let endCursorPosition = docs.userCursor.style.transform;
+				// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
+				if (startCursorPosition !== endCursorPosition) {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+			}, 1);
+		} else {
+			await docs.pasteClipboardPlainText().then(() => {
+				setTimeout(() => {
+					let endCursorPosition = docs.userCursor.style.transform;
+					// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
+					if (startCursorPosition !== endCursorPosition) {
+						docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					}
+				}, 1);
+			});
+		}
+
+	}
+
 	// Called in normal mode.
 	vim.normal_keydown = function (e) {
 		if (e.key.match(/F\d+/)) {
@@ -227,8 +283,6 @@ function runVim() {
 
 		e.preventDefault();
 		e.stopPropagation();
-
-		// console.log(docs.atEndOfLine());
 
 		if (e.key === "Shift") {
 			// Shift by itself does nothing
@@ -245,20 +299,7 @@ function runVim() {
 
 		// Paste (no support for numbers/pasting multiple times yet)
 		if (e.key === "p" && vim.currentSequence.length === 0) {
-			let cursorLocations = docs.getCursorLocations();
-			if ((cursorLocations[0] && cursorLocations[1]) || cursorLocations[1]) {
-				// If we're on an empty line or at the end of a line, do not move right
-			} else {
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-			}
-			// This set time out is ugly but doesn't work without it on my mac laptop
-			// In reality doesn't matter because it is 1 millisecond later so user won't notice at all
-			docs.pasteClipboard().then(() => {
-				setTimeout(() => {
-					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				}, 1);
-			});
-
+			vim.paste(e);
 			vim.num = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
@@ -267,11 +308,20 @@ function runVim() {
 
 		// Paste (no support for numbers/pasting multiple times yet)
 		if (e.key === "P" && vim.currentSequence.length === 0) {
-			docs.pasteClipboard().then(() => {
+			if (e.ctrlKey === false) {
+				// Paste with formatting
+				docs.contentDocument.execCommand("paste");
 				setTimeout(() => {
 					docs.pressKey(docs.codeFromKey("ArrowLeft"));
 				}, 1);
-			});
+			} else {
+				// Paste without formatting
+				docs.pasteClipboardPlainText().then(() => {
+					setTimeout(() => {
+						docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					}, 1);
+				});
+			}
 			vim.num = "";
 			updateUISequenceText("");
 			docs.setCursorWidth();
@@ -418,7 +468,6 @@ function runVim() {
 		}
 
 		if (e.key === "I" && vim.currentSequence.length === 0) {
-			console.log("Yo");
 			let oldCoords = docs.userCursor.style.transform;
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			let newCoords = docs.userCursor.style.transform;
