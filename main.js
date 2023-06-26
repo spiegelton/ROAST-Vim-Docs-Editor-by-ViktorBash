@@ -226,11 +226,11 @@ function runVim() {
 		if (leftXCoord === xCoord && leftYCoord === yCoord) {
 			// We are the start of a file
 			let startYCoord = docs.getYCoord();
-			docs.pressKey(docs.codeFromKey("ArrowRight")); 
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			let endYCoord = docs.getYCoord();
 			if (startYCoord !== endYCoord) {
 				// We are at the start of an empty line, so don't move right actually
-				docs.pressKey(docs.codeFromKey("ArrowLeft")); 
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		} else {
 			docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our ArrowLeft because we're not at the start of the file
@@ -271,8 +271,7 @@ function runVim() {
 				}, 1);
 			});
 		}
-
-	}
+	};
 
 	// Called in normal mode.
 	vim.normal_keydown = function (e) {
@@ -527,7 +526,6 @@ function runVim() {
 				let cursorPosition = docs.userCursor.style.transform;
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 				let newCursorPosition = docs.userCursor.style.transform;
-				console.log(cursorPosition, newCursorPosition);
 				if (cursorPosition === newCursorPosition) {
 					// We've reached end of the file
 					break;
@@ -555,19 +553,60 @@ function runVim() {
 		}
 
 		if (e.key == "x" && vim.currentSequence.length === 0) {
-			const numRepeats = parseInt(vim.num) || 1;
-			for (let i = 0; i < numRepeats; i++) {
-				let cursorLocations = docs.getCursorLocations();
+			// if we're at the end of a line, r should go on the current line
+			// if we're at the end of a multiline (fake) line, r can move to next multiline
+			let [xCoord, yCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+			let [leftXCoord, leftYCoord] = docs.getCoords();
 
-				if (cursorLocations[0] && cursorLocations[1]) {
-					// On an empty space, we can break out and end now because 'x' does nothing on an empty line
-					break;
-				} else if (cursorLocations[1]) {
-					// On the end of a non-empty line
+			// IF: We are not at the start of the file, undo our arrow left with an arrow right
+			if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
+				// We are not at the beginning of the file, so undo our arrow right
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+			// IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
+			// about line ending stuff
+			if (
+				leftYCoord !== yCoord ||
+				(leftYCoord === yCoord && leftXCoord === xCoord)
+			) {
+				// At the beginning of a line or multiline, no need for checking if we're at the end
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				let [rightXCoord, rightYCoord] = docs.getCoords();
+				// let rightYCoord = docs.getYCoord();
+				if (rightYCoord !== yCoord) {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				} else if (rightXCoord === xCoord && rightYCoord === yCoord) {
+					// We are at the end of the file on an empty line, do nothing
+				} else {
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+
+			// We are not at the start of a file or line, so we have to check if we're at the end of a line,
+			// middle of a line, or end of a file
+			else {
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				let [newXCoord, newYCoord] = docs.getCoords();
+				if (xCoord === newXCoord && yCoord === newYCoord) {
+					// We are at the end of the file, guaranteed to not be an empty line from above
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				} else if (yCoord === newYCoord) {
+					// We are in the middle of the line somewhere or something, standard procedure
 					docs.pressKey(docs.codeFromKey("Backspace"));
 				} else {
-					// On a regular (not edge case) character/place
-					docs.pressKey(docs.codeFromKey("Delete"));
+					// We've either passed a space or a return that has put us one multiline or line down
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+					let [finalXCoord, finalYCoord] = docs.getCoords();
+					if (finalXCoord === xCoord && finalYCoord === yCoord) {
+						// We are dealing with a "Return" and actual new line
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					} else {
+						// We are dealing with a space and just a multiline
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
 				}
 			}
 
@@ -1129,6 +1168,4 @@ function runVim() {
 			return vim.visual_keydown(e);
 		}
 	};
-
-	// console.log("Vim Docs Editor Loaded");
 }
