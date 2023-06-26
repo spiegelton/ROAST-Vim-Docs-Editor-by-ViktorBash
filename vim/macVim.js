@@ -1,11 +1,11 @@
 import { baseVim } from "./baseVim.js";
-import { docs } from '../docs.js';
+import { docs } from "../docs.js";
 import { updateUIModeText, updateUISequenceText } from "./UI.js";
 
 // Add on top of base vim to work on mac machines
 let macVim = {
 	__proto__: baseVim,
-}
+};
 
 // Move to the end of a real line
 // Used by "A" and "$"
@@ -15,26 +15,23 @@ macVim.moveToEndOfLine = function () {
 	let [middleXCoord, middleYCoord] = docs.getCoords();
 	if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
 		// We are at the end of the file already, do nothing
-	}
-	else if (startYCoord === middleYCoord) {
+	} else if (startYCoord === middleYCoord) {
 		// We are the in the middle of a line somewhere
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-	}
-	else {
+	} else {
 		// We are on the end of a multiline or line
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
 		let [finalXCoord, finalYCoord] = docs.getCoords();
 		if (finalXCoord === startXCoord && finalYCoord === startYCoord) {
 			// We were at the end of a life and are back there, do nothing else
-		}
-		else {
+		} else {
 			// We were at the end of a multiline
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
 		}
 	}
-}
+};
 
 macVim.moveToStartOfLine = function () {
 	let oldCoords = docs.userCursor.style.transform;
@@ -59,7 +56,7 @@ macVim.moveToStartOfLine = function () {
 		// We can just arrow up from here in all scenarios
 		docs.pressKey(docs.codeFromKey("ArrowUp"), true);
 	}
-}
+};
 
 // Called in normal mode.
 macVim.normal_keydown = function (e) {
@@ -173,18 +170,15 @@ macVim.normal_keydown = function (e) {
 		let [middleXCoord, middleYCoord] = docs.getCoords();
 		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
 			// We are at the end of the file already, do nothing
-		}
-		else if (startYCoord === middleYCoord) {
+		} else if (startYCoord === middleYCoord) {
 			// We are the in the middle of a line somewhere, do nothing
-		}
-		else {
+		} else {
 			// We are on the end of a multiline or line
 			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
 			let [finalXCoord, finalYCoord] = docs.getCoords();
 			if (finalXCoord === startXCoord && finalYCoord === startYCoord) {
 				// We were at the end of a line and are back there, do nothing else
-			}
-			else {
+			} else {
 				// We were at the end of a multiline
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -223,10 +217,7 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	if (
-		(e.key === "E" || e.key === "e") &&
-		macVim.currentSequence.length === 0
-	) {
+	if ((e.key === "E" || e.key === "e") && macVim.currentSequence.length === 0) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 			let cursorPosition = docs.userCursor.style.transform;
@@ -251,10 +242,7 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	if (
-		(e.key === "w" || e.key === "W") &&
-		macVim.currentSequence.length === 0
-	) {
+	if ((e.key === "w" || e.key === "W") && macVim.currentSequence.length === 0) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
@@ -274,7 +262,7 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "$" && macVim.currentSequence.length === 0) {
-		macVim.moveToEndOfLine()
+		macVim.moveToEndOfLine();
 		macVim.num = "";
 		macVim.currentSequence = "";
 		updateUISequenceText("");
@@ -282,12 +270,12 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
-		// let [startXCoord, startYCoord] = docs.getCoords();
-		// docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		// let [middleXCoord, middleYCoord] = docs.getCoords();
-		// docs.pressKey(docs.codeFromKey("ArrowRight"));
-		// docs.pressKey(docs.codeFromKey("ArrowRight"));
-		// let [finalXCoord, finalYCoord] = docs.getCoords();
+	// let [startXCoord, startYCoord] = docs.getCoords();
+	// docs.pressKey(docs.codeFromKey("ArrowLeft"));
+	// let [middleXCoord, middleYCoord] = docs.getCoords();
+	// docs.pressKey(docs.codeFromKey("ArrowRight"));
+	// docs.pressKey(docs.codeFromKey("ArrowRight"));
+	// let [finalXCoord, finalYCoord] = docs.getCoords();
 
 	if (e.key == "x" && macVim.currentSequence.length === 0) {
 		// if we're at the end of a line, r should go on the current line
@@ -585,66 +573,69 @@ macVim.normal_keydown = function (e) {
 		macVim.currentSequence[0] === "r" &&
 		macVim.currentSequence.length === 2
 	) {
-		// if we're at the end of a line, r should go on the current line
-		// if we're at the end of a multiline (fake) line, r can move to next multiline
-		let [xCoord, yCoord] = docs.getCoords();
-		docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
-		let [leftXCoord, leftYCoord] = docs.getCoords();
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			// if we're at the end of a line, r should go on the current line
+			// if we're at the end of a multiline (fake) line, r can move to next multiline
+			let [xCoord, yCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+			let [leftXCoord, leftYCoord] = docs.getCoords();
 
-		// IF: We are not at the start of the file, undo our arrow left with an arrow right
-		if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
-			// We are not at the beginning of the file, so undo our arrow right
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-		}
-		// IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
-		// about line ending stuff
-		if (
-			leftYCoord !== yCoord ||
-			(leftYCoord === yCoord && leftXCoord === xCoord)
-		) {
-			// At the beginning of a line or multiline, no need for checking if we're at the end
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			let [rightXCoord, rightYCoord] = docs.getCoords();
-			// let rightYCoord = docs.getYCoord();
-			if (rightYCoord !== yCoord) {
-				// Empty line
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
-			} else if (rightXCoord === xCoord && rightYCoord === yCoord) {
-				// We are at the end of the file on an empty line
-				docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
-			} else {
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
+			// IF: We are not at the start of the file, undo our arrow left with an arrow right
+			if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
+				// We are not at the beginning of the file, so undo our arrow right
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
-		}
-		// We are not at the start of a file or line, so we have to check if we're at the end of a line,
-		// middle of a line, or end of a file
-		else {
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			let [newXCoord, newYCoord] = docs.getCoords();
-			if (xCoord === newXCoord && yCoord === newYCoord) {
-				// We are at the end of the file, guaranteed to not be an empty line from above
-				// Don't backspace
-				docs.pressKey(macVim.currentSequence.charCodeAt(1));
-			} else if (yCoord === newYCoord) {
-				// We are in the middle of the line somewhere or something, standard procedure
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				docs.pressKey(macVim.currentSequence.charCodeAt(1));
-			} else {
-				// We've either passed a space or a return that has put us one multiline or line down
-				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-				let [finalXCoord, finalYCoord] = docs.getCoords();
-				if (finalXCoord === xCoord && finalYCoord === yCoord) {
-					// We are dealing with a "Return" and actual new line
-					// Don't hit backspace since we're at the end of the line 
-					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+			// IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
+			// about line ending stuff
+			if (
+				leftYCoord !== yCoord ||
+				(leftYCoord === yCoord && leftXCoord === xCoord)
+			) {
+				// At the beginning of a line or multiline, no need for checking if we're at the end
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				let [rightXCoord, rightYCoord] = docs.getCoords();
+				// let rightYCoord = docs.getYCoord();
+				if (rightYCoord !== yCoord) {
+					// Empty line
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
+				} else if (rightXCoord === xCoord && rightYCoord === yCoord) {
+					// We are at the end of the file on an empty line
+					docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
 				} else {
-					// We are dealing with a space and just a multiline
-					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
+				}
+			}
+			// We are not at the start of a file or line, so we have to check if we're at the end of a line,
+			// middle of a line, or end of a file
+			else {
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				let [newXCoord, newYCoord] = docs.getCoords();
+				if (xCoord === newXCoord && yCoord === newYCoord) {
+					// We are at the end of the file, guaranteed to not be an empty line from above
+					// Don't backspace
+					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+				} else if (yCoord === newYCoord) {
+					// We are in the middle of the line somewhere or something, standard procedure
 					docs.pressKey(docs.codeFromKey("Backspace"));
 					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+				} else {
+					// We've either passed a space or a return that has put us one multiline or line down
+					docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+					let [finalXCoord, finalYCoord] = docs.getCoords();
+					if (finalXCoord === xCoord && finalYCoord === yCoord) {
+						// We are dealing with a "Return" and actual new line
+						// Don't hit backspace since we're at the end of the line
+						docs.pressKey(macVim.currentSequence.charCodeAt(1));
+					} else {
+						// We are dealing with a space and just a multiline
+						docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+						docs.pressKey(docs.codeFromKey("ArrowRight"));
+						docs.pressKey(docs.codeFromKey("Backspace"));
+						docs.pressKey(macVim.currentSequence.charCodeAt(1));
+					}
 				}
 			}
 		}
@@ -715,10 +706,7 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	if (
-		(e.key === "v" || e.key === "V") &&
-		macVim.currentSequence.length === 0
-	) {
+	if ((e.key === "v" || e.key === "V") && macVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
 		macVim.switchToNormalMode();
 		return true;
@@ -787,10 +775,7 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	if (
-		(e.key === "D" || e.key === "C") &&
-		macVim.currentSequence.length === 0
-	) {
+	if ((e.key === "D" || e.key === "C") && macVim.currentSequence.length === 0) {
 		// Delete the whole line(s) that we partially selected
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		docs.pressKey(docs.codeFromKey("Backspace"));
@@ -908,4 +893,4 @@ macVim.visual_keydown = function (e) {
 	return true;
 };
 
-export { macVim }
+export { macVim };
