@@ -266,7 +266,7 @@ docs.getYCoord = function () {
 	let coords = docs.userCursor.style.transform;
 	let xIndex = coords.indexOf("px");
 	let yCoord = coords.slice(xIndex + 4, coords.length - 3);
-	return yCoord;
+	return parseInt(yCoord);
 }
 
 docs.getCoords = function () {
@@ -274,7 +274,7 @@ docs.getCoords = function () {
 	let xIndex = coords.indexOf("px");
 	let xCoord = coords.slice(10, xIndex);
 	let yCoord = coords.slice(xIndex + 4, coords.length - 3);
-	return [xCoord, yCoord];
+	return [parseInt(xCoord), parseInt(yCoord)];
 }
 
 export { docs };
