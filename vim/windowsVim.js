@@ -490,51 +490,36 @@ windowsVim.normal_keydown = function (e) {
 
 	// cc
 	if (e.key === "c" && windowsVim.currentSequence === "c") {
+		// We are going to select text down, move right one arrow, select text up, and delete
 		const numRepeats = parseInt(windowsVim.num) || 1;
-		if (numRepeats === 1) {
-			// Handle case for 1
+		for (let i = 0; i < numRepeats; i++) {
 			let cursorLocations = docs.getCursorLocations();
-			if (cursorLocations[0] && cursorLocations[1]) {
-				windowsVim.switchToInsertMode();
-				return true;
-			}
-
-			if (!cursorLocations[0]) {
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			if (cursorLocations[3] && cursorLocations[0]) {
+				// We are at the end of a file on an empty line
+				if (i !== numRepeats - 1) {
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+				break;
 			}
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			docs.pressKey(docs.codeFromKey("Backspace"));
-			windowsVim.switchToInsertMode();
-			return true;
-		} else {
-			for (let i = 0; i < numRepeats; i++) {
-				let cursorLocations = docs.getCursorLocations();
-
-				if (cursorLocations[3] && cursorLocations[0]) {
-					// We are at the end of a file on an empty line, so we're done completely
-					windowsVim.switchToInsertMode();
-					return true;
+			if (cursorLocations[3]) {
+				// We are at the end of the file, so backspace again to remove the empty line we're on
+				if (i !== numRepeats - 1) {
+					docs.pressKey(docs.codeFromKey("Backspace"));
 				}
-				if (!cursorLocations[0]) {
-					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				}
-				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				cursorLocations = docs.getCursorLocations();
-				if (i === numRepeats - 1 || cursorLocations[3]) {
-					// We either reached the end of file or end of sequence,
-					// Don't backspace for the last line we delete, we have to stay on it
-					windowsVim.switchToInsertMode();
-					return true;
-				}
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				break; // With dd we finish if we reach the end of the
+			}
+			if (i === numRepeats - 1) {
+				docs.pressKey(docs.codeFromKey("Enter"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
+
+		windowsVim.switchToInsertMode();
+		return true;
 	}
 
 	// diw, ciw
