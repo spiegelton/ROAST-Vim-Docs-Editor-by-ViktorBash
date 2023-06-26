@@ -282,6 +282,13 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
+		// let [startXCoord, startYCoord] = docs.getCoords();
+		// docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		// let [middleXCoord, middleYCoord] = docs.getCoords();
+		// docs.pressKey(docs.codeFromKey("ArrowRight"));
+		// docs.pressKey(docs.codeFromKey("ArrowRight"));
+		// let [finalXCoord, finalYCoord] = docs.getCoords();
+
 	if (e.key == "x" && macVim.currentSequence.length === 0) {
 		// if we're at the end of a line, r should go on the current line
 		// if we're at the end of a multiline (fake) line, r can move to next multiline
@@ -326,15 +333,15 @@ macVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 			} else {
 				// We've either passed a space or a return that has put us one multiline or line down
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
 				let [finalXCoord, finalYCoord] = docs.getCoords();
 				if (finalXCoord === xCoord && finalYCoord === yCoord) {
 					// We are dealing with a "Return" and actual new line
 					docs.pressKey(docs.codeFromKey("Backspace"));
 				} else {
 					// We are dealing with a space and just a multiline
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
 					docs.pressKey(docs.codeFromKey("Backspace"));
 				}
 			}
