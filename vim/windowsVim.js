@@ -569,7 +569,12 @@ windowsVim.normal_keydown = function (e) {
 	// If the current sequence is in the keyMaps, then execute the command
 	if (windowsVim.currentSequence in windowsVim.keyMaps) {
 		windowsVim.keyMaps[windowsVim.currentSequence].forEach(([key, ...args]) => {
-			const numRepeats = parseInt(windowsVim.num) || 1;
+			let numRepeats = parseInt(windowsVim.num) || 1;
+			// For 'gg' and 'G', we only want to run it once no matter what
+			if (windowsVim.currentSequence === "G" || windowsVim.currentSequence === "gg") {
+				numRepeats = 1;
+			}
+
 			for (let i = 0; i < numRepeats; i++) {
 				docs.pressKey(docs.codeFromKey(key), ...args);
 			}
