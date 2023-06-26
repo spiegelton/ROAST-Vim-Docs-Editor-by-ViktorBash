@@ -5,7 +5,10 @@ module.exports = {
   entry: {
     main: [
       "./docs.js",
-      "./main.js"
+      "./main.js",
+      "./vim/baseVim.js",
+      "./vim/macVim.js",
+      "./vim/windowsVim.js"
     ]
   },
   output: {

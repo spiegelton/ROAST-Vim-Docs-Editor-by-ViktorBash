@@ -1,0 +1,900 @@
+import { baseVim } from "./baseVim.js";
+import { docs } from '../docs.js';
+import { updateUIModeText, updateUISequenceText } from "./UI.js";
+
+// Add on top of base vim to work on mac machines
+let macVim = {
+	__proto__: baseVim,
+}
+
+// Called in normal mode.
+macVim.normal_keydown = function (e) {
+	if (e.key.match(/F\d+/)) {
+		// Let function keys (F1 to F12), go through normally
+		return true;
+	}
+
+	e.preventDefault();
+	e.stopPropagation();
+
+	if (e.key === "Shift") {
+		// Shift by itself does nothing
+		return true;
+	}
+
+	if (e.key == "Escape") {
+		// Remove any saved queries that the user had
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		return true;
+	}
+
+	// Paste (no support for numbers/pasting multiple times yet)
+	if (e.key === "p" && macVim.currentSequence.length === 0) {
+		macVim.paste(e);
+		macVim.num = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	// Paste (no support for numbers/pasting multiple times yet)
+	if (e.key === "P" && macVim.currentSequence.length === 0) {
+		if (e.ctrlKey === false) {
+			// Paste with formatting
+			docs.contentDocument.execCommand("paste");
+			setTimeout(() => {
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}, 1);
+		} else {
+			// Paste without formatting
+			docs.pasteClipboardPlainText().then(() => {
+				setTimeout(() => {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}, 1);
+			});
+		}
+		macVim.num = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (e.key === "i" && macVim.currentSequence.length === 0) {
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (e.key === "v" && macVim.currentSequence.length === 0) {
+		macVim.visualModeIsLinedBased = false;
+		macVim.switchToVisualMode();
+		return true;
+	}
+
+	if (e.key === "V" && macVim.currentSequence.length === 0) {
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[0]) {
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+		}
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+		macVim.visualModeIsLinedBased = true;
+		macVim.switchToVisualMode();
+		return true;
+	}
+
+	if (e.key.match(/\d+/) && macVim.currentSequence.length === 0) {
+		if (e.key === "0" && macVim.num.length !== 0) {
+			// 0 is part of the number being typed (ex: "100")
+			if (macVim.num.length < 3) {
+				// We don't want to crash, so max you can type in is a 3 digit number (999)
+				macVim.num += e.key;
+			}
+		} else if (e.key !== "0") {
+			// We have any digit besides 0 being typed (ex: "1" or "11")
+			if (macVim.num.length < 3) {
+				macVim.num += e.key;
+			}
+		} else {
+			// else, 0 is the actual command (ex: "0"), so continue to down below
+			let cursorLocations = docs.getCursorLocations();
+			if (cursorLocations[0] && cursorLocations[1]) {
+				// Do nothing
+			} else if (cursorLocations[0]) {
+				docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			} else {
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			}
+		}
+		updateUISequenceText(macVim.num + macVim.currentSequence);
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (e.key === "a" && macVim.currentSequence.length === 0) {
+		let initialCoords = docs.userCursor.style.transform;
+		let initialXIndex = initialCoords.indexOf("px");
+		let initialYCoord = initialCoords.slice(
+			initialXIndex + 4,
+			initialCoords.length - 3
+		);
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let newYCoord = docs.getYCoord();
+		if (initialYCoord !== newYCoord) {
+			// We're either on a new multiline or a real new line, check which scenario and adjust accordingly
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			let finalCoords = docs.userCursor.style.transform;
+			if (finalCoords === initialCoords) {
+				// We've encountered a new line, we don't need to move the cursor anymore
+			} else {
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+			}
+		}
+
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (e.key === "A" && macVim.currentSequence.length === 0) {
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[3]) {
+			// If we're not at the end of the file, move down and left
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+			let newCursorLocations = docs.getCursorLocations();
+			if (!newCursorLocations[3]) {
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+		}
+
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (e.key === "O" && macVim.currentSequence.length === 0) {
+		let cursorLocations = docs.getCursorLocations();
+		if (cursorLocations[2]) {
+			// At start of file
+			docs.pressKey(docs.codeFromKey("Enter"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		} else if (cursorLocations[3] && cursorLocations[0]) {
+			// At end of file on an empty line
+			docs.pressKey(docs.codeFromKey("Enter"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		} else if (cursorLocations[3]) {
+			// At end of file on non-empty line
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			docs.pressKey(docs.codeFromKey("Enter"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		} // Past this point we are guaranteed to not be at the start or end of the file
+		else if (cursorLocations[0] && cursorLocations[1]) {
+			// We are on an empty line
+			docs.pressKey(docs.codeFromKey("Enter"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		} else if (cursorLocations[0]) {
+			docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			docs.pressKey(docs.codeFromKey("Enter"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		} else {
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			docs.pressKey(docs.codeFromKey("Enter"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		}
+
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (e.key === "o" && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[3]) {
+			// If after going down we are not at the end of the file, go back 1
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		}
+		// Hit enter for the new line
+		docs.pressKey(docs.codeFromKey("Enter"));
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (e.key === "I" && macVim.currentSequence.length === 0) {
+		let oldCoords = docs.userCursor.style.transform;
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let newCoords = docs.userCursor.style.transform;
+		if (oldCoords === newCoords) {
+			// We are at the end of a file (which may be an empty line, so we have to test for that)
+			let initialYCoord = docs.getYCoord();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let finalYCoord = docs.getYCoord();
+
+			// We we are going to check Y-Values, if the y-value didn't change, hit arrow up
+			// If the y value did change, hit arrow right
+			if (initialYCoord === finalYCoord) {
+				// Y Coord didn't change, so we should get to the start of a line with arrow up
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+			} else {
+				// Y Coord changed, so we were at the start of a line (so just go back)
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+		} else {
+			// We can just arrow up from here in all scenarios
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+		}
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (
+		(e.key === "E" || e.key === "e") &&
+		macVim.currentSequence.length === 0
+	) {
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			let cursorPosition = docs.userCursor.style.transform;
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+			let cursorLocations = docs.getCursorLocations();
+			if (cursorLocations[3]) {
+				// We reached end of the file
+				break;
+			}
+
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let newCursorPosition = docs.userCursor.style.transform;
+			if (cursorPosition === newCursorPosition) {
+				// We are stuck in a loop because of punctuation or something, move forward
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+		}
+		macVim.num = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (
+		(e.key === "w" || e.key === "W") &&
+		macVim.currentSequence.length === 0
+	) {
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+			let cursorPosition = docs.userCursor.style.transform;
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+			let newCursorPosition = docs.userCursor.style.transform;
+			if (cursorPosition === newCursorPosition) {
+				// We've reached end of the file
+				break;
+			}
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+		}
+		macVim.num = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (e.key === "$" && macVim.currentSequence.length === 0) {
+		let cursorLocations = docs.getCursorLocations();
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+		if (!cursorLocations[3]) {
+			// If we're not at the end of a file, move back left
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (e.key == "x" && macVim.currentSequence.length === 0) {
+		// if we're at the end of a line, r should go on the current line
+		// if we're at the end of a multiline (fake) line, r can move to next multiline
+		let [xCoord, yCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+		let [leftXCoord, leftYCoord] = docs.getCoords();
+
+		// IF: We are not at the start of the file, undo our arrow left with an arrow right
+		if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
+			// We are not at the beginning of the file, so undo our arrow right
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+		}
+		// IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
+		// about line ending stuff
+		if (
+			leftYCoord !== yCoord ||
+			(leftYCoord === yCoord && leftXCoord === xCoord)
+		) {
+			// At the beginning of a line or multiline, no need for checking if we're at the end
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [rightXCoord, rightYCoord] = docs.getCoords();
+			// let rightYCoord = docs.getYCoord();
+			if (rightYCoord !== yCoord) {
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			} else if (rightXCoord === xCoord && rightYCoord === yCoord) {
+				// We are at the end of the file on an empty line, do nothing
+			} else {
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+		}
+
+		// We are not at the start of a file or line, so we have to check if we're at the end of a line,
+		// middle of a line, or end of a file
+		else {
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [newXCoord, newYCoord] = docs.getCoords();
+			if (xCoord === newXCoord && yCoord === newYCoord) {
+				// We are at the end of the file, guaranteed to not be an empty line from above
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			} else if (yCoord === newYCoord) {
+				// We are in the middle of the line somewhere or something, standard procedure
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			} else {
+				// We've either passed a space or a return that has put us one multiline or line down
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				let [finalXCoord, finalYCoord] = docs.getCoords();
+				if (finalXCoord === xCoord && finalYCoord === yCoord) {
+					// We are dealing with a "Return" and actual new line
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				} else {
+					// We are dealing with a space and just a multiline
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+		}
+
+		macVim.num = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	// ALL Support for d and c multiline commands here
+
+	// D, d$, C, c$
+	if (
+		(e.key === "D" && macVim.currentSequence.length === 0) ||
+		(e.key === "$" && macVim.currentSequence === "d") ||
+		(e.key === "C" && macVim.currentSequence.length === 0) ||
+		(e.key === "$" && macVim.currentSequence === "c")
+	) {
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[1]) {
+			// If we're not at the end of the file, delete text
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+		}
+		if (e.key === "C" || macVim.currentSequence === "c") {
+			macVim.switchToInsertMode();
+			return true;
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	// d0, c0
+	if (
+		(e.key === "0" && macVim.currentSequence === "d") ||
+		(e.key === "0" && macVim.currentSequence === "c")
+	) {
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[0]) {
+			// If we're not at the start of the line, delete text
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+		}
+		if (macVim.currentSequence === "c") {
+			macVim.switchToInsertMode();
+			return true;
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	// dd
+	if (e.key === "d" && macVim.currentSequence === "d") {
+		// We are going to select text down, move right one arrow, select text up, and delete
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			let cursorLocations = docs.getCursorLocations();
+			if (cursorLocations[3] && cursorLocations[0]) {
+				// We are at the end of a file on an empty line
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				break;
+			}
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+			if (cursorLocations[3]) {
+				// We are at the end of the file, so backspace again to remove the empty line we're on
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				break; // With dd we finish if we reach the end of the
+			}
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	// cc
+	if (e.key === "c" && macVim.currentSequence === "c") {
+		const numRepeats = parseInt(macVim.num) || 1;
+		if (numRepeats === 1) {
+			// Handle case for 1
+			let cursorLocations = docs.getCursorLocations();
+			if (cursorLocations[0] && cursorLocations[1]) {
+				macVim.switchToInsertMode();
+				return true;
+			}
+
+			if (!cursorLocations[0]) {
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+			macVim.switchToInsertMode();
+			return true;
+		} else {
+			for (let i = 0; i < numRepeats; i++) {
+				let cursorLocations = docs.getCursorLocations();
+
+				if (cursorLocations[3] && cursorLocations[0]) {
+					// We are at the end of a file on an empty line, so we're done completely
+					macVim.switchToInsertMode();
+					return true;
+				}
+				if (!cursorLocations[0]) {
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				cursorLocations = docs.getCursorLocations();
+				if (i === numRepeats - 1 || cursorLocations[3]) {
+					// We either reached the end of file or end of sequence,
+					// Don't backspace for the last line we delete, we have to stay on it
+					macVim.switchToInsertMode();
+					return true;
+				}
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+		}
+	}
+
+	// diw, ciw
+	if (
+		(e.key === "w" && macVim.currentSequence === "di") ||
+		(e.key === "w" && macVim.currentSequence === "ci")
+	) {
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			let cursorLocations = docs.getCursorLocations();
+			if (cursorLocations[0] && cursorLocations[1]) {
+				// Do nothing, we're on an empty line
+			} else if (cursorLocations[0]) {
+				// We're at the start of a line, so select right and delete
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			} else if (cursorLocations[0]) {
+				// We're at the end of a line, so select left and delete
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			} else {
+				// We're in the middle somewhere, move right and then all the way to the start of the word
+				// then all the way to the right with highlighting, then delete
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true, false);
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+		}
+		if (macVim.currentSequence === "ci") {
+			macVim.switchToInsertMode();
+			return true;
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		return true;
+	}
+
+	// y$
+	if (e.key === "$" && macVim.currentSequence === "y") {
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[1]) {
+			// IF we're not at the end of a line, select the text
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+			docs.contentDocument.execCommand("copy"); // TODO: Replace deprecated execCommand
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		// Don't need to set cursor width because we didn't move anywhere
+		return true;
+	}
+
+	// y0
+	if (e.key === "0" && macVim.currentSequence === "y") {
+		let cursorLocations = docs.getCursorLocations();
+		// Technically macVim will move up a line if you're at the start already, but that seems ugly, so we'll implement it
+		// slightly different on purpose.
+		if (cursorLocations[0]) {
+			// If we're at the start, do nothing except copy blankness into the clipboard
+			navigator.clipboard.writeText("");
+		} else {
+			// We are not at the start of a line, so select text normally
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.contentDocument.execCommand("copy");
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		// Don't need to set cursor width because we didn't move anywhere
+		return true;
+	}
+
+	// yy or Y
+	if ((e.key === "y" && macVim.currentSequence === "y") || e.key === "Y") {
+		macVim.copyWholeLine();
+		return true;
+	}
+
+	macVim.currentSequence += e.key; // Add the current key to the sequence
+
+	// If the current sequence is in the keyMaps, then execute the command
+	if (macVim.currentSequence in macVim.keyMaps) {
+		macVim.keyMaps[macVim.currentSequence].forEach(([key, ...args]) => {
+			const numRepeats = parseInt(macVim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				docs.pressKey(docs.codeFromKey(key), ...args);
+			}
+		});
+		macVim.num = "";
+		macVim.currentSequence = "";
+	}
+
+	// r for replace command:
+	if (
+		macVim.currentSequence[0] === "r" &&
+		macVim.currentSequence.length === 2
+	) {
+		// if we're at the end of a line, r should go on the current line
+		// if we're at the end of a multiline (fake) line, r can move to next multiline
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			let [xCoord, yCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+			let [leftXCoord, leftYCoord] = docs.getCoords();
+
+			// IF: We are not at the start of the file, undo our arrow left with an arrow right
+			if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
+				// We are not at the beginning of the file, so undo our arrow right
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+			// IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
+			// about line ending stuff
+			if (
+				leftYCoord !== yCoord ||
+				(leftYCoord === yCoord && leftXCoord === xCoord)
+			) {
+				// At the beginning of a line or multiline, no need for checking if we're at the end
+				docs.pressKey(macVim.currentSequence.charCodeAt(1));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				let rightYCoord = docs.getYCoord();
+				if (rightYCoord !== yCoord) {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				} else {
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+				continue;
+			}
+
+			// We are not at the start of a file or line, so we have to check if we're at the end of a line,
+			// middle of a line, or end of a file
+
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [newXCoord, newYCoord] = docs.getCoords();
+			if (xCoord === newXCoord && yCoord === newYCoord) {
+				// We are at the end of the file, just add our word and chill
+				docs.pressKey(macVim.currentSequence.charCodeAt(1));
+			} else if (yCoord === newYCoord) {
+				// We are in the middle of the line somewhere or something, standard procedure
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				docs.pressKey(macVim.currentSequence.charCodeAt(1));
+			} else {
+				// We've either passed a space or a return that has put us one multiline or line down
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				let [finalXCoord, finalYCoord] = docs.getCoords();
+				if (finalXCoord === xCoord && finalYCoord === yCoord) {
+					// We are dealing with a "Return" and actual new line
+					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+				} else {
+					// We are dealing with a space and just a multiline
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+				}
+			}
+		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+	}
+
+	if (
+		macVim.currentSequence.length !== 0 &&
+		!macVim.incompleteKeyMaps.includes(macVim.currentSequence)
+	) {
+		// This means that the current sequence is invalid, so we have to reset it
+		macVim.num = "";
+		macVim.currentSequence = "";
+	}
+
+	updateUISequenceText(macVim.num + macVim.currentSequence);
+	docs.setCursorWidth();
+	return true;
+};
+
+// Called in visual mode.
+macVim.visual_keydown = function (e) {
+	if (e.key.match(/F\d+/)) {
+		// Pass through any function keys.
+		return true;
+	}
+
+	e.preventDefault();
+	e.stopPropagation();
+
+	if (e.key === "Shift") {
+		// Shift by itself does nothing
+		return true;
+	}
+
+	if (e.key == "Escape") {
+		// Escape visual mode.
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		// go to the right side when the left side could be a solution as well
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key === "p" && macVim.currentSequence.length === 0) {
+		// We have to first delete the highlighted text, then paste in the clipboard
+		docs.pressKey(docs.codeFromKey("Backspace"));
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		docs.pasteClipboard();
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key === "P" && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("Backspace"));
+		docs.pasteClipboard();
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key === "I" && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (
+		(e.key === "v" || e.key === "V") &&
+		macVim.currentSequence.length === 0
+	) {
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key.match(/\d+/) && macVim.currentSequence.length === 0) {
+		if (e.key === "0" && macVim.num.length !== 0) {
+			// 0 is part of the number being typed (ex: "100")
+			if (macVim.num.length < 3) {
+				// We don't want to crash, so max you can type in is a 3 digit number (999)
+				macVim.num += e.key;
+			}
+		} else if (e.key !== "0") {
+			// We have any digit besides 0 being typed (ex: "1" or "11")
+			if (macVim.num.length < 3) {
+				macVim.num += e.key;
+			}
+		} else {
+			docs.pressKey(docs.codeFromKey("Home"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+		}
+		updateUISequenceText(macVim.num + macVim.currentSequence);
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (e.key === "A" && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		if (macVim.visualModeIsLinedBased) {
+			let cursorLocations = docs.getCursorLocations();
+			if (!cursorLocations[3]) {
+				// If we're not at the end of a file, move left
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+		}
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (e.key === "$" && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (e.key === "x" && macVim.currentSequence.length === 0) {
+		docs.contentDocument.execCommand("cut");
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key === "d" && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("Backspace"));
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key === "c" && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("Backspace"));
+		macVim.switchToInsertMode();
+		return true;
+	}
+
+	if (
+		(e.key === "D" || e.key === "C") &&
+		macVim.currentSequence.length === 0
+	) {
+		// Delete the whole line(s) that we partially selected
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		docs.pressKey(docs.codeFromKey("Backspace"));
+		let cursorLocations = docs.getCursorLocations();
+		if (!cursorLocations[0]) {
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+		}
+		if (e.key === "C") {
+			macVim.switchToInsertMode();
+			return true;
+		}
+		macVim.num = "";
+		macVim.updateUISequenceText("");
+		docs.setCursorWidth();
+		return true;
+	}
+
+	if (e.key === "Y" && macVim.currentSequence.length === 0) {
+		macVim.copyWholeLineVisualMode();
+		return true;
+	}
+
+	if (e.key === "y" && macVim.currentSequence.length === 0) {
+		docs.contentDocument.execCommand("copy");
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	// Now we do checks that only apply to line-based visual mode, where we do not follow the norm
+	if (macVim.visualModeIsLinedBased) {
+		// Left and right traversal now do nothing
+		let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W"];
+		if (doNothingKeys.includes(e.key) && macVim.currentSequence.length === 0) {
+			macVim.num = "";
+			updateUISequenceText("");
+			return true;
+		}
+
+		if (e.key === "k" && macVim.currentSequence.length === 0) {
+			const numRepeats = parseInt(macVim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			}
+			macVim.num = "";
+			updateUISequenceText("");
+			return true;
+		}
+
+		if (e.key === "j" && macVim.currentSequence.length === 0 && !docs.isMac) {
+			const numRepeats = parseInt(macVim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			}
+			macVim.num = "";
+			updateUISequenceText("");
+			return true;
+		}
+		if (e.key === "j" && macVim.currentSequence.length === 0 && docs.isMac) {
+			// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
+			const numRepeats = parseInt(macVim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+			}
+			macVim.num = "";
+			updateUISequenceText("");
+			return true;
+		}
+	}
+
+	macVim.currentSequence += e.key;
+
+	if (macVim.currentSequence in macVim.differentVisualKeyMaps) {
+		macVim.differentVisualKeyMaps[macVim.currentSequence].forEach(
+			([key, ...args]) => {
+				const numRepeats = parseInt(macVim.num) || 1;
+				for (let i = 0; i < numRepeats; i++) {
+					if (key.indexOf("Arrow") == 0) {
+						// get the special keys pressed and default to false
+						const keyArgs = [...args, false, false].slice(0, 2);
+						keyArgs[1] = true;
+						docs.pressKey(docs.codeFromKey(key), ...keyArgs);
+					} else {
+						docs.pressKey(docs.codeFromKey(key), ...args);
+					}
+				}
+			}
+		);
+		macVim.num = "";
+		macVim.currentSequence = "";
+	} else if (macVim.currentSequence in macVim.keyMaps) {
+		macVim.keyMaps[macVim.currentSequence].forEach(([key, ...args]) => {
+			const numRepeats = parseInt(macVim.num) || 1;
+			for (let i = 0; i < numRepeats; i++) {
+				// get the special keys pressed and default to false
+				const keyArgs = [...args, false, false].slice(0, 2);
+				keyArgs[1] = true;
+				docs.pressKey(docs.codeFromKey(key), ...keyArgs);
+			}
+		});
+		macVim.num = "";
+		macVim.currentSequence = "";
+	}
+
+	if (
+		macVim.currentSequence.length !== 0 &&
+		!macVim.incompleteKeyMaps.includes(macVim.currentSequence)
+	) {
+		// This means that the current sequence is invalid, so we have to reset it
+		macVim.num = "";
+		macVim.currentSequence = "";
+	}
+	return true;
+};
+
+export { macVim }
