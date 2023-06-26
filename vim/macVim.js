@@ -571,7 +571,7 @@ macVim.normal_keydown = function (e) {
 			let numRepeats = parseInt(macVim.num) || 1;
 
 			// For 'gg' and 'G', we only want to run it once no matter what
-			if (windowsVim.currentSequence === "G" || windowsVim.currentSequence === "gg") {
+			if (macVim.currentSequence === "G" || macVim.currentSequence === "gg") {
 				numRepeats = 1;
 			}
 
