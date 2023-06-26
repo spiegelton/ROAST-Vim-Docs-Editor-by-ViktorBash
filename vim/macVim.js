@@ -36,6 +36,31 @@ macVim.moveToEndOfLine = function () {
 	}
 }
 
+macVim.moveToStartOfLine = function () {
+	let oldCoords = docs.userCursor.style.transform;
+	docs.pressKey(docs.codeFromKey("ArrowRight"));
+	let newCoords = docs.userCursor.style.transform;
+	if (oldCoords === newCoords) {
+		// We are at the end of a file (which may be an empty line, so we have to test for that)
+		let initialYCoord = docs.getYCoord();
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let finalYCoord = docs.getYCoord();
+
+		// We we are going to check Y-Values, if the y-value didn't change, hit arrow up
+		// If the y value did change, hit arrow right
+		if (initialYCoord === finalYCoord) {
+			// Y Coord didn't change, so we should get to the start of a line with arrow up
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+		} else {
+			// Y Coord changed, so we were at the start of a line (so just go back)
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+		}
+	} else {
+		// We can just arrow up from here in all scenarios
+		docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+	}
+}
+
 // Called in normal mode.
 macVim.normal_keydown = function (e) {
 	if (e.key.match(/F\d+/)) {
@@ -177,36 +202,9 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "O" && macVim.currentSequence.length === 0) {
-		let cursorLocations = docs.getCursorLocations();
-		if (cursorLocations[2]) {
-			// At start of file
-			docs.pressKey(docs.codeFromKey("Enter"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		} else if (cursorLocations[3] && cursorLocations[0]) {
-			// At end of file on an empty line
-			docs.pressKey(docs.codeFromKey("Enter"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		} else if (cursorLocations[3]) {
-			// At end of file on non-empty line
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-			docs.pressKey(docs.codeFromKey("Enter"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		} // Past this point we are guaranteed to not be at the start or end of the file
-		else if (cursorLocations[0] && cursorLocations[1]) {
-			// We are on an empty line
-			docs.pressKey(docs.codeFromKey("Enter"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		} else if (cursorLocations[0]) {
-			docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-			docs.pressKey(docs.codeFromKey("Enter"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		} else {
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-			docs.pressKey(docs.codeFromKey("Enter"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		}
-
+		macVim.moveToStartOfLine();
+		docs.pressKey(docs.codeFromKey("Enter"));
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		macVim.switchToInsertMode();
 		return true;
 	}
@@ -220,28 +218,7 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "I" && macVim.currentSequence.length === 0) {
-		let oldCoords = docs.userCursor.style.transform;
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		let newCoords = docs.userCursor.style.transform;
-		if (oldCoords === newCoords) {
-			// We are at the end of a file (which may be an empty line, so we have to test for that)
-			let initialYCoord = docs.getYCoord();
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			let finalYCoord = docs.getYCoord();
-
-			// We we are going to check Y-Values, if the y-value didn't change, hit arrow up
-			// If the y value did change, hit arrow right
-			if (initialYCoord === finalYCoord) {
-				// Y Coord didn't change, so we should get to the start of a line with arrow up
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-			} else {
-				// Y Coord changed, so we were at the start of a line (so just go back)
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-			}
-		} else {
-			// We can just arrow up from here in all scenarios
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-		}
+		macVim.moveToStartOfLine();
 		macVim.switchToInsertMode();
 		return true;
 	}
