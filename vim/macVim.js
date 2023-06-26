@@ -278,12 +278,31 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "$" && macVim.currentSequence.length === 0) {
-		let cursorLocations = docs.getCursorLocations();
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-		if (!cursorLocations[3]) {
-			// If we're not at the end of a file, move back left
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+			// We are at the end of the file already, do nothing
 		}
+		else if (startYCoord === middleYCoord) {
+			// We are the in the middle of a line somewhere
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+		}
+		else {
+			// We are on the end of a multiline or line
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			let [finalXCoord, finalYCoord] = docs.getCoords();
+			if (finalXCoord === startXCoord && finalYCoord === startYCoord) {
+				// We were at the end of a life and are back there, do nothing else
+			}
+			else {
+				// We were at the end of a multiline
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+			}
+		}
+
 		macVim.num = "";
 		macVim.currentSequence = "";
 		updateUISequenceText("");
