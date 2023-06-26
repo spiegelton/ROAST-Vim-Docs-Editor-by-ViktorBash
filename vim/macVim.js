@@ -212,13 +212,8 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "o" && macVim.currentSequence.length === 0) {
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[3]) {
-			// If after going down we are not at the end of the file, go back 1
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		}
-		// Hit enter for the new line
+		// Get to the bottom of the current line, then press enter
+		macVim.moveToEndOfLine();
 		docs.pressKey(docs.codeFromKey("Enter"));
 		macVim.switchToInsertMode();
 		return true;
