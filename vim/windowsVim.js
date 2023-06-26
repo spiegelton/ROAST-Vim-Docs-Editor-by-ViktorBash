@@ -8,6 +8,65 @@ let windowsVim = {
 	__proto__: baseVim,
 }
 
+// TODO: Switch A and $ to use this function
+// Move to the start of a line
+windowsVim.moveToEndOfLine = function () {
+	let [startXCoord, startYCoord] = docs.getCoords();
+	docs.pressKey(docs.codeFromKey("ArrowRight")); 
+	let [middleXCoord, middleYCoord] = docs.getCoords();
+	if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+		// We are at the end of the file already, good to go
+	}
+	else if (startYCoord === middleYCoord) {
+		// We're in the middle of a line
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let [endXCoord, endYCoord] = docs.getCoords();
+		if (endXCoord < middleXCoord) {
+			console.log(endXCoord, middleXCoord);
+			// This is the edge case if we're at the end of a file, undo our arrow left
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+		}
+	}
+	else {
+		// We are on the end of a multiline or line
+		docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+		let [endXCoord, endYCoord] = docs.getCoords();
+		if (endXCoord === startXCoord && endYCoord === startYCoord) {
+			// We are at the end of a line, do nothing
+		} 
+		else {
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+			let [middleXCoord, middleYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let [endXCoord, endYCoord] = docs.getCoords();
+			if (endXCoord < middleXCoord) {
+				// This is the edge case if we're at the end of a file, undo our arrow left
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+		}
+
+
+	}
+
+	// docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+	// if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+	// 	// We are at the end of the file already, good to go
+	// }
+	// else {
+	// 	docs.pressKey(docs.codeFromKey("ArrowLeft"));
+	// 	let [endXCoord, endYCoord] = docs.getCoords();
+
+	// 	if (endXCoord < middleXCoord ) { 
+	// 		// This is the edge case if we're at the end of a file now, we undo our arrow left
+	// 		docs.pressKey(docs.codeFromKey("ArrowRight"));
+	// 	}
+	// }
+
+}
+
 // Called in normal mode.
 windowsVim.normal_keydown = function (e) {
 	if (e.key.match(/F\d+/)) {
@@ -189,13 +248,8 @@ windowsVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "o" && windowsVim.currentSequence.length === 0) {
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[3]) {
-			// If after going down we are not at the end of the file, go back 1
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		}
-		// Hit enter for the new line
+		// Move to the end of the line and press enter
+		windowsVim.moveToEndOfLine();
 		docs.pressKey(docs.codeFromKey("Enter"));
 		windowsVim.switchToInsertMode();
 		return true;

@@ -84,8 +84,6 @@ baseVim.copyWholeLine = async function () {
 		docs.pressKey(docs.codeFromKey("ArrowRight"));
 	} else {
 		let [xCoord, yCoord] = docs.getCoords(); // This is how we will know our original location
-		xCoord = parseInt(xCoord);
-		yCoord = parseInt(yCoord);
 
 		if (cursorLocations[0]) {
 			// We are at the start of a line, so move to the right so that going up works properly
@@ -99,8 +97,6 @@ baseVim.copyWholeLine = async function () {
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // We are at the end, now we have to get back to our original location
 
 		let [newXCoord, newYCoord] = docs.getCoords();
-		newXCoord = parseInt(newXCoord);
-		newYCoord = parseInt(newYCoord);
 
 		let startTime = Date.now();
 		while (newXCoord !== xCoord || newYCoord !== yCoord) {
