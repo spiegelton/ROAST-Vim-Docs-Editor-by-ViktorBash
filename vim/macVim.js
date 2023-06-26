@@ -243,7 +243,6 @@ macVim.normal_keydown = function (e) {
 			}
 
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			let newCursorPosition = docs.userCursor.style.transform;
 			if (cursorPosition === newCursorPosition) {
 				// We are stuck in a loop because of punctuation or something, move forward
