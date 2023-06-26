@@ -143,22 +143,26 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "a" && macVim.currentSequence.length === 0) {
-		let initialCoords = docs.userCursor.style.transform;
-		let initialXIndex = initialCoords.indexOf("px");
-		let initialYCoord = initialCoords.slice(
-			initialXIndex + 4,
-			initialCoords.length - 3
-		);
+		let [startXCoord, startYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		let newYCoord = docs.getYCoord();
-		if (initialYCoord !== newYCoord) {
-			// We're either on a new multiline or a real new line, check which scenario and adjust accordingly
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+			// We are at the end of the file already, do nothing
+		}
+		else if (startYCoord === middleYCoord) {
+			// We are the in the middle of a line somewhere, do nothing
+		}
+		else {
+			// We are on the end of a multiline or line
 			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-			let finalCoords = docs.userCursor.style.transform;
-			if (finalCoords === initialCoords) {
-				// We've encountered a new line, we don't need to move the cursor anymore
-			} else {
+			let [finalXCoord, finalYCoord] = docs.getCoords();
+			if (finalXCoord === startXCoord && finalYCoord === startYCoord) {
+				// We were at the end of a line and are back there, do nothing else
+			}
+			else {
+				// We were at the end of a multiline
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
 		}
 
