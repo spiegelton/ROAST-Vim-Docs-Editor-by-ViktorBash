@@ -518,6 +518,8 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
+		windowsVim.num = "";
+		windowsVim.currentSequence = ""; // Needs to be here for some reason
 		windowsVim.switchToInsertMode();
 		return true;
 	}
