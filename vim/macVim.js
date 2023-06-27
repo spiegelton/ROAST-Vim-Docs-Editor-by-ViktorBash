@@ -350,17 +350,41 @@ macVim.normal_keydown = function (e) {
 		(e.key === "C" && macVim.currentSequence.length === 0) ||
 		(e.key === "$" && macVim.currentSequence === "c")
 	) {
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[1]) {
-			// If we're not at the end of the file, delete text
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+			// We are at the end of the file already, do nothing
+		} else if (startYCoord === middleYCoord) {
+			// We're in the middle of a line
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
 			docs.pressKey(docs.codeFromKey("Backspace"));
+		} else {
+			// We are on the end of a multiline or line
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			let [endXCoord, endYCoord] = docs.getCoords();
+			if (endXCoord === startXCoord && endYCoord === startYCoord) {
+				// We are at the end of a line, do nothing
+			} else {
+				// We are on a multiline
+
+				// Get back to original position
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+
+				// Highlight
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
 		}
+
 		if (e.key === "C" || macVim.currentSequence === "c") {
+			macVim.num = "";
+			macVim.currentSequence = "";
 			macVim.switchToInsertMode();
 			return true;
 		}
+
 		macVim.num = "";
 		macVim.currentSequence = "";
 		updateUISequenceText("");
