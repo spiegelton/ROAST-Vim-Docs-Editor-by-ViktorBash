@@ -24,7 +24,6 @@ windowsVim.moveToEndOfLine = function () {
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		let [endXCoord, endYCoord] = docs.getCoords();
 		if (endXCoord < middleXCoord) {
-			console.log(endXCoord, middleXCoord);
 			// This is the edge case if we're at the end of a file, undo our arrow left
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 		}
@@ -57,12 +56,12 @@ windowsVim.normal_keydown = function (e) {
 	e.preventDefault();
 	e.stopPropagation();
 
-	if (e.key === "Shift") {
+	if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
 		// Shift by itself does nothing
 		return true;
 	}
 
-	if (e.key == "Escape") {
+	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
 		// Remove any saved queries that the user had
 		windowsVim.num = "";
 		windowsVim.currentSequence = "";
@@ -821,12 +820,12 @@ windowsVim.visual_keydown = function (e) {
 	e.preventDefault();
 	e.stopPropagation();
 
-	if (e.key === "Shift") {
+	if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
 		// Shift by itself does nothing
 		return true;
 	}
 
-	if (e.key == "Escape") {
+	if ((e.key === "Escape") || (e.key === "c" && e.ctrlKey === true)) {
 		// Escape visual mode.
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
 		// go to the right side when the left side could be a solution as well

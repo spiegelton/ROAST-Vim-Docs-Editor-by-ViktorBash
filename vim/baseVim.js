@@ -207,7 +207,7 @@ baseVim.paste = async function (e) {
 // Called in insert mode.
 baseVim.insert_keydown = function (e) {
 	// Let all characters flow freely (except for escape)
-	if (e.key == "Escape") {
+	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
 		baseVim.switchToNormalMode();
 		return true;
 	}
