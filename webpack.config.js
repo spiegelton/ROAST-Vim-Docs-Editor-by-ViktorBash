@@ -8,7 +8,8 @@ module.exports = {
       "./main.js",
       "./vim/baseVim.js",
       "./vim/macVim.js",
-      "./vim/windowsVim.js"
+      "./vim/windowsVim.js",
+      "./vim/UI.js"
     ]
   },
   output: {
