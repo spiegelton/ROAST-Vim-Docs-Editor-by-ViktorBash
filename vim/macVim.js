@@ -530,14 +530,38 @@ macVim.normal_keydown = function (e) {
 
 	// y$
 	if (e.key === "$" && macVim.currentSequence === "y") {
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[1]) {
-			// IF we're not at the end of a line, select the text
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-			docs.contentDocument.execCommand("copy"); // TODO: Replace deprecated execCommand
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+			// We are at the end of the file already, do nothing
+			navigator.clipboard.writeText("");
+		} else if (startYCoord === middleYCoord) {
+			// We're in the middle of a line
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			docs.contentDocument.execCommand("copy");
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		} else {
+			// We are on the end of a multiline or line
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			let [endXCoord, endYCoord] = docs.getCoords();
+			if (endXCoord === startXCoord && endYCoord === startYCoord) {
+				// We are at the end of a line, do nothing
+				navigator.clipboard.writeText("");
+			} else {
+				// We are on a multiline
+
+				// Get back to original position
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+
+				// Highlight, copy, deselect
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.contentDocument.execCommand("copy");
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
 		}
+
 		macVim.num = "";
 		macVim.currentSequence = "";
 		updateUISequenceText("");
