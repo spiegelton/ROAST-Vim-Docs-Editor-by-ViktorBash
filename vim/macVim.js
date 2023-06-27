@@ -459,23 +459,30 @@ macVim.normal_keydown = function (e) {
 
 	// dd
 	if (e.key === "d" && macVim.currentSequence === "d") {
-		// We are going to select text down, move right one arrow, select text up, and delete
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
-			let cursorLocations = docs.getCursorLocations();
-			if (cursorLocations[3] && cursorLocations[0]) {
-				// We are at the end of a file on an empty line
+			macVim.moveToEndOfLine();
+			let [startXCoord, startYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let [midXCoord, midYCoord] = docs.getCoords();
+			if (startXCoord === midXCoord && startYCoord === midYCoord) {
+				// At the start of the file
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
 				docs.pressKey(docs.codeFromKey("Backspace"));
-				break;
 			}
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-			docs.pressKey(docs.codeFromKey("Backspace"));
-			if (cursorLocations[3]) {
-				// We are at the end of the file, so backspace again to remove the empty line we're on
+			else if (startYCoord === midYCoord) {
+				// In the middle of a line or something
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 				docs.pressKey(docs.codeFromKey("Backspace"));
-				break; // With dd we finish if we reach the end of the
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+			else {
+				// We are on an empty line
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("Backspace"));
 			}
 		}
 		macVim.num = "";
