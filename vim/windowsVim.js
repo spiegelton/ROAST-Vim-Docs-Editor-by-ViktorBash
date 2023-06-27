@@ -1,23 +1,22 @@
 import { baseVim } from "./baseVim.js";
-import { docs } from '../docs.js';
+import { docs } from "../docs.js";
 import { updateUIModeText, updateUISequenceText } from "./UI.js";
 
 // Add on top of base vim to work on windows machines
 
 let windowsVim = {
 	__proto__: baseVim,
-}
+};
 
 // TODO: Switch A and $ to use this function
 // Move to the start of a line
 windowsVim.moveToEndOfLine = function () {
 	let [startXCoord, startYCoord] = docs.getCoords();
-	docs.pressKey(docs.codeFromKey("ArrowRight")); 
+	docs.pressKey(docs.codeFromKey("ArrowRight"));
 	let [middleXCoord, middleYCoord] = docs.getCoords();
 	if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
 		// We are at the end of the file already, good to go
-	}
-	else if (startYCoord === middleYCoord) {
+	} else if (startYCoord === middleYCoord) {
 		// We're in the middle of a line
 		let [startXCoord, startYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
@@ -29,15 +28,13 @@ windowsVim.moveToEndOfLine = function () {
 			// This is the edge case if we're at the end of a file, undo our arrow left
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 		}
-	}
-	else {
+	} else {
 		// We are on the end of a multiline or line
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
 		let [endXCoord, endYCoord] = docs.getCoords();
 		if (endXCoord === startXCoord && endYCoord === startYCoord) {
 			// We are at the end of a line, do nothing
-		} 
-		else {
+		} else {
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true);
 			let [middleXCoord, middleYCoord] = docs.getCoords();
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -47,25 +44,8 @@ windowsVim.moveToEndOfLine = function () {
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
 		}
-
-
 	}
-
-	// docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-	// if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
-	// 	// We are at the end of the file already, good to go
-	// }
-	// else {
-	// 	docs.pressKey(docs.codeFromKey("ArrowLeft"));
-	// 	let [endXCoord, endYCoord] = docs.getCoords();
-
-	// 	if (endXCoord < middleXCoord ) { 
-	// 		// This is the edge case if we're at the end of a file now, we undo our arrow left
-	// 		docs.pressKey(docs.codeFromKey("ArrowRight"));
-	// 	}
-	// }
-
-}
+};
 
 // Called in normal mode.
 windowsVim.normal_keydown = function (e) {
@@ -174,19 +154,14 @@ windowsVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "a" && windowsVim.currentSequence.length === 0) {
-		let initialCoords = docs.userCursor.style.transform;
-		let initialXIndex = initialCoords.indexOf("px");
-		let initialYCoord = initialCoords.slice(
-			initialXIndex + 4,
-			initialCoords.length - 3
-		);
+		let [initialXCoord, initialYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowRight"));
 		let newYCoord = docs.getYCoord();
 		if (initialYCoord !== newYCoord) {
 			// We're either on a new multiline or a real new line, check which scenario and adjust accordingly
 			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-			let finalCoords = docs.userCursor.style.transform;
-			if (finalCoords === initialCoords) {
+			let [finalXCoord, finalYCoord] = docs.getCoords();
+			if (finalXCoord === initialXCoord && finalYCoord === initialYCoord) {
 				// We've encountered a new line, we don't need to move the cursor anymore
 			} else {
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
@@ -563,13 +538,42 @@ windowsVim.normal_keydown = function (e) {
 
 	// y$
 	if (e.key === "$" && windowsVim.currentSequence === "y") {
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[1]) {
-			// IF we're not at the end of a line, select the text
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+			// We are at the end of the file already, good to go
+			navigator.clipboard.writeText("");
+		} else if (startYCoord === middleYCoord) {
+			// We're in the middle of a line
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-			docs.contentDocument.execCommand("copy"); // TODO: Replace deprecated execCommand
+			docs.contentDocument.execCommand("copy");
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		} else {
+			// We are on the end of a multiline or line
+			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			let [endXCoord, endYCoord] = docs.getCoords();
+			if (endXCoord === startXCoord && endYCoord === startYCoord) {
+				// We are at the end of a line, do nothing
+				navigator.clipboard.writeText("");
+			} else {
+				// We are on a multiline
+
+				// Get back to original position
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+				// Copy
+				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+				docs.contentDocument.execCommand("copy");
+
+				// Put cursor back at original position
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+
 		}
 		windowsVim.num = "";
 		windowsVim.currentSequence = "";
@@ -612,7 +616,10 @@ windowsVim.normal_keydown = function (e) {
 		windowsVim.keyMaps[windowsVim.currentSequence].forEach(([key, ...args]) => {
 			let numRepeats = parseInt(windowsVim.num) || 1;
 			// For 'gg' and 'G', we only want to run it once no matter what
-			if (windowsVim.currentSequence === "G" || windowsVim.currentSequence === "gg") {
+			if (
+				windowsVim.currentSequence === "G" ||
+				windowsVim.currentSequence === "gg"
+			) {
 				numRepeats = 1;
 			}
 
@@ -861,7 +868,10 @@ windowsVim.visual_keydown = function (e) {
 	if (windowsVim.visualModeIsLinedBased) {
 		// Left and right traversal now do nothing
 		let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W"];
-		if (doNothingKeys.includes(e.key) && windowsVim.currentSequence.length === 0) {
+		if (
+			doNothingKeys.includes(e.key) &&
+			windowsVim.currentSequence.length === 0
+		) {
 			windowsVim.num = "";
 			updateUISequenceText("");
 			return true;
@@ -877,7 +887,11 @@ windowsVim.visual_keydown = function (e) {
 			return true;
 		}
 
-		if (e.key === "j" && windowsVim.currentSequence.length === 0 && !docs.isMac) {
+		if (
+			e.key === "j" &&
+			windowsVim.currentSequence.length === 0 &&
+			!docs.isMac
+		) {
 			const numRepeats = parseInt(windowsVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
 				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
@@ -886,7 +900,11 @@ windowsVim.visual_keydown = function (e) {
 			updateUISequenceText("");
 			return true;
 		}
-		if (e.key === "j" && windowsVim.currentSequence.length === 0 && docs.isMac) {
+		if (
+			e.key === "j" &&
+			windowsVim.currentSequence.length === 0 &&
+			docs.isMac
+		) {
 			// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
 			const numRepeats = parseInt(windowsVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
@@ -944,5 +962,4 @@ windowsVim.visual_keydown = function (e) {
 	return true;
 };
 
-
-export { windowsVim }
+export { windowsVim };
