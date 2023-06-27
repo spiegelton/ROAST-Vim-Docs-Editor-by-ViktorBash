@@ -494,51 +494,89 @@ macVim.normal_keydown = function (e) {
 
 	// cc
 	if (e.key === "c" && macVim.currentSequence === "c") {
+		// const numRepeats = parseInt(macVim.num) || 1;
+		// if (numRepeats === 1) {
+		// 	// Handle case for 1
+		// 	let cursorLocations = docs.getCursorLocations();
+		// 	if (cursorLocations[0] && cursorLocations[1]) {
+		// 		macVim.switchToInsertMode();
+		// 		return true;
+		// 	}
+
+		// 	if (!cursorLocations[0]) {
+		// 		docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+		// 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		// 	}
+		// 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		// 	docs.pressKey(docs.codeFromKey("Backspace"));
+		// 	macVim.switchToInsertMode();
+		// 	return true;
+		// } else {
+		// 	for (let i = 0; i < numRepeats; i++) {
+		// 		let cursorLocations = docs.getCursorLocations();
+
+		// 		if (cursorLocations[3] && cursorLocations[0]) {
+		// 			// We are at the end of a file on an empty line, so we're done completely
+		// 			macVim.switchToInsertMode();
+		// 			return true;
+		// 		}
+		// 		if (!cursorLocations[0]) {
+		// 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+		// 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		// 		}
+		// 		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		// 		docs.pressKey(docs.codeFromKey("Backspace"));
+		// 		cursorLocations = docs.getCursorLocations();
+		// 		if (i === numRepeats - 1 || cursorLocations[3]) {
+		// 			// We either reached the end of file or end of sequence,
+		// 			// Don't backspace for the last line we delete, we have to stay on it
+		// 			macVim.switchToInsertMode();
+		// 			return true;
+		// 		}
+		// 		docs.pressKey(docs.codeFromKey("Backspace"));
+		// 		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		// 	}
+		// }
+
 		const numRepeats = parseInt(macVim.num) || 1;
-		if (numRepeats === 1) {
-			// Handle case for 1
-			let cursorLocations = docs.getCursorLocations();
-			if (cursorLocations[0] && cursorLocations[1]) {
-				macVim.switchToInsertMode();
-				return true;
-			}
-
-			if (!cursorLocations[0]) {
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-			docs.pressKey(docs.codeFromKey("Backspace"));
-			macVim.switchToInsertMode();
-			return true;
-		} else {
-			for (let i = 0; i < numRepeats; i++) {
-				let cursorLocations = docs.getCursorLocations();
-
-				if (cursorLocations[3] && cursorLocations[0]) {
-					// We are at the end of a file on an empty line, so we're done completely
-					macVim.switchToInsertMode();
-					return true;
-				}
-				if (!cursorLocations[0]) {
-					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				}
-				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-				docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				cursorLocations = docs.getCursorLocations();
-				if (i === numRepeats - 1 || cursorLocations[3]) {
-					// We either reached the end of file or end of sequence,
-					// Don't backspace for the last line we delete, we have to stay on it
-					macVim.switchToInsertMode();
-					return true;
-				}
-				docs.pressKey(docs.codeFromKey("Backspace"));
+		for (let i = 0; i < numRepeats; i++) {
+			macVim.moveToEndOfLine();
+			let [startXCoord, startYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let [midXCoord, midYCoord] = docs.getCoords();
+			if (startXCoord === midXCoord && startYCoord === midYCoord) {
+				// At the start of the file
+				if (i !== numRepeats - 1) {
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+			else if (startYCoord === midYCoord) {
+				// In the middle of a line or something
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				if (i !== numRepeats - 1) {
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+			else {
+				// We are on an empty line
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				if (i !== numRepeats - 1) {
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
 			}
 		}
+		macVim.num = "";
+		macVim.currentSequence = "";
+		updateUISequenceText("");
+		docs.setCursorWidth();
+		macVim.switchToInsertMode();
+		return true;
+
 	}
 
 	// diw, ciw
