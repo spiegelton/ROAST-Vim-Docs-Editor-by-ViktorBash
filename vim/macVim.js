@@ -397,16 +397,59 @@ macVim.normal_keydown = function (e) {
 		(e.key === "0" && macVim.currentSequence === "d") ||
 		(e.key === "0" && macVim.currentSequence === "c")
 	) {
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[0]) {
-			// If we're not at the start of the line, delete text
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+			// At start of file, do nothing
+		}
+		else if (startYCoord === middleYCoord) {
+			// In the middle of a line
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			docs.pressKey(docs.codeFromKey("Backspace"));
 		}
+		else {
+			// At the start of a line or multiline, figure out which one and then act accordingly
+			let [tempXCoord, tempYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let [finalXCoord, finalYCoord] = docs.getCoords();
+			if (tempYCoord === finalYCoord && tempXCoord === finalXCoord) {
+				// The line above us was the start of the file on an empty line, so just go back (we only do
+				// one because the last ArrowLeft didn't do anything)
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+			else if (tempYCoord !== finalYCoord) {
+				// The line above us is empty, so just get back (we were at the start of a line)
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+			else {
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+				let [finalXCoord, finalYCoord] = docs.getCoords();
+				if (finalXCoord === middleXCoord && finalYCoord === middleYCoord) {
+					// We were at the start of an enter, just go back
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				}
+				else {
+					// We were at the start of a multiline
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+		}
+
 		if (macVim.currentSequence === "c") {
+			macVim.num = "";
+			macVim.currentSequence = "";
 			macVim.switchToInsertMode();
 			return true;
 		}
+
 		macVim.num = "";
 		macVim.currentSequence = "";
 		updateUISequenceText("");
