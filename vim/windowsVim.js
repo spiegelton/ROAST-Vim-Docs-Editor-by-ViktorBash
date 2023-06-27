@@ -536,10 +536,7 @@ windowsVim.normal_keydown = function (e) {
 		for (let i = 0; i < numRepeats; i++) {
 			let cursorLocations = docs.getCursorLocations();
 			if (cursorLocations[3] && cursorLocations[0]) {
-				// We are at the end of a file on an empty line
-				if (i !== numRepeats - 1) {
-					docs.pressKey(docs.codeFromKey("Backspace"));
-				}
+				// We are at the end of a file on an empty line, do not delete
 				break;
 			}
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
@@ -547,10 +544,7 @@ windowsVim.normal_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			docs.pressKey(docs.codeFromKey("Backspace"));
 			if (cursorLocations[3]) {
-				// We are at the end of the file, so backspace again to remove the empty line we're on
-				if (i !== numRepeats - 1) {
-					docs.pressKey(docs.codeFromKey("Backspace"));
-				}
+				// We are at the end of the file, do not delete
 				break; // With dd we finish if we reach the end of the
 			}
 			if (i === numRepeats - 1) {
