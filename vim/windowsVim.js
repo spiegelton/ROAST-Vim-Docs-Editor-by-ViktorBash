@@ -987,8 +987,7 @@ windowsVim.visual_keydown = function (e) {
 
 		if (
 			e.key === "j" &&
-			windowsVim.currentSequence.length === 0 &&
-			!docs.isMac
+			windowsVim.currentSequence.length === 0
 		) {
 			const numRepeats = parseInt(windowsVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
@@ -998,21 +997,7 @@ windowsVim.visual_keydown = function (e) {
 			updateUISequenceText("");
 			return true;
 		}
-		if (
-			e.key === "j" &&
-			windowsVim.currentSequence.length === 0 &&
-			docs.isMac
-		) {
-			// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
-			const numRepeats = parseInt(windowsVim.num) || 1;
-			for (let i = 0; i < numRepeats; i++) {
-				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-				docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-			}
-			windowsVim.num = "";
-			updateUISequenceText("");
-			return true;
-		}
+		
 	}
 
 	windowsVim.currentSequence += e.key;

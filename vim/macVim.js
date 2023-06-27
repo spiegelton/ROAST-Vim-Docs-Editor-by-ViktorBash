@@ -1020,16 +1020,7 @@ macVim.visual_keydown = function (e) {
 			return true;
 		}
 
-		if (e.key === "j" && macVim.currentSequence.length === 0 && !docs.isMac) {
-			const numRepeats = parseInt(macVim.num) || 1;
-			for (let i = 0; i < numRepeats; i++) {
-				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			}
-			macVim.num = "";
-			updateUISequenceText("");
-			return true;
-		}
-		if (e.key === "j" && macVim.currentSequence.length === 0 && docs.isMac) {
+		if (e.key === "j" && macVim.currentSequence.length === 0) {
 			// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
 			const numRepeats = parseInt(macVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {

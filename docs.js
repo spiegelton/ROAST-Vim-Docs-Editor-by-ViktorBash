@@ -20,7 +20,7 @@ docs.observe = function (el, config, callback, observeOnce) {
 };
 
 docs.isMac = false;
-let macPlatforms = ["MacIntel", "MacPPC", "Mac68K"];
+let macPlatforms = ["MacIntel", "MacPPC", "Mac68K", "iPhone", "iPad"];
 if (macPlatforms.includes(navigator.platform)) {
 	docs.isMac = true;
 }
