@@ -649,18 +649,57 @@ windowsVim.normal_keydown = function (e) {
 
 	// y0
 	if (e.key === "0" && windowsVim.currentSequence === "y") {
-		let cursorLocations = docs.getCursorLocations();
 		// Technically windowsVim will move up a line if you're at the start already, but that seems ugly, so we'll implement it
 		// slightly different on purpose.
-		if (cursorLocations[0]) {
-			// If we're at the start, do nothing except copy blankness into the clipboard
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let [middleXCoord, middleYCoord] = docs.getCoords();
+		if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+			// At start of file, do nothing
 			navigator.clipboard.writeText("");
-		} else {
-			// We are not at the start of a line, so select text normally
+		}
+		else if (startYCoord === middleYCoord) {
+			// In the middle of a line
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			docs.contentDocument.execCommand("copy");
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		}
+		else {
+			// At the start of a line or multiline, figure out which one and then act accordingly
+			let [tempXCoord, tempYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let [finalXCoord, finalYCoord] = docs.getCoords();
+			if (tempYCoord === finalYCoord && tempXCoord === finalXCoord) {
+				// The line above us was the start of the file on an empty line, so just go back (we only do
+				// one because the last ArrowLeft didn't do anything)
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				navigator.clipboard.writeText("");
+			}
+			else if (tempYCoord !== finalYCoord) {
+				// The line above us is empty, so just get back (we were at the start of a line)
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				navigator.clipboard.writeText("");
+			}
+			else {
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				let [finalXCoord, finalYCoord] = docs.getCoords();
+				if (finalXCoord === startXCoord && finalYCoord === startYCoord) {
+					// We were at the start of a multiline, so copy
+					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+					docs.contentDocument.execCommand("copy");
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+				else {
+					// We are at the start of a line, so just go back
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					navigator.clipboard.writeText("");
+
+				}
+			}
+		}
+
 		windowsVim.num = "";
 		windowsVim.currentSequence = "";
 		updateUISequenceText("");
