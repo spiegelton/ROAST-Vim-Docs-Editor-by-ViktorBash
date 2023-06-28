@@ -6,14 +6,16 @@ import { updateUIModeText, updateUISequenceText } from "./vim/UI.js";
 
 // Get the user and only run Vim if they have paid (being on the free trial counts as paying)
 let user = await extpay.getUser().catch((err) => {
-	console.error("Vim for Docs Error: Network error, no connection");
+	console.error("Vim for Google Docs Error: Network error, no connection");
 });
 
 
 if (user.paid) {
 	runVim();
 } else if (user.subscriptionStatus === "past_due") {
-	updateUIModeText("-- PAST DUE --");
+	// We grant the user a grace period to get their payment details in order
+	// (This grace period is defined in the Stripe settings)
+	runVim();
 } else if (user.subscriptionStatus === "unpaid") {
 	updateUIModeText("-- UNPAID --");
 } else if (user.subscriptionStatus === "canceled") {
