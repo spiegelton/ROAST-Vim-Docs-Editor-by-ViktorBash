@@ -272,21 +272,16 @@ windowsVim.normal_keydown = function (e) {
 	) {
 		const numRepeats = parseInt(windowsVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
-			let cursorPosition = docs.userCursor.style.transform;
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [startXCoord, startYCoord] = docs.getCoords();
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-			let cursorLocations = docs.getCursorLocations();
-			if (cursorLocations[3]) {
-				// We reached end of the file
-				break;
+			let [endXCoord, endYCoord] = docs.getCoords();
+			if (startXCoord === endXCoord && startYCoord === endYCoord) {
+				// End of file reached, do nothing
 			}
-
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			let newCursorPosition = docs.userCursor.style.transform;
-			if (cursorPosition === newCursorPosition) {
-				// We are stuck in a loop because of punctuation or something, move forward
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			else {
+				// Keep going like regular
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
 		windowsVim.num = "";

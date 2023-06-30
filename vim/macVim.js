@@ -220,8 +220,6 @@ macVim.normal_keydown = function (e) {
 	if ((e.key === "E" || e.key === "e") && macVim.currentSequence.length === 0) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
-
-
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			let [startXCoord, startYCoord] = docs.getCoords();
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
