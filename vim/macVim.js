@@ -7,6 +7,16 @@ let macVim = {
 	__proto__: baseVim,
 };
 
+
+// Cannot be in baseVim for some reason
+macVim.clearData = function () {
+	macVim.num = "";
+	macVim.currentSequence = "";
+	updateUISequenceText("");
+	docs.setCursorWidth();
+	return;
+}
+
 // Move to the end of a real line
 // Used by "A" and "$"
 macVim.moveToEndOfLine = function () {
@@ -84,9 +94,7 @@ macVim.normal_keydown = function (e) {
 	// Paste (no support for numbers/pasting multiple times yet)
 	if (e.key === "p" && macVim.currentSequence.length === 0) {
 		macVim.paste(e);
-		macVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
@@ -106,18 +114,18 @@ macVim.normal_keydown = function (e) {
 				}, 1);
 			});
 		}
-		macVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
 	if (e.key === "i" && macVim.currentSequence.length === 0) {
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
 
 	if (e.key === "v" && macVim.currentSequence.length === 0) {
+		macVim.clearData();
 		macVim.visualModeIsLinedBased = false;
 		macVim.switchToVisualMode();
 		return true;
@@ -130,6 +138,8 @@ macVim.normal_keydown = function (e) {
 		}
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+
+		macVim.clearData();
 		macVim.visualModeIsLinedBased = true;
 		macVim.switchToVisualMode();
 		return true;
@@ -185,12 +195,14 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
 
 	if (e.key === "A" && macVim.currentSequence.length === 0) {
 		macVim.moveToEndOfLine();
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
@@ -199,6 +211,8 @@ macVim.normal_keydown = function (e) {
 		macVim.moveToStartOfLine();
 		docs.pressKey(docs.codeFromKey("Enter"));
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
@@ -207,12 +221,16 @@ macVim.normal_keydown = function (e) {
 		// Get to the bottom of the current line, then press enter
 		macVim.moveToEndOfLine();
 		docs.pressKey(docs.codeFromKey("Enter"));
+
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
 
 	if (e.key === "I" && macVim.currentSequence.length === 0) {
 		macVim.moveToStartOfLine();
+
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
@@ -232,9 +250,7 @@ macVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
-		macVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
@@ -244,27 +260,15 @@ macVim.normal_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 		}
-		macVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
 	if (e.key === "$" && macVim.currentSequence.length === 0) {
 		macVim.moveToEndOfLine();
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
-
-	// let [startXCoord, startYCoord] = docs.getCoords();
-	// docs.pressKey(docs.codeFromKey("ArrowLeft"));
-	// let [middleXCoord, middleYCoord] = docs.getCoords();
-	// docs.pressKey(docs.codeFromKey("ArrowRight"));
-	// docs.pressKey(docs.codeFromKey("ArrowRight"));
-	// let [finalXCoord, finalYCoord] = docs.getCoords();
 
 	if (e.key == "x" && macVim.currentSequence.length === 0) {
 		// if we're at the end of a line, r should go on the current line
@@ -323,10 +327,7 @@ macVim.normal_keydown = function (e) {
 				}
 			}
 		}
-
-		macVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
@@ -374,10 +375,7 @@ macVim.normal_keydown = function (e) {
 			return true;
 		}
 
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
@@ -432,17 +430,10 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 
+		macVim.clearData();
 		if (macVim.currentSequence === "c") {
-			macVim.num = "";
-			macVim.currentSequence = "";
 			macVim.switchToInsertMode();
-			return true;
 		}
-
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
 		return true;
 	}
 
@@ -474,10 +465,7 @@ macVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 			}
 		}
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
@@ -515,10 +503,7 @@ macVim.normal_keydown = function (e) {
 				}
 			}
 		}
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 
@@ -551,13 +536,11 @@ macVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 			}
 		}
+
+		macVim.clearData();
 		if (macVim.currentSequence === "ci") {
 			macVim.switchToInsertMode();
-			return true;
 		}
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
 		return true;
 	}
 
@@ -595,10 +578,7 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		// Don't need to set cursor width because we didn't move anywhere
+		macVim.clearData();
 		return true;
 	}
 
@@ -656,10 +636,7 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		// Don't need to set cursor width because we didn't move anywhere
+		macVim.clearData();
 		return true;
 	}
 
@@ -723,10 +700,7 @@ macVim.normal_keydown = function (e) {
 			[newXCoord, newYCoord] = docs.getCoords();
 		}
 
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		// Don't need to update cursor because we went nowhere
+		macVim.clearData();
 		return true;
 
 	}
@@ -747,8 +721,8 @@ macVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey(key), ...args);
 			}
 		});
-		macVim.num = "";
-		macVim.currentSequence = "";
+		macVim.clearData();
+		return;
 	}
 
 	// r for replace command:
@@ -823,10 +797,7 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
@@ -835,10 +806,12 @@ macVim.normal_keydown = function (e) {
 		!macVim.incompleteKeyMaps.includes(macVim.currentSequence)
 	) {
 		// This means that the current sequence is invalid, so we have to reset it
-		macVim.num = "";
-		macVim.currentSequence = "";
+		macVim.clearData();
+		return true;
+
 	}
 
+	// Basically catch here anything that is a valid keymap but is not fully finished typing yet (ex: "g", but not "gg" yet)
 	updateUISequenceText(macVim.num + macVim.currentSequence);
 	docs.setCursorWidth();
 	return true;
@@ -863,6 +836,7 @@ macVim.visual_keydown = function (e) {
 		// Escape visual mode.
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
 		// go to the right side when the left side could be a solution as well
+		macVim.clearData();
 		macVim.switchToNormalMode();
 		return true;
 	}
@@ -871,6 +845,7 @@ macVim.visual_keydown = function (e) {
 		// We have to first delete the highlighted text, then paste in the clipboard
 		docs.pressKey(docs.codeFromKey("Backspace"));
 		macVim.paste(e);
+		macVim.clearData();
 		macVim.switchToNormalMode();
 		return true;
 	}
@@ -891,18 +866,21 @@ macVim.visual_keydown = function (e) {
 				}, 1);
 			});
 		}
+		macVim.clearData();
 		macVim.switchToNormalMode();
 		return true;
 	}
 
 	if (e.key === "I" && macVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
 
 	if ((e.key === "v" || e.key === "V") && macVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		macVim.clearData();
 		macVim.switchToNormalMode();
 		return true;
 	}
@@ -938,6 +916,7 @@ macVim.visual_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
@@ -945,27 +924,27 @@ macVim.visual_keydown = function (e) {
 	if (e.key === "$" && macVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		macVim.clearData();
 		return true;
 	}
 
 	if (e.key === "x" && macVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("cut");
+		macVim.clearData();
 		macVim.switchToNormalMode();
 		return true;
 	}
 
 	if (e.key === "d" && macVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
+		macVim.clearData();
 		macVim.switchToNormalMode();
 		return true;
 	}
 
 	if (e.key === "c" && macVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
+		macVim.clearData();
 		macVim.switchToInsertMode();
 		return true;
 	}
@@ -1025,17 +1004,21 @@ macVim.visual_keydown = function (e) {
 			macVim.switchToInsertMode();
 			return true;
 		}
+
+		macVim.clearData();
 		return true;
 	}
 
 	if (e.key === "Y" && macVim.currentSequence.length === 0) {
 		macVim.copyWholeLineVisualMode();
+		macVim.clearData();
 		return true;
 	}
 
 	if (e.key === "y" && macVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("copy");
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		macVim.clearData();
 		macVim.switchToNormalMode();
 		return true;
 	}
@@ -1045,8 +1028,7 @@ macVim.visual_keydown = function (e) {
 		// Left and right traversal now do nothing
 		let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W"];
 		if (doNothingKeys.includes(e.key) && macVim.currentSequence.length === 0) {
-			macVim.num = "";
-			updateUISequenceText("");
+			macVim.clearData();
 			return true;
 		}
 
@@ -1055,8 +1037,7 @@ macVim.visual_keydown = function (e) {
 			for (let i = 0; i < numRepeats; i++) {
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			}
-			macVim.num = "";
-			updateUISequenceText("");
+			macVim.clearData();
 			return true;
 		}
 
@@ -1067,8 +1048,7 @@ macVim.visual_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 				docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 			}
-			macVim.num = "";
-			updateUISequenceText("");
+			macVim.clearData();
 			return true;
 		}
 	}
@@ -1091,8 +1071,8 @@ macVim.visual_keydown = function (e) {
 				}
 			}
 		);
-		macVim.num = "";
-		macVim.currentSequence = "";
+		macVim.clearData();
+		return true;
 	} else if (macVim.currentSequence in macVim.keyMaps) {
 		macVim.keyMaps[macVim.currentSequence].forEach(([key, ...args]) => {
 			const numRepeats = parseInt(macVim.num) || 1;
@@ -1103,8 +1083,8 @@ macVim.visual_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey(key), ...keyArgs);
 			}
 		});
-		macVim.num = "";
-		macVim.currentSequence = "";
+		macVim.clearData();
+		return true;
 	}
 
 	if (
@@ -1115,6 +1095,8 @@ macVim.visual_keydown = function (e) {
 		macVim.num = "";
 		macVim.currentSequence = "";
 	}
+
+	updateUISequenceText(macVim.num + macVim.currentSequence);
 	return true;
 };
 
