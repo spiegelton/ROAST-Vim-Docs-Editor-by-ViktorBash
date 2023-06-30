@@ -262,6 +262,7 @@ docs.getCursorLocations = function () {
 	return result;
 };
 
+// Get the y coordinate of the cursor
 docs.getYCoord = function () {
 	let coords = docs.userCursor.style.transform;
 	let xIndex = coords.indexOf("px");
@@ -269,6 +270,7 @@ docs.getYCoord = function () {
 	return parseInt(yCoord);
 }
 
+// Get the x and y coordinates of the cursor
 docs.getCoords = function () {
 	let coords = docs.userCursor.style.transform;
 	let xIndex = coords.indexOf("px");

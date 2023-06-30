@@ -2,14 +2,15 @@ import { baseVim } from "./baseVim.js";
 import { docs } from "../docs.js";
 import { updateUIModeText, updateUISequenceText } from "./UI.js";
 
-// Add on top of base vim to work on windows machines
 
 let windowsVim = {
+	// windowsVim inherits from baseVim to get started
 	__proto__: baseVim,
 };
 
-// TODO: Switch A and $ to use this function
-// Move to the start of a line
+/* 
+* Move to the end of a line
+*/
 windowsVim.moveToEndOfLine = function () {
 	let [startXCoord, startYCoord] = docs.getCoords();
 	docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -71,14 +72,14 @@ windowsVim.normal_keydown = function (e) {
 
 	// Paste (no support for numbers/pasting multiple times yet)
 	if (e.key === "p" && windowsVim.currentSequence.length === 0) {
-		windowsVim.paste(e);
+		windowsVim.paste(e); // All the cursor logic is in here
 		windowsVim.num = "";
 		updateUISequenceText("");
 		docs.setCursorWidth();
 		return true;
 	}
 
-	// Paste (no support for numbers/pasting multiple times yet)
+	// Paste before cursor now
 	if (e.key === "P" && windowsVim.currentSequence.length === 0) {
 		if (e.ctrlKey === false) {
 			// Paste with formatting
@@ -100,17 +101,20 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Go to insert mode where we are
 	if (e.key === "i" && windowsVim.currentSequence.length === 0) {
 		windowsVim.switchToInsertMode();
 		return true;
 	}
 
+	// Go to visual mode
 	if (e.key === "v" && windowsVim.currentSequence.length === 0) {
 		windowsVim.visualModeIsLinedBased = false;
 		windowsVim.switchToVisualMode();
 		return true;
 	}
 
+	// Go to visual line based mode (select the whole current line)
 	if (e.key === "V" && windowsVim.currentSequence.length === 0) {
 		let cursorLocations = docs.getCursorLocations();
 		if (!cursorLocations[0]) {
@@ -152,6 +156,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// append
 	if (e.key === "a" && windowsVim.currentSequence.length === 0) {
 		let [initialXCoord, initialYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -171,6 +176,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Append at end of line
 	if (e.key === "A" && windowsVim.currentSequence.length === 0) {
 		let cursorLocations = docs.getCursorLocations();
 		if (!cursorLocations[3]) {
@@ -186,6 +192,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Insert a new line above and go to insert mode
 	if (e.key === "O" && windowsVim.currentSequence.length === 0) {
 		let cursorLocations = docs.getCursorLocations();
 		if (cursorLocations[2]) {
@@ -221,6 +228,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Insert a new line below and go to insert mode
 	if (e.key === "o" && windowsVim.currentSequence.length === 0) {
 		// Move to the end of the line and press enter
 		windowsVim.moveToEndOfLine();
@@ -229,6 +237,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Insert at the beginning of the line
 	if (e.key === "I" && windowsVim.currentSequence.length === 0) {
 		let oldCoords = docs.userCursor.style.transform;
 		docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -256,6 +265,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Go to the last character in the next word
 	if (
 		(e.key === "E" || e.key === "e") &&
 		windowsVim.currentSequence.length === 0
@@ -285,6 +295,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Go to the first character in the next word
 	if (
 		(e.key === "w" || e.key === "W") &&
 		windowsVim.currentSequence.length === 0
@@ -307,6 +318,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Go to the end of the line
 	if (e.key === "$" && windowsVim.currentSequence.length === 0) {
 		let cursorLocations = docs.getCursorLocations();
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true);
@@ -321,6 +333,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	// Delete the current character
 	if (e.key == "x" && windowsVim.currentSequence.length === 0) {
 		// if we're at the end of a line, r should go on the current line
 		// if we're at the end of a multiline (fake) line, r can move to next multiline
@@ -387,7 +400,7 @@ windowsVim.normal_keydown = function (e) {
 
 	// ALL Support for d and c multiline commands here
 
-	// D, d$, C, c$
+	// D, d$, C, c$ (delete to end of line)
 	if (
 		(e.key === "D" && windowsVim.currentSequence.length === 0) ||
 		(e.key === "$" && windowsVim.currentSequence === "d") ||
@@ -439,7 +452,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// d0, c0
+	// d0, c0 (delete to beginning of line)
 	if (
 		(e.key === "0" && windowsVim.currentSequence === "d") ||
 		(e.key === "0" && windowsVim.currentSequence === "c")
@@ -500,7 +513,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// dd
+	// dd (delete whole line)
 	if (e.key === "d" && windowsVim.currentSequence === "d") {
 		// We are going to select text down, move right one arrow, select text up, and delete
 		const numRepeats = parseInt(windowsVim.num) || 1;
@@ -528,7 +541,8 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// cc
+	// cc (delete whole line and enter insert mode)
+	// If just executed one time/loop, we delete everything on the line but not actually the line itself
 	if (e.key === "c" && windowsVim.currentSequence === "c") {
 		// We are going to select text down, move right one arrow, select text up, and delete
 		const numRepeats = parseInt(windowsVim.num) || 1;
@@ -558,7 +572,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// diw, ciw
+	// diw, ciw (delete the current word we're on)
 	if (
 		(e.key === "w" && windowsVim.currentSequence === "di") ||
 		(e.key === "w" && windowsVim.currentSequence === "ci")
@@ -595,7 +609,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// y$
+	// y$ (copy to the end of the line)
 	if (e.key === "$" && windowsVim.currentSequence === "y") {
 		let [startXCoord, startYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -640,7 +654,7 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// y0
+	// y0 (copy to the start of the line)
 	if (e.key === "0" && windowsVim.currentSequence === "y") {
 		// Technically windowsVim will move up a line if you're at the start already, but that seems ugly, so we'll implement it
 		// slightly different on purpose.
@@ -700,9 +714,9 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// yy or Y
+	// yy or Y (copy the whole line)
 	if ((e.key === "y" && windowsVim.currentSequence === "y") || e.key === "Y") {
-		windowsVim.copyWholeLine();
+		windowsVim.copyWholeLine(); // All the heavy lifting in this
 		return true;
 	}
 
@@ -833,6 +847,7 @@ windowsVim.visual_keydown = function (e) {
 		return true;
 	}
 
+	// Paste after cursor
 	if (e.key === "p" && windowsVim.currentSequence.length === 0) {
 		// We have to first delete the highlighted text, then paste in the clipboard
 		docs.pressKey(docs.codeFromKey("Backspace"));
@@ -842,6 +857,7 @@ windowsVim.visual_keydown = function (e) {
 		return true;
 	}
 
+	// Paste before cursor
 	if (e.key === "P" && windowsVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
 		docs.pasteClipboard();

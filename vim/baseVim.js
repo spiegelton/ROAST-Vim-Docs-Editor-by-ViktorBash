@@ -1,11 +1,15 @@
 import { docs } from "../docs.js";
 import { updateUIModeText, updateUISequenceText } from "./UI.js";
 
+// baseVim is inherited by both macVim and windowsVim, and provides keyboard system agnostic functions/info
+
 let baseVim = {
+	// Main variables here
 	mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual"]
-	num: "", // Keep track of number keys pressed by the user
+	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
 	currentSequence: "", // Keep track of key sequences (ex: "gg")
-	visualModeIsLinedBased: false, // Whether visual mode is line based (V) or regular (v)
+	visualModeIsLinedBased: false, // Whether visual mode is line based (V) or regular (v), this is set before calling switchToVisualMode()
+	// Basic commands have their keymaps here, instead of in the functions later on
 	keyMaps: {
 		Backspace: [["ArrowLeft"]],
 		b: [["ArrowLeft", true]], // ctrl + <-
@@ -32,7 +36,7 @@ let baseVim = {
 	},
 	incompleteKeyMaps: ["g", "r", "d", "c", "y", "di", "ci"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
 	// di for diw, ci for ciw
-	differentVisualKeyMaps: {
+	differentVisualKeyMaps: { // Some of the commands for the same key are different in visual mode, and if so, they are stored here
 		u: [],
 		U: [],
 		gg: [["Home", true, true]],
@@ -74,6 +78,9 @@ baseVim.switchToInsertMode = function () {
 	docs.setCursorWidth(true);
 };
 
+/*
+ * This function copies a whole line and keeps the cursor in the original position
+*/
 baseVim.copyWholeLine = async function () {
 	let cursorLocations = docs.getCursorLocations();
 	if (cursorLocations[0] && cursorLocations[3]) {
@@ -130,6 +137,9 @@ baseVim.copyWholeLine = async function () {
 	// Not updating cursor because we're at the same place
 };
 
+/*
+* Copy a whole line in visual mode via 2 copy commands, TODO: Make better
+*/
 baseVim.copyWholeLineVisualMode = async function () {
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 	docs.contentDocument.execCommand("copy");
@@ -148,6 +158,11 @@ baseVim.copyWholeLineVisualMode = async function () {
 	return true;
 };
 
+/*
+* Paste whatever is in the clipboard at the appropriate place (lot of logic to move the cursor around)
+* You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
+* with stuff like being at the end of a line or multiline
+*/
 baseVim.paste = async function (e) {
 	// The main thing is to check that if we're at the end, are we at the end of a multiline or real line
 	let [xCoord, yCoord] = docs.getCoords();
@@ -204,7 +219,9 @@ baseVim.paste = async function (e) {
 };
 
 
-// Called in insert mode.
+/*
+* Handles all keydown events in insert mode (basically only checks for escape/ctrl+c)
+*/
 baseVim.insert_keydown = function (e) {
 	// Let all characters flow freely (except for escape)
 	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {

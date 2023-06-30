@@ -18,6 +18,7 @@ for (let i = 0; i < trialButtons.length; i++) {
 	trialButtons[i].addEventListener("click", (event) => {extpay.openTrialPage("7 day")});
 }
 
+// We wil select later which modal to display
 let newUserModal = document.querySelector("#newUser");
 let trialUserModal = document.querySelector("#trialUser");
 let expiredTrialUserModal = document.querySelector("#expiredTrialUser");
@@ -25,6 +26,7 @@ let paidUserModal = document.querySelector("#paidUser");
 let pastDueUserModal = document.querySelector("#pastDueUser");
 let cancelledUserModal = document.querySelector("#cancelledUser");
 
+// Used for showing how much time the user has left on their trial
 function convertMillisecondsToDaysAndHours(milliseconds) {
   // Calculate the number of seconds, minutes, and hours
   const seconds = Math.floor(milliseconds / 1000);
