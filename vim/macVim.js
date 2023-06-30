@@ -972,20 +972,59 @@ macVim.visual_keydown = function (e) {
 
 	if ((e.key === "D" || e.key === "C") && macVim.currentSequence.length === 0) {
 		// Delete the whole line(s) that we partially selected
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		docs.pressKey(docs.codeFromKey("Backspace"));
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[0]) {
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-			docs.pressKey(docs.codeFromKey("Backspace"));
+
+		// Now we need to just need to basically do the same logic as "dd" or "cc"
+		if (e.key === "D") {
+			macVim.moveToEndOfLine();
+			let [startXCoord, startYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let [midXCoord, midYCoord] = docs.getCoords();
+			if (startXCoord === midXCoord && startYCoord === midYCoord) {
+				// At the start of the file
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+			else if (startYCoord === midYCoord) {
+				// In the middle of a line or something
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+			else {
+				// We are on an empty line
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+
+			macVim.switchToNormalMode();
+			return true;
 		}
-		if (e.key === "C") {
+		else if (e.key === "C") {
+			macVim.moveToEndOfLine();
+			let [startXCoord, startYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			let [midXCoord, midYCoord] = docs.getCoords();
+			if (startXCoord === midXCoord && startYCoord === midYCoord) {
+				// Do nothing
+			}
+			else if (startYCoord === midYCoord) {
+				// In the middle of a line or something
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+			else {
+				// We are on an empty line
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			}
+
 			macVim.switchToInsertMode();
 			return true;
 		}
-		macVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
 		return true;
 	}
 
