@@ -984,7 +984,7 @@ macVim.visual_keydown = function (e) {
 			return true;
 		}
 		macVim.num = "";
-		macVim.updateUISequenceText("");
+		docs.updateUISequenceText("");
 		docs.setCursorWidth();
 		return true;
 	}
