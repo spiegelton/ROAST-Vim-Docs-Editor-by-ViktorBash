@@ -870,15 +870,27 @@ macVim.visual_keydown = function (e) {
 	if (e.key === "p" && macVim.currentSequence.length === 0) {
 		// We have to first delete the highlighted text, then paste in the clipboard
 		docs.pressKey(docs.codeFromKey("Backspace"));
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		docs.pasteClipboard();
+		macVim.paste(e);
 		macVim.switchToNormalMode();
 		return true;
 	}
 
 	if (e.key === "P" && macVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
-		docs.pasteClipboard();
+		if (e.ctrlKey === false) {
+			// Paste with formatting
+			docs.contentDocument.execCommand("paste");
+			setTimeout(() => {
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}, 1);
+		} else {
+			// Paste without formatting
+			docs.pasteClipboardPlainText().then(() => {
+				setTimeout(() => {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}, 1);
+			});
+		}
 		macVim.switchToNormalMode();
 		return true;
 	}
