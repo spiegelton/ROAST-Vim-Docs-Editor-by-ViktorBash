@@ -932,7 +932,7 @@ windowsVim.visual_keydown = function (e) {
 			return true;
 		}
 		windowsVim.num = "";
-		windowsVim.updateUISequenceText("");
+		updateUISequenceText("");
 		docs.setCursorWidth();
 		return true;
 	}
