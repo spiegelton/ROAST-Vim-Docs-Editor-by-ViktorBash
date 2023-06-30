@@ -244,14 +244,7 @@ macVim.normal_keydown = function (e) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-			let cursorPosition = docs.userCursor.style.transform;
-			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-			let newCursorPosition = docs.userCursor.style.transform;
-			if (cursorPosition === newCursorPosition) {
-				// We've reached end of the file
-				break;
-			}
-			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
 		}
 		macVim.num = "";
 		updateUISequenceText("");

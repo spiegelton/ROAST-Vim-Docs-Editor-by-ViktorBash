@@ -15,16 +15,13 @@ let baseVim = {
 		b: [["ArrowLeft", true]], // ctrl + <-
 		B: [["ArrowLeft", true]], // ctrl + <-
 		w: [
-			// w and W only for visual mode used, TODO: fix in visual mode
 			["ArrowRight", true],
-			["ArrowRight", true],
-			["ArrowLeft", true],
-		], // w is same behavior as eeb
+			["ArrowRight"],
+		],
 		W: [
 			["ArrowRight", true],
-			["ArrowRight", true],
-			["ArrowLeft", true],
-		], // w is same behavior as eeb
+			["ArrowRight"],
+		],
 		h: [["ArrowLeft"]],
 		j: [["ArrowDown"]],
 		k: [["ArrowUp"]],
@@ -43,6 +40,8 @@ let baseVim = {
 		G: [["End", true, true]],
 		e: [["ArrowRight", true, true]], // ctrl + ->
 		E: [["ArrowRight", true, true]], // ctrl + ->
+		W: [["ArrowRight", true], ["ArrowRight"], ["ArrowRight"]],
+		w: [["ArrowRight", true], ["ArrowRight"], ["ArrowRight"]]
 	},
 };
 

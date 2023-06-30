@@ -295,29 +295,6 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// Go to the first character in the next word
-	if (
-		(e.key === "w" || e.key === "W") &&
-		windowsVim.currentSequence.length === 0
-	) {
-		const numRepeats = parseInt(windowsVim.num) || 1;
-		for (let i = 0; i < numRepeats; i++) {
-			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-			let cursorPosition = docs.userCursor.style.transform;
-			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-			let newCursorPosition = docs.userCursor.style.transform;
-			if (cursorPosition === newCursorPosition) {
-				// We've reached end of the file
-				break;
-			}
-			docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-		}
-		windowsVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
-		return true;
-	}
-
 	// Go to the end of the line
 	if (e.key === "$" && windowsVim.currentSequence.length === 0) {
 		let cursorLocations = docs.getCursorLocations();
