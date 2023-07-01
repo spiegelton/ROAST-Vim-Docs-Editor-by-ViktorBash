@@ -756,13 +756,13 @@ macVim.normal_keydown = function (e) {
 				if (rightYCoord !== yCoord) {
 					// Empty line
 					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-					docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
+					docs.pressKey(macVim.currentSequence.charCodeAt(1));
 				} else if (rightXCoord === xCoord && rightYCoord === yCoord) {
 					// We are at the end of the file on an empty line
-					docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
+					docs.pressKey(macVim.currentSequence.charCodeAt(1));
 				} else {
 					docs.pressKey(docs.codeFromKey("Backspace"));
-					docs.pressKey(0, false, false, macVim.currentSequence.charAt(1));
+					docs.pressKey(macVim.currentSequence.charCodeAt(1));
 				}
 			}
 			// We are not at the start of a file or line, so we have to check if we're at the end of a line,
