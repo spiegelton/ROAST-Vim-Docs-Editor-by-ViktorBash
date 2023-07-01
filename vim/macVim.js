@@ -641,7 +641,7 @@ macVim.normal_keydown = function (e) {
 	}
 
 	// yy or Y
-	if ((e.key === "y" && macVim.currentSequence === "y") || e.key === "Y") {
+	if ((e.key === "y" && macVim.currentSequence === "y") || (e.key === "Y" && macVim.currentSequence === "")) {
 		// Unlike y0 or y$ on an empty line we want to copy the empty line/enter if we're on one
 		let [xCoord, yCoord] = docs.getCoords(); // Handy later for getting back to original position
 		macVim.moveToEndOfLine();

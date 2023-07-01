@@ -687,7 +687,7 @@ windowsVim.normal_keydown = function (e) {
 	}
 
 	// yy or Y (copy the whole line)
-	if ((e.key === "y" && windowsVim.currentSequence === "y") || e.key === "Y") {
+	if ((e.key === "y" && windowsVim.currentSequence === "y") || (e.key === "Y" && windowsVim.currentSequence === "")) {
 		windowsVim.copyWholeLine(); // All the heavy lifting in this
 		return true;
 	}
