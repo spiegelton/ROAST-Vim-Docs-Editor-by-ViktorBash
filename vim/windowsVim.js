@@ -285,20 +285,23 @@ windowsVim.normal_keydown = function (e) {
 		windowsVim.currentSequence.length === 0
 	) {
 		const numRepeats = parseInt(windowsVim.num) || 1;
-		for (let i = 0; i < numRepeats; i++) {
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			let [startXCoord, startYCoord] = docs.getCoords();
+		// We do some optimization here to make it faster
+		for (let i = 0; i < numRepeats - 1; i++) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-			let [endXCoord, endYCoord] = docs.getCoords();
-			if (startXCoord === endXCoord && startYCoord === endYCoord) {
-				// End of file reached, do nothing
-			}
-			else {
-				// Keep going like regular
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
+		}
+
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+		let [endXCoord, endYCoord] = docs.getCoords();
+		if (startXCoord === endXCoord && startYCoord === endYCoord) {
+			// End of file reached, do nothing
+		}
+		else {
+			// Keep going like regular
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		}
 
 		windowsVim.clearData();
