@@ -77,6 +77,16 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	if (e.key === "r" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+		// Redo
+		const numRepeats = parseInt(windowsVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("Y"), true);  // Ctrl + Y is redo on windows
+		}
+		windowsVim.clearData();
+		return true;
+	}
+
 	// Paste (no support for numbers/pasting multiple times yet)
 	if (e.key === "p" && windowsVim.currentSequence.length === 0) {
 		windowsVim.paste(e); // All the cursor logic is in here
@@ -492,10 +502,15 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
-		windowsVim.clearData();
 		if (windowsVim.currentSequence === "c") {
+			windowsVim.num = "";
+			windowsVim.currentSequence = "";
 			windowsVim.switchToInsertMode();
 		}
+		else {
+			windowsVim.clearData();
+		}
+
 		return true;
 	}
 
@@ -583,9 +598,13 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
-		windowsVim.clearData();
 		if (windowsVim.currentSequence === "ci") {
+			windowsVim.currentSequence = "";
+			windowsVim.num = "";
 			windowsVim.switchToInsertMode();
+		}
+		else {
+			windowsVim.clearData();
 		}
 		return true;
 	}
