@@ -32,8 +32,6 @@ let baseVim = {
 		G: [["End", true, true]],
 		e: [["ArrowRight", true, true]], // ctrl + ->
 		E: [["ArrowRight", true, true]], // ctrl + ->
-		W: [["ArrowRight", true], ["ArrowRight"], ["ArrowRight"]],
-		w: [["ArrowRight", true], ["ArrowRight"], ["ArrowRight"]]
 	},
 };
 

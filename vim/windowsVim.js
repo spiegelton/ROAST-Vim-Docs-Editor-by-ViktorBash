@@ -815,6 +815,7 @@ windowsVim.visual_keydown = function (e) {
 		// Escape visual mode.
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
 		// go to the right side when the left side could be a solution as well
+		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
 	}
@@ -825,6 +826,7 @@ windowsVim.visual_keydown = function (e) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
 		docs.pressKey(docs.codeFromKey("ArrowRight"));
 		docs.pasteClipboard();
+		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
 	}
@@ -833,12 +835,14 @@ windowsVim.visual_keydown = function (e) {
 	if (e.key === "P" && windowsVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
 		docs.pasteClipboard();
+		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
 	}
 
 	if (e.key === "I" && windowsVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -848,6 +852,7 @@ windowsVim.visual_keydown = function (e) {
 		windowsVim.currentSequence.length === 0
 	) {
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
 	}
@@ -883,6 +888,8 @@ windowsVim.visual_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
+
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -890,27 +897,27 @@ windowsVim.visual_keydown = function (e) {
 	if (e.key === "$" && windowsVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		windowsVim.clearData();
 		return true;
 	}
 
 	if (e.key === "x" && windowsVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("cut");
+		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
 	}
 
 	if (e.key === "d" && windowsVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
+		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
 	}
 
 	if (e.key === "c" && windowsVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -931,20 +938,20 @@ windowsVim.visual_keydown = function (e) {
 			windowsVim.switchToInsertMode();
 			return true;
 		}
-		windowsVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		windowsVim.clearData();
 		return true;
 	}
 
 	if (e.key === "Y" && windowsVim.currentSequence.length === 0) {
 		windowsVim.copyWholeLineVisualMode();
+		windowsVim.clearDat();
 		return true;
 	}
 
 	if (e.key === "y" && windowsVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("copy");
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
 	}
@@ -957,8 +964,7 @@ windowsVim.visual_keydown = function (e) {
 			doNothingKeys.includes(e.key) &&
 			windowsVim.currentSequence.length === 0
 		) {
-			windowsVim.num = "";
-			updateUISequenceText("");
+			windowsVim.clearData();
 			return true;
 		}
 
@@ -967,8 +973,7 @@ windowsVim.visual_keydown = function (e) {
 			for (let i = 0; i < numRepeats; i++) {
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 			}
-			windowsVim.num = "";
-			updateUISequenceText("");
+			windowsVim.clearData();
 			return true;
 		}
 
@@ -980,11 +985,20 @@ windowsVim.visual_keydown = function (e) {
 			for (let i = 0; i < numRepeats; i++) {
 				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 			}
-			windowsVim.num = "";
-			updateUISequenceText("");
+			windowsVim.clearData();
 			return true;
 		}
 		
+	}
+
+	if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence.length === 0) {
+		const numRepeats = parseInt(windowsVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+		}
+		windowsVim.clearData();
+		return true;
 	}
 
 	windowsVim.currentSequence += e.key;
@@ -1005,8 +1019,8 @@ windowsVim.visual_keydown = function (e) {
 				}
 			}
 		);
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
+		windowsVim.clearData();
+		return true;
 	} else if (windowsVim.currentSequence in windowsVim.keyMaps) {
 		windowsVim.keyMaps[windowsVim.currentSequence].forEach(([key, ...args]) => {
 			const numRepeats = parseInt(windowsVim.num) || 1;
@@ -1017,8 +1031,8 @@ windowsVim.visual_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey(key), ...keyArgs);
 			}
 		});
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
+		windowsVim.clearData();
+		return true;
 	}
 
 	if (
@@ -1029,6 +1043,8 @@ windowsVim.visual_keydown = function (e) {
 		windowsVim.num = "";
 		windowsVim.currentSequence = "";
 	}
+
+	updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
 	return true;
 };
 

@@ -977,6 +977,7 @@ macVim.visual_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 			}
 
+			macVim.clearData();
 			macVim.switchToNormalMode();
 			return true;
 		}
@@ -999,6 +1000,7 @@ macVim.visual_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 			}
 
+			macVim.clearData();
 			macVim.switchToInsertMode();
 			return true;
 		}
@@ -1049,6 +1051,17 @@ macVim.visual_keydown = function (e) {
 			macVim.clearData();
 			return true;
 		}
+	}
+
+	if ((e.key === "w" || e.key === "W") && macVim.currentSequence.length === 0) {
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+		}
+		macVim.clearData();
+		return true;
 	}
 
 	macVim.currentSequence += e.key;
