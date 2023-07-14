@@ -947,12 +947,6 @@ windowsVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	if (e.key === "Y" && windowsVim.currentSequence.length === 0) {
-		windowsVim.copyWholeLineVisualMode();
-		windowsVim.clearDat();
-		return true;
-	}
-
 	if (e.key === "y" && windowsVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("copy");
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));

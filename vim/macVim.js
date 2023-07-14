@@ -1009,12 +1009,6 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	if (e.key === "Y" && macVim.currentSequence.length === 0) {
-		macVim.copyWholeLineVisualMode();
-		macVim.clearData();
-		return true;
-	}
-
 	if (e.key === "y" && macVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("copy");
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
