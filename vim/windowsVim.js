@@ -8,6 +8,15 @@ let windowsVim = {
 	__proto__: baseVim,
 };
 
+// Cannot be in baseVim for some reason
+windowsVim.clearData = function () {
+	windowsVim.num = "";
+	windowsVim.currentSequence = "";
+	updateUISequenceText("");
+	docs.setCursorWidth();
+	return;
+}
+
 /* 
 * Move to the end of a line
 */
@@ -64,18 +73,14 @@ windowsVim.normal_keydown = function (e) {
 
 	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
 		// Remove any saved queries that the user had
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
+		windowsVim.clearData();
 		return true;
 	}
 
 	// Paste (no support for numbers/pasting multiple times yet)
 	if (e.key === "p" && windowsVim.currentSequence.length === 0) {
 		windowsVim.paste(e); // All the cursor logic is in here
-		windowsVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -95,20 +100,20 @@ windowsVim.normal_keydown = function (e) {
 				}, 1);
 			});
 		}
-		windowsVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		windowsVim.clearData();
 		return true;
 	}
 
 	// Go to insert mode where we are
 	if (e.key === "i" && windowsVim.currentSequence.length === 0) {
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
 
 	// Go to visual mode
 	if (e.key === "v" && windowsVim.currentSequence.length === 0) {
+		windowsVim.clearData();
 		windowsVim.visualModeIsLinedBased = false;
 		windowsVim.switchToVisualMode();
 		return true;
@@ -122,6 +127,8 @@ windowsVim.normal_keydown = function (e) {
 		}
 		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+
+		windowsVim.clearData();
 		windowsVim.visualModeIsLinedBased = true;
 		windowsVim.switchToVisualMode();
 		return true;
@@ -172,6 +179,7 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -188,6 +196,7 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -224,6 +233,7 @@ windowsVim.normal_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		}
 
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -233,6 +243,8 @@ windowsVim.normal_keydown = function (e) {
 		// Move to the end of the line and press enter
 		windowsVim.moveToEndOfLine();
 		docs.pressKey(docs.codeFromKey("Enter"));
+
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -261,6 +273,8 @@ windowsVim.normal_keydown = function (e) {
 			// We can just arrow up from here in all scenarios
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
 		}
+
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -284,9 +298,8 @@ windowsVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
-		windowsVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -298,10 +311,8 @@ windowsVim.normal_keydown = function (e) {
 			// If we're not at the end of a file, move back left
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		}
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -364,9 +375,7 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
-		windowsVim.num = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -417,10 +426,7 @@ windowsVim.normal_keydown = function (e) {
 			return true;
 		}
 
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -472,16 +478,10 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
+		windowsVim.clearData();
 		if (windowsVim.currentSequence === "c") {
-			windowsVim.num = "";
-			windowsVim.currentSequence = "";
 			windowsVim.switchToInsertMode();
-			return true;
 		}
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
 		return true;
 	}
 
@@ -506,10 +506,8 @@ windowsVim.normal_keydown = function (e) {
 				break; // With dd we finish if we reach the end of the
 			}
 		}
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
-		docs.setCursorWidth();
+
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -538,8 +536,7 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
-		windowsVim.num = "";
-		windowsVim.currentSequence = ""; // Needs to be here for some reason
+		windowsVim.clearData();
 		windowsVim.switchToInsertMode();
 		return true;
 	}
@@ -571,13 +568,11 @@ windowsVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("Backspace"));
 			}
 		}
+
+		windowsVim.clearData();
 		if (windowsVim.currentSequence === "ci") {
 			windowsVim.switchToInsertMode();
-			return true;
 		}
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
 		return true;
 	}
 
@@ -619,10 +614,8 @@ windowsVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
-		// Don't need to set cursor width because we didn't move anywhere
+
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -679,16 +672,14 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
-		updateUISequenceText("");
-		// Don't need to set cursor width because we didn't move anywhere
+		windowsVim.clearData();
 		return true;
 	}
 
 	// yy or Y (copy the whole line)
 	if ((e.key === "y" && windowsVim.currentSequence === "y") || (e.key === "Y" && windowsVim.currentSequence === "")) {
 		windowsVim.copyWholeLine(); // All the heavy lifting in this
+		windowsVim.clearData();
 		return true;
 	}
 
@@ -710,8 +701,8 @@ windowsVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey(key), ...args);
 			}
 		});
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
+		windowsVim.clearData();
+		return;
 	}
 
 	// r for replace command:
@@ -778,8 +769,8 @@ windowsVim.normal_keydown = function (e) {
 				}
 			}
 		}
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
+		windowsVim.clearData();
+		return true;
 	}
 
 	if (
@@ -787,8 +778,8 @@ windowsVim.normal_keydown = function (e) {
 		!windowsVim.incompleteKeyMaps.includes(windowsVim.currentSequence)
 	) {
 		// This means that the current sequence is invalid, so we have to reset it
-		windowsVim.num = "";
-		windowsVim.currentSequence = "";
+		windowsVim.clearData();
+		return true;
 	}
 
 	updateUISequenceText(windowsVim.num + windowsVim.currentSequence);

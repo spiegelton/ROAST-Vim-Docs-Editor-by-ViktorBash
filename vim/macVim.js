@@ -85,9 +85,7 @@ macVim.normal_keydown = function (e) {
 
 	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
 		// Remove any saved queries that the user had
-		macVim.num = "";
-		macVim.currentSequence = "";
-		updateUISequenceText("");
+		windowsVim.clearData();
 		return true;
 	}
 
