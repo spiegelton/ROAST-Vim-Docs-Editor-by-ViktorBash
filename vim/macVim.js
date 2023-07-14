@@ -428,10 +428,15 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 
-		macVim.clearData();
 		if (macVim.currentSequence === "c") {
+			macVim.num = "";
+			macVim.currentSequence = "";
 			macVim.switchToInsertMode();
 		}
+		else {
+			macVim.clearData();
+		}
+
 		return true;
 	}
 
@@ -535,9 +540,13 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 
-		macVim.clearData();
 		if (macVim.currentSequence === "ci") {
+			macVim.currentSequence = "";
+			macVim.num = "";
 			macVim.switchToInsertMode();
+		}
+		else {
+			macVim.clearData();
 		}
 		return true;
 	}
