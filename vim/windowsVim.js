@@ -940,25 +940,44 @@ windowsVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	// if (
-	// 	e.key === "D" &&
-	// 	windowsVim.currentSequence.length === 0
-	// ) {
-	// 	docs.pressKey(docs.codeFromKey("Backspace"));
-	// 	windowsVim.moveToEndOfLine();
-	// 	let [startXCoord, startYCoord] = docs.getCoords();
-	// 	docs.pressKey(docs.codeFromKey("ArrowLeft"));
+	if (
+		e.key === "D" &&
+		windowsVim.currentSequence.length === 0
+	) {
+		docs.pressKey(docs.codeFromKey("Backspace"));
+		windowsVim.moveToEndOfLine();
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let [midXCoord, midYCoord] = docs.getCoords();
+		if (startXCoord === midXCoord && startYCoord === midYCoord) {
+			// At the start of the file
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("Backspace"));
+		}
+		else if (startYCoord === midYCoord) {
+			// In the middle of a line or something
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("Backspace"));
 
+		}
+		else {
+			// We are on an empty line
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("Backspace"));
+		}
 
+		windowsVim.clearData();
+		windowsVim.switchToNormalMode();
+		return true;
+	}
 
-	// 	windowsVim.clearData();
-	// 	windowsVim.switchToNormalMode();
-	// 	return true;
-	// }
+	if (e.key === "C" && windowsVim.currentSequence.length === 0) {
 
-	// if (e.key === "C" && windowsVim.currentSequence.length === 0) {
-
-	// }
+	}
 
 	if (e.key === "y" && windowsVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("copy");
