@@ -829,8 +829,7 @@ windowsVim.visual_keydown = function (e) {
 	if (e.key === "p" && windowsVim.currentSequence.length === 0) {
 		// We have to first delete the highlighted text, then paste in the clipboard
 		docs.pressKey(docs.codeFromKey("Backspace"));
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		docs.pasteClipboard();
+		windowsVim.paste(e);
 		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
@@ -839,7 +838,21 @@ windowsVim.visual_keydown = function (e) {
 	// Paste before cursor
 	if (e.key === "P" && windowsVim.currentSequence.length === 0) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
-		docs.pasteClipboard();
+		if (e.ctrlKey == false) {
+			// Paste with formatting
+			docs.contentDocument.execCommand("paste");
+			setTimeout(() => {
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}, 1);
+		}
+		else {
+			// Paste without formatting
+			docs.pasteClipboardPlainText().then(() => {
+				setTimeout(() => {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				})
+			})
+		}
 		windowsVim.clearData();
 		windowsVim.switchToNormalMode();
 		return true;
@@ -927,25 +940,25 @@ windowsVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	if (
-		(e.key === "D" || e.key === "C") &&
-		windowsVim.currentSequence.length === 0
-	) {
-		// Delete the whole line(s) that we partially selected
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-		docs.pressKey(docs.codeFromKey("Backspace"));
-		let cursorLocations = docs.getCursorLocations();
-		if (!cursorLocations[0]) {
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-			docs.pressKey(docs.codeFromKey("Backspace"));
-		}
-		if (e.key === "C") {
-			windowsVim.switchToInsertMode();
-			return true;
-		}
-		windowsVim.clearData();
-		return true;
-	}
+	// if (
+	// 	e.key === "D" &&
+	// 	windowsVim.currentSequence.length === 0
+	// ) {
+	// 	docs.pressKey(docs.codeFromKey("Backspace"));
+	// 	windowsVim.moveToEndOfLine();
+	// 	let [startXCoord, startYCoord] = docs.getCoords();
+	// 	docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+
+
+	// 	windowsVim.clearData();
+	// 	windowsVim.switchToNormalMode();
+	// 	return true;
+	// }
+
+	// if (e.key === "C" && windowsVim.currentSequence.length === 0) {
+
+	// }
 
 	if (e.key === "y" && windowsVim.currentSequence.length === 0) {
 		docs.contentDocument.execCommand("copy");

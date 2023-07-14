@@ -127,27 +127,6 @@ baseVim.copyWholeLine = async function () {
 };
 
 /*
-* Copy a whole line in visual mode via 2 copy commands, TODO: Make better
-*/
-baseVim.copyWholeLineVisualMode = async function () {
-	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-	docs.contentDocument.execCommand("copy");
-	docs.pressKey(docs.codeFromKey("ArrowLeft"));
-	let copiedText = await navigator.clipboard.readText();
-
-	let cursorLocations = docs.getCursorLocations();
-	if (!cursorLocations[0]) {
-		docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-		docs.contentDocument.execCommand("copy");
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		copiedText = (await navigator.clipboard.readText()) + copiedText;
-	}
-	navigator.clipboard.writeText(copiedText);
-	baseVim.switchToNormalMode();
-	return true;
-};
-
-/*
 * Paste whatever is in the clipboard at the appropriate place (lot of logic to move the cursor around)
 * You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
 * with stuff like being at the end of a line or multiline
