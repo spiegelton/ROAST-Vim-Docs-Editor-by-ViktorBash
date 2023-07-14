@@ -976,7 +976,27 @@ windowsVim.visual_keydown = function (e) {
 	}
 
 	if (e.key === "C" && windowsVim.currentSequence.length === 0) {
-
+		docs.pressKey(docs.codeFromKey("Backspace"));
+		windowsVim.moveToEndOfLine();
+		let [startXCoord, startYCoord] = docs.getCoords();
+		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		let [midXCoord, midYCoord] = docs.getCoords();
+		if (startXCoord === midXCoord && startYCoord === midYCoord) {
+			// Do nothing
+		}
+		else if (startYCoord === midYCoord) {
+			// In the middle of a line or something
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+		}
+		else {
+			// We are on an empty line
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+		}
+		windowsVim.clearData();
+		windowsVim.switchToInsertMode();
+		return true;
 	}
 
 	if (e.key === "y" && windowsVim.currentSequence.length === 0) {
