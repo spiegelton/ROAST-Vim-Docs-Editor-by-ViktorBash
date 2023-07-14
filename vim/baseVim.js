@@ -14,14 +14,6 @@ let baseVim = {
 		Backspace: [["ArrowLeft"]],
 		b: [["ArrowLeft", true]], // ctrl + <-
 		B: [["ArrowLeft", true]], // ctrl + <-
-		w: [
-			["ArrowRight", true],
-			["ArrowRight"],
-		],
-		W: [
-			["ArrowRight", true],
-			["ArrowRight"],
-		],
 		h: [["ArrowLeft"]],
 		j: [["ArrowDown"]],
 		k: [["ArrowUp"]],

@@ -316,6 +316,15 @@ windowsVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence.length === 0) {
+		const numRepeats = parseInt(windowsVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+		}
+		windowsVim.clearData();
+		return true;
+	}
+
 	// Delete the current character
 	if (e.key == "x" && windowsVim.currentSequence.length === 0) {
 		// if we're at the end of a line, r should go on the current line
