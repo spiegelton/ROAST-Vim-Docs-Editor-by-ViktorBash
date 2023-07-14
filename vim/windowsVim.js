@@ -844,6 +844,25 @@ windowsVim.visual_keydown = function (e) {
 		return true;
 	}
 
+	if ((e.key === "U" || e.key === "u") && windowsVim.currentSequence.length === 0) {
+		// Escape visual mode
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		// go to the right side when the left side could be a solution as well
+		windowsVim.clearData();
+		windowsVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key === "r" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+		// Escape visual mode
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		// go to the right side when the left side could be a solution as well
+		windowsVim.clearData();
+		windowsVim.switchToNormalMode();
+		return true;
+
+	}
+
 	// Paste after cursor
 	if (e.key === "p" && windowsVim.currentSequence.length === 0) {
 		// We have to first delete the highlighted text, then paste in the clipboard
@@ -1067,6 +1086,12 @@ windowsVim.visual_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
 			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 		}
+		windowsVim.clearData();
+		return true;
+	}
+
+	if (e.key === "r" && windowsVim.currentSequence.length === 0) {
+		// Invalid
 		windowsVim.clearData();
 		return true;
 	}
