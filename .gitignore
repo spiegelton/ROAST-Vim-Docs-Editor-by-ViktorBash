@@ -1,8 +1,4 @@
 # IDE Files
 .vscode/
 
-
-# Not necessary right now
 node_modules/
-package-lock.json
-package.json
