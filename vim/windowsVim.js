@@ -287,6 +287,7 @@ windowsVim.normal_keydown = function (e) {
 		const numRepeats = parseInt(windowsVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			let [startXCoord, startYCoord] = docs.getCoords();
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 			let [endXCoord, endYCoord] = docs.getCoords();
@@ -295,6 +296,7 @@ windowsVim.normal_keydown = function (e) {
 			}
 			else {
 				// Keep going like regular
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
