@@ -147,7 +147,7 @@ macVim.normal_keydown = function (e) {
 	if (e.key === "v" && macVim.currentSequence.length === 0) {
 		macVim.clearData();
 		macVim.visualModeIsLinedBased = false;
-		macVim.switchToVisualMode();
+		macVim.switchToVisualMode(macVim.visualModeIsLinedBased);
 		return true;
 	}
 
@@ -161,7 +161,7 @@ macVim.normal_keydown = function (e) {
 
 		macVim.clearData();
 		macVim.visualModeIsLinedBased = true;
-		macVim.switchToVisualMode();
+		macVim.switchToVisualMode(macVim.visualModeIsLinedBased);
 		return true;
 	}
 

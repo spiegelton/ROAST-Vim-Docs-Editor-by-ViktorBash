@@ -42,12 +42,12 @@ baseVim.switchToNormalMode = function () {
 	docs.setCursorWidth();
 };
 
-baseVim.switchToVisualMode = function () {
+baseVim.switchToVisualMode = function (isLineBased = false) {
 	baseVim.currentSequence = "";
 	baseVim.mode = "visual";
 	baseVim.num = "";
 	updateUISequenceText("");
-	if (!baseVim.visualModeIsLinedBased) {
+	if (!isLineBased) {
 		updateUIModeText("-- VISUAL --");
 	} else {
 		updateUIModeText("-- VISUAL LINE --");

@@ -155,7 +155,7 @@ windowsVim.normal_keydown = function (e) {
     if (e.key === "v" && windowsVim.currentSequence.length === 0) {
         windowsVim.clearData();
         windowsVim.visualModeIsLinedBased = false;
-        windowsVim.switchToVisualMode();
+        windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
         return true;
     }
 
@@ -170,7 +170,7 @@ windowsVim.normal_keydown = function (e) {
 
         windowsVim.clearData();
         windowsVim.visualModeIsLinedBased = true;
-        windowsVim.switchToVisualMode();
+        windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
         return true;
     }
 
