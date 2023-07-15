@@ -44,6 +44,8 @@ if (!docs.isMac) {
 			ArrowDown: 40,
 			Delete: 46,
 			Z: 90,
+			PageUp: 33,
+			PageDown: 34,
 		};
 		if (key in specialKeys) {
 			return specialKeys[key];
@@ -68,6 +70,8 @@ if (!docs.isMac) {
 			Delete: 46,
 			Z: 90,
             V: 86, // Critical
+			PageUp: 33,
+			PageDown: 34,
 		};
 		if (key in specialKeys) {
 			return specialKeys[key];
