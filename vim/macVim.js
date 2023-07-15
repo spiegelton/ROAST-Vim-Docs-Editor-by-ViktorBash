@@ -85,7 +85,17 @@ macVim.normal_keydown = function (e) {
 
 	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
 		// Remove any saved queries that the user had
-		windowsVim.clearData();
+		macVim.clearData();
+		return true;
+	}
+
+	if (e.key === "r" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
+		// Redo
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("Y"), true);
+		}
+		macVim.clearData();
 		return true;
 	}
 
@@ -848,6 +858,24 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
+	if ((e.key === "U" || e.key === "u") && macVim.currentSequence.length === 0) {
+		// Escape visual mode.
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		// go to the right side when the left side could be a solution as well
+		macVim.clearData();
+		macVim.switchToNormalMode();
+		return true;
+	}
+
+	if (e.key === "r" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
+		// Escape visual mode.
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+		// go to the right side when the left side could be a solution as well
+		macVim.clearData();
+		macVim.switchToNormalMode();
+		return true;
+	}
+
 	if (e.key === "p" && macVim.currentSequence.length === 0) {
 		// We have to first delete the highlighted text, then paste in the clipboard
 		docs.pressKey(docs.codeFromKey("Backspace"));
@@ -1063,6 +1091,12 @@ macVim.visual_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 		}
+		macVim.clearData();
+		return true;
+	}
+
+	if (e.key === "r" && macVim.length === 0) {
+		// Invalid
 		macVim.clearData();
 		return true;
 	}

@@ -132,7 +132,15 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 				shiftKey: shiftKey,
 				metaKey: true,
 			};
-		} else if (keyCode === docs.codeFromKey("V")) {
+		} 
+		else if (keyCode === docs.codeFromKey("Y") && ctrlKey === true) {
+			data = {
+				keyCode: keyCode,
+				metaKey: true
+			}
+		}
+		
+		else if (keyCode === docs.codeFromKey("V")) {
             // Paste
 			// TODO: Remove this (appears unused in reality)
             data = { keyCode: keyCode, metaKey: true };
