@@ -26,8 +26,6 @@ let baseVim = {
 	incompleteKeyMaps: ["g", "r", "d", "c", "y", "di", "ci"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
 	// di for diw, ci for ciw
 	differentVisualKeyMaps: { // Some of the commands for the same key are different in visual mode, and if so, they are stored here
-		u: [],
-		U: [],
 		gg: [["Home", true, true]],
 		G: [["End", true, true]],
 		e: [["ArrowRight", true, true]], // ctrl + ->
