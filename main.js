@@ -23,7 +23,7 @@ if (user.paid) {
 } else {
 	// Check if user started or went past their free trial
 	const now = new Date();
-	const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 day in milliseconds
+	const sevenDays = 1000 * 60 * 60 * 24 * 7 * 2; // 14 days in milliseconds
 	if (user.trialStartedAt === null) {
 		// User has not yet started their free trial, so prompt them to do so
 		extpay.openTrialPage();

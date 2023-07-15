@@ -15,7 +15,7 @@ for (let i = 0; i < payButtons.length; i++) {
 }
 for (let i = 0; i < trialButtons.length; i++) {
 	// Add event listener to each trial button
-	trialButtons[i].addEventListener("click", (event) => {extpay.openTrialPage("7 day")});
+	trialButtons[i].addEventListener("click", (event) => {extpay.openTrialPage("14 day")});
 }
 
 // We wil select later which modal to display
@@ -61,7 +61,7 @@ async function start() {
 	else {
 		// Check if user started or went past their free trial
 		const now = new Date();
-		const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 day in milliseconds
+		const sevenDays = 1000 * 60 * 60 * 24 * 7 * 2; // 14 days in milliseconds
 		if (user.trialStartedAt === null) {
 			// User is a new user (no recorded trial)
 			newUserModal.style.display = "block";
