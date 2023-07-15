@@ -1137,16 +1137,14 @@ windowsVim.visual_keydown = function (e) {
 	// Page up/page down if we are not line based visual mode
 	if (e.key === "d" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
 		// Ctrl-d is page-down
-			docs.pressKey(docs.codeFromKey("PageDown"), false, true);
+		docs.pressKey(docs.codeFromKey("PageDown"), false, true);
 		windowsVim.clearData();
 		return true;
 	}
 
 	if (e.key === "u" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
 		// Ctrl-u is page-up
-		for (let i = 0; i < 10; i++) {
-			docs.pressKey(docs.codeFromKey("PageUp"), false, true);
-		}
+		docs.pressKey(docs.codeFromKey("PageUp"), false, true);
 		windowsVim.clearData();
 		return true;
 	}

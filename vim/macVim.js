@@ -89,6 +89,18 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
+	if (e.key === "d" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
+		// Page down
+		docs.pressKey(docs.codeFromKey("PageDown"));
+		macVim.clearData();
+		return true;
+	}
+	if (e.key === "u" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
+		docs.pressKey(docs.codeFromKey("PageUp"));
+		macVim.clearData();
+		return true;
+	}
+
 	if (e.key === "r" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
 		// Redo
 		const numRepeats = parseInt(macVim.num) || 1;
@@ -858,7 +870,7 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	if ((e.key === "U" || e.key === "u") && macVim.currentSequence.length === 0) {
+	if ((e.key === "U" || e.key === "u") && macVim.currentSequence.length === 0 && !e.ctrlKey) {
 		// Escape visual mode.
 		docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
 		// go to the right side when the left side could be a solution as well
@@ -970,7 +982,7 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	if (e.key === "d" && macVim.currentSequence.length === 0) {
+	if (e.key === "d" && macVim.currentSequence.length === 0 && !e.ctrlKey) {
 		docs.pressKey(docs.codeFromKey("Backspace"));
 		macVim.clearData();
 		macVim.switchToNormalMode();
@@ -1082,6 +1094,31 @@ macVim.visual_keydown = function (e) {
 			macVim.clearData();
 			return true;
 		}
+
+		if (e.key === "d" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
+			// Ctrl-d is page down
+			docs.pressKey(docs.codeFromKey("PageDown"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+			macVim.clearData();
+			return true;
+		}
+		if (e.key === "u" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
+			docs.pressKey(docs.codeFromKey("PageUp"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			macVim.clearData();
+			return true;
+		}
+	}
+	
+	// Page up/down if we are not line based visual mode
+	if (e.key === "d" && e.ctrlKey == true && macVim.currentSequence.length === 0) {
+		// Page down
+		docs.pressKey(docs.codeFromKey("PageDown"), false, true);
+	}
+
+	if (e.key === "u" && e.ctrlKey == true && macVim.currentSequence.length === 0) {
+		// Page up
+		docs.pressKey(docs.codeFromKey("PageUp"), false, true);
 	}
 
 	if ((e.key === "w" || e.key === "W") && macVim.currentSequence.length === 0) {
