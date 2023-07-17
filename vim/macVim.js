@@ -7,6 +7,14 @@ let macVim = {
 	__proto__: baseVim,
 };
 
+// List of shortcuts for visual mode that we will let pass through (ex: Command + B to bold)
+macVim.visualShortcuts = [
+	// e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
+	["b", false, false, true, false], // Bold (Command + B)
+	["i", false, false, true, false], // Italic (Command + I)
+	["X", false, false, true, true], // Strikethrough (Command + Shift + X)
+]
+
 
 // Cannot be in baseVim for some reason
 macVim.clearData = function () {
@@ -851,6 +859,25 @@ macVim.visual_keydown = function (e) {
 	if (e.key.match(/F\d+/)) {
 		// Pass through any function keys.
 		return true;
+	}
+
+	// Check if the key is a Google Docs native shortcut
+	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
+
+	console.log(checkIfNativeShortcut)
+	// Check if the native shortcut is in the macVim.visualShortcuts
+	for (let i = 0; i < macVim.visualShortcuts.length; i++) {
+		let equal = true;
+		for (let j = 0; j < macVim.visualShortcuts[i].length; j++) {
+			if (macVim.visualShortcuts[i][j] !== checkIfNativeShortcut[j]) {
+				equal = false;
+				break;
+			}
+		}
+		if (equal) {
+			macVim.clearData();
+			return true;
+		}
 	}
 
 	e.preventDefault();
