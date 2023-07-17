@@ -864,7 +864,6 @@ macVim.visual_keydown = function (e) {
 	// Check if the key is a Google Docs native shortcut
 	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
 
-	console.log(checkIfNativeShortcut)
 	// Check if the native shortcut is in the macVim.visualShortcuts
 	for (let i = 0; i < macVim.visualShortcuts.length; i++) {
 		let equal = true;
