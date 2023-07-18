@@ -3,6 +3,8 @@ const extpay = ExtPay("vim-for-docs");
 let payButtons = document.querySelectorAll("#payButton");
 let trialButtons = document.querySelectorAll("#trialButton");
 let shortcutButton = document.querySelector("#shortCutButton");
+let payLicenseButtons = document.querySelectorAll("#payLicenseButton")
+let loginButton = document.querySelector("#loginButton");
 
 shortcutButton.addEventListener("click", () => {
 	// When the user clicks on shortcut button, open the shortcuts page
@@ -17,6 +19,17 @@ for (let i = 0; i < trialButtons.length; i++) {
 	// Add event listener to each trial button
 	trialButtons[i].addEventListener("click", (event) => {extpay.openTrialPage("14 day")});
 }
+
+for (let i = 0; i < payLicenseButtons.length; i++) {
+	// Add event listener to each pay license button
+	payLicenseButtons[i].addEventListener("click", (event) => {
+		chrome.tabs.create({ url: "https://buy.stripe.com/00gcQH2ca2xV5pK8ww"}) 
+	})
+}
+
+loginButton.addEventListener("click", () => {
+	extpay.openLoginPage();
+});
 
 // We wil select later which modal to display
 let newUserModal = document.querySelector("#newUser");
@@ -49,6 +62,7 @@ async function start() {
 	if (user.paid) {
 		// User is a paid user
 		paidUserModal.style.display = "block";
+		loginButton.style.display = "none";
 	}
 	else if (user.subscriptionStatus === "past_due" || user.subscriptionStatus === "unpaid") {
 		// User is a past due user
