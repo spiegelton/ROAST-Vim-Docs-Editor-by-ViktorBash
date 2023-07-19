@@ -39,6 +39,11 @@ if (user.paid) {
 
 
 function runVim() {
+
+	// These 2 variables help us switch to visual mode whenever the user clicks and drags in normal mode
+	let mouseDown = false;
+	let visualModeClassList = "kix-cursor docs-ui-unprintable"
+
 	if (docs.isMac) {
 		docs.keydown = function (e) {
 			if (macVim.mode == "insert") {
@@ -51,6 +56,18 @@ function runVim() {
 				return macVim.visual_keydown(e);
 			}
 		};
+
+		// Add event listener to switch to visual mode automatically from normal mode
+		const userObserver = new MutationObserver((mutationsList) => {
+			mutationsList.forEach((mutation) => {
+				if (mouseDown && mutation.type === "attributes" && mutation.attributeName === "class" && docs.userCursor.classList.value === visualModeClassList && macVim.mode === "normal") {
+					macVim.switchToVisualMode();
+				}
+			})
+		});
+
+		const userObserverConfig = { attributes: true, attributeFilter: ['class'] }
+		userObserver.observe(docs.userCursor, userObserverConfig);
 	}
 	else {
 		docs.keydown = function (e) {
@@ -64,5 +81,26 @@ function runVim() {
 				return windowsVim.visual_keydown(e);
 			}
 		};
+
+		// Add event listener to switch to visual mode automatically from normal mode
+		const userObserver = new MutationObserver((mutationsList) => {
+			mutationsList.forEach((mutation) => {
+				if (mouseDown && mutation.type === "attributes" && mutation.attributeName === "class" && docs.userCursor.classList.value === visualModeClassList && windowsVim.mode === "normal") {
+					windowsVim.switchToVisualMode();
+				}
+			})
+		});
+
+		const userObserverConfig = { attributes: true, attributeFilter: ['class'] }
+		userObserver.observe(docs.userCursor, userObserverConfig);
 	}
+
+	window.addEventListener("mousedown", () => {
+		mouseDown = true;
+	})
+
+	window.addEventListener("mouseup", () => {
+		mouseDown = false;
+	})
+
 }
