@@ -55,6 +55,8 @@ if (!docs.isMac) {
             V: 86, // Critical
 			PageUp: 33,
 			PageDown: 34,
+			f: 70,
+			F: 70,
 		};
 		if (key in specialKeys) {
 			return specialKeys[key];
@@ -121,6 +123,13 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 			};
 		} 
 		else if (keyCode === docs.codeFromKey("Y") && ctrlKey === true) {
+			data = {
+				keyCode: keyCode,
+				metaKey: true
+			}
+		}
+		else if (keyCode === docs.codeFromKey("f") && ctrlKey === true) {
+			// Works for both "F" and "f" since they both have same keycode
 			data = {
 				keyCode: keyCode,
 				metaKey: true

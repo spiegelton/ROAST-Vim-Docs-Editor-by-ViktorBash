@@ -120,6 +120,13 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
+    // Search
+    if (e.key === "/" && macVim.currentSequence.length === 0) {
+	    docs.pressKey(docs.codeFromKey("f"), true);
+        macVim.clearData();
+        return true;
+    }
+
 	if (e.key === "d" && e.ctrlKey === true && macVim.currentSequence.length === 0) {
 		// Page down
 		docs.pressKey(docs.codeFromKey("PageDown"));
@@ -936,6 +943,13 @@ macVim.visual_keydown = function (e) {
 		macVim.switchToNormalMode();
 		return true;
 	}
+
+    // Search
+    if (e.key === "/" && macVim.currentSequence.length === 0) {
+	    docs.pressKey(docs.codeFromKey("f"), true);
+        macVim.clearData();
+        return true;
+    }
 
 	if (e.key === "p" && macVim.currentSequence.length === 0) {
 		// We have to first delete the highlighted text, then paste in the clipboard
