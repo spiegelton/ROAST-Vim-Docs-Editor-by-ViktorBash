@@ -13,6 +13,12 @@ macVim.visualShortcuts = [
 	["b", false, false, true, false], // Bold (Command + B)
 	["i", false, false, true, false], // Italic (Command + I)
 	["X", false, false, true, true], // Strikethrough (Command + Shift + X)
+    ["f", false, false, true, false], // Search (Command + F)
+]
+
+macVim.normalShortcuts = [
+	// e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
+    ["f", false, false, true, false], // Search (Command + F)
 ]
 
 
@@ -81,6 +87,23 @@ macVim.normal_keydown = function (e) {
 	if (e.key.match(/F\d+/)) {
 		// Let function keys (F1 to F12), go through normally
 		return true;
+	}
+
+	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
+
+	// Check if the native shortcut is in the normalShortcuts
+	for (let i = 0; i < macVim.normalShortcuts.length; i++) {
+		let equal = true;
+		for (let j = 0; j < macVim.normalShortcuts[i].length; j++) {
+			if (macVim.normalShortcuts[i][j] !== checkIfNativeShortcut[j]) {
+				equal = false;
+				break;
+			}
+		}
+		if (equal) {
+			macVim.clearData();
+			return true;
+		}
 	}
 
 	e.preventDefault();

@@ -76,11 +76,6 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    /*
-
-    We are going to add an event listener to the ctrl-f functionality, when the user hits "escape" on the input
-    */
-
 	// Check if the key is a Google Docs native shortcut
 	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
 
