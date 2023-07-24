@@ -1,24 +1,5 @@
 var docs = {};
 
-/*********** UTILITIES ***********/
-// Helper method to observe changes to a DOM element. Used in the getSelection
-// and getCurrentParagraph methods, where we watch the element that Kix puts
-// the selection into when you press ctrl+C.
-docs.observe = function (el, config, callback, observeOnce) {
-	observeOnce = typeof observeOnce !== "undefined" && observeOnce;
-
-	var observer = new MutationObserver(function (mutations) {
-		if (observeOnce) {
-			observer.disconnect();
-		}
-
-		callback(mutations);
-	});
-
-	observer.observe(el, config);
-	return observer;
-};
-
 docs.isMac = false;
 let macPlatforms = ["MacIntel", "MacPPC", "Mac68K", "iPhone", "iPad"];
 if (macPlatforms.includes(navigator.platform)) {
@@ -46,6 +27,8 @@ if (!docs.isMac) {
 			Z: 90,
 			PageUp: 33,
 			PageDown: 34,
+			f: 70,
+			F: 70,
 		};
 		if (key in specialKeys) {
 			return specialKeys[key];

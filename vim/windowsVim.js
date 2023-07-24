@@ -114,6 +114,13 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
+    // Search
+    if (e.key === "/" && windowsVim.currentSequence.length === 0) {
+	    docs.pressKey(docs.codeFromKey("f"), true);
+        windowsVim.clearData();
+        return true;
+    }
+
     if (
         e.key === "d" &&
         e.ctrlKey === true &&
@@ -955,6 +962,13 @@ windowsVim.visual_keydown = function (e) {
         // go to the right side when the left side could be a solution as well
         windowsVim.clearData();
         windowsVim.switchToNormalMode();
+        return true;
+    }
+
+    // Search
+    if (e.key === "/" && windowsVim.currentSequence.length === 0) {
+	    docs.pressKey(docs.codeFromKey("f"), true);
+        windowsVim.clearData();
         return true;
     }
 
