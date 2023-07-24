@@ -13,6 +13,12 @@ windowsVim.visualShortcuts = [
 	["b", false, true, false, false], // Bold (Ctrl + B)
 	["i", false, true, false, false], // Italic (Ctrl + I)
 	["%", true, false, false, true], // Strikethrough (Alt Shift 5)
+    ["f", false, true, false, false], // Search (Ctrl + F)
+]
+
+windowsVim.normalShortcuts = [
+	// e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
+    ["f", false, true, false, false], // Search (Ctrl + F)
 ]
 
 // Cannot be in baseVim for some reason
@@ -69,6 +75,30 @@ windowsVim.normal_keydown = function (e) {
         // Let function keys (F1 to F12), go through normally
         return true;
     }
+
+    /*
+
+    We are going to add an event listener to the ctrl-f functionality, when the user hits "escape" on the input
+    */
+
+	// Check if the key is a Google Docs native shortcut
+	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
+
+	// Check if the native shortcut is in the normalShortcuts
+	for (let i = 0; i < windowsVim.normalShortcuts.length; i++) {
+		let equal = true;
+		for (let j = 0; j < windowsVim.normalShortcuts[i].length; j++) {
+			if (windowsVim.normalShortcuts[i][j] !== checkIfNativeShortcut[j]) {
+				equal = false;
+				break;
+			}
+		}
+		if (equal) {
+			windowsVim.clearData();
+			return true;
+		}
+	}
+
 
     e.preventDefault();
     e.stopPropagation();
