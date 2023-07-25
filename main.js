@@ -43,6 +43,7 @@ function runVim() {
 	// These 2 variables help us switch to visual mode whenever the user clicks and drags in normal mode
 	let mouseDown = false;
 	let visualModeClassList = "kix-cursor docs-ui-unprintable"
+	let mouseDownCoords = [-1, -1];
 
 	if (docs.isMac) {
 		docs.keydown = function (e) {
@@ -94,13 +95,35 @@ function runVim() {
 		const userObserverConfig = { attributes: true, attributeFilter: ['class'] }
 		userObserver.observe(docs.userCursor, userObserverConfig);
 	}
+	// let area = document.querySelector(".kix-rotatingtilemanager.docs-ui-hit-region-surface")
 
-	window.addEventListener("mousedown", () => {
+	window.addEventListener("mousedown", (event) => {
 		mouseDown = true;
+		mouseDownCoords = [event.clientX, event.clientY];
 	})
 
-	window.addEventListener("mouseup", () => {
+	window.addEventListener("mouseup", (event) => {
 		mouseDown = false;
-	})
+		if (mouseDownCoords[0] === event.clientX && mouseDownCoords[1] === event.clientY)
+		{
+			// We clicked in place (didn't drag) --> Switch to normal if we were in visual mode
+			if (docs.isMac && macVim.mode === "visual") {
+				macVim.switchToNormalMode();
+
+			}
+			else if (!docs.isMac && windowsVim.mode === "visual") {
+				windowsVim.switchToNormalMode();
+			}
+		}
+
+		// if (mouseDownCoords[0] !== event.clientY && mouseDownCoords[1] !== event.clientY) {
+		// 	if (docs.isMac && macVim.mode === "normal") {
+		// 		macVim.switchToVisualMode();
+		// 	}
+		// 	else if (!docs.isMac && windowsVim.mode === "normal") {
+		// 		windowsVim.switchToVisualMode();
+		// 	}
+		// }
+	});
 
 }

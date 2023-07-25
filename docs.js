@@ -283,4 +283,5 @@ docs.getCoords = function () {
 	return [parseInt(xCoord), parseInt(yCoord)];
 }
 
+
 export { docs };
