@@ -585,6 +585,28 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
+    // "dw"
+    if (e.key === "w" && windowsVim.currentSequence === "d") {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+            docs.pressKey(docs.codeFromKey("Backspace"));
+        }
+
+        let [xCoord, yCoord] = docs.getCoords();
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        let [newXCoord, newYCoord] = docs.getCoords();
+        if (xCoord === newXCoord && yCoord === newYCoord) {
+            // We are at the end of the file, do nothing
+        }
+        else {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+
+        windowsVim.clearData();
+        return true;
+    }
+
     // dd (delete whole line)
     if (e.key === "d" && windowsVim.currentSequence === "d") {
         // We are going to select text down, move right one arrow, select text up, and delete

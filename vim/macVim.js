@@ -500,6 +500,28 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
+    // "dw"
+    if (e.key === "w" && macVim.currentSequence === "d") {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+            docs.pressKey(docs.codeFromKey("Backspace"));
+        }
+
+        let [xCoord, yCoord] = docs.getCoords();
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        let [newXCoord, newYCoord] = docs.getCoords();
+        if (xCoord === newXCoord && yCoord === newYCoord) {
+            // We are at the end of the file, do nothing
+        }
+        else {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+
+		macVim.clearData();
+		return true;
+    }
+
 	// dd
 	if (e.key === "d" && macVim.currentSequence === "d") {
 		const numRepeats = parseInt(macVim.num) || 1;
