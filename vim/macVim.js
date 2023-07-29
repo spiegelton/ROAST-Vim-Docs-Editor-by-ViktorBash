@@ -258,9 +258,13 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key === "O" && macVim.currentSequence.length === 0) {
+		const numRepeats = parseInt(macVim.num) || 1;
 		macVim.moveToStartOfLine();
-		docs.pressKey(docs.codeFromKey("Enter"));
-		docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("Enter"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		}
 
 		macVim.clearData();
 		macVim.switchToInsertMode();
@@ -269,8 +273,12 @@ macVim.normal_keydown = function (e) {
 
 	if (e.key === "o" && macVim.currentSequence.length === 0) {
 		// Get to the bottom of the current line, then press enter
+		const numRepeats = parseInt(macVim.num) || 1;
 		macVim.moveToEndOfLine();
-		docs.pressKey(docs.codeFromKey("Enter"));
+
+		for (let i = 0; i < numRepeats; i++) {
+			docs.pressKey(docs.codeFromKey("Enter"));
+		}
 
 		macVim.clearData();
 		macVim.switchToInsertMode();
