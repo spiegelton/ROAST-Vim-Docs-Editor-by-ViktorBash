@@ -48,6 +48,25 @@ windowsVim.moveToEndOfLine = function () {
     }
 };
 
+
+windowsVim.moveToStartOfLine = function () {
+    let [startXCoord, startYCoord] = docs.getCoords();
+    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    let [endXCoord, endYCoord] = docs.getCoords();
+    if (startXCoord === endXCoord && startYCoord === endYCoord) {
+        // We are at the start of the file already, do nothing
+    }
+    else if (startYCoord !== endYCoord) {
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        // We already were at the start of a line, so just go back
+    }
+    else {
+        // Move back and arrow-up to get to the start of the line
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+    }
+}
+
 // Called in normal mode.
 windowsVim.normal_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
@@ -207,15 +226,7 @@ windowsVim.normal_keydown = function (e) {
             }
         } else {
             // else, 0 is the actual command (ex: "0"), so continue to down below
-            let cursorLocations = docs.getCursorLocations();
-            if (cursorLocations[0] && cursorLocations[1]) {
-                // Do nothing
-            } else if (cursorLocations[0]) {
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            } else {
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            }
+            windowsVim.moveToStartOfLine();
         }
         updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
         docs.setCursorWidth();

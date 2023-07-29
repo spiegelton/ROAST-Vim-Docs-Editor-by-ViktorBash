@@ -217,15 +217,7 @@ macVim.normal_keydown = function (e) {
 			}
 		} else {
 			// else, 0 is the actual command (ex: "0"), so continue to down below
-			let cursorLocations = docs.getCursorLocations();
-			if (cursorLocations[0] && cursorLocations[1]) {
-				// Do nothing
-			} else if (cursorLocations[0]) {
-				docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-			} else {
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-			}
+			macVim.moveToStartOfLine();
 		}
 		updateUISequenceText(macVim.num + macVim.currentSequence);
 		docs.setCursorWidth();
