@@ -267,32 +267,10 @@ windowsVim.normal_keydown = function (e) {
 
     // Insert a new line above and go to insert mode
     if (e.key === "O" && windowsVim.currentSequence.length === 0) {
-        let cursorLocations = docs.getCursorLocations();
-        if (cursorLocations[2]) {
-            // At start of file
-            docs.pressKey(docs.codeFromKey("Enter"));
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        } else if (cursorLocations[3] && cursorLocations[0]) {
-            // At end of file on an empty line
-            docs.pressKey(docs.codeFromKey("Enter"));
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        } else if (cursorLocations[3]) {
-            // At end of file on non-empty line
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            docs.pressKey(docs.codeFromKey("Enter"));
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        } // Past this point we are guaranteed to not be at the start or end of the file
-        else if (cursorLocations[0] && cursorLocations[1]) {
-            // We are on an empty line
-            docs.pressKey(docs.codeFromKey("Enter"));
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        } else if (cursorLocations[0]) {
-            docs.pressKey(docs.codeFromKey("ArrowRight")); // This helps immensely to gauge where we are
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            docs.pressKey(docs.codeFromKey("Enter"));
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        } else {
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        windowsVim.moveToStartOfLine();
+
+        for (let i = 0; i < numRepeats; i++) {
             docs.pressKey(docs.codeFromKey("Enter"));
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
@@ -305,8 +283,12 @@ windowsVim.normal_keydown = function (e) {
     // Insert a new line below and go to insert mode
     if (e.key === "o" && windowsVim.currentSequence.length === 0) {
         // Move to the end of the line and press enter
+        const numRepeats = parseInt(windowsVim.num) || 1;
         windowsVim.moveToEndOfLine();
-        docs.pressKey(docs.codeFromKey("Enter"));
+
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("Enter"));
+        }
 
         windowsVim.clearData();
         windowsVim.switchToInsertMode();
