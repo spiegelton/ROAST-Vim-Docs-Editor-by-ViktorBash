@@ -48,7 +48,7 @@ macVim.moveToEndOfLine = function () {
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
 		let [finalXCoord, finalYCoord] = docs.getCoords();
 		if (finalXCoord === startXCoord && finalYCoord === startYCoord) {
-			// We were at the end of a life and are back there, do nothing else
+			// We were at the end of a file and are back there, do nothing else
 		} else {
 			// We were at the end of a multiline
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));

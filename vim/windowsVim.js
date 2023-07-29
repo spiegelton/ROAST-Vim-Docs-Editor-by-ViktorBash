@@ -34,38 +34,17 @@ windowsVim.clearData = function () {
  * Move to the end of a line
  */
 windowsVim.moveToEndOfLine = function () {
+    // We check if we're at the end of the file or not
     let [startXCoord, startYCoord] = docs.getCoords();
     docs.pressKey(docs.codeFromKey("ArrowRight"));
-    let [middleXCoord, middleYCoord] = docs.getCoords();
-    if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
-        // We are at the end of the file already, good to go
-    } else if (startYCoord === middleYCoord) {
-        // We're in the middle of a line
-        let [startXCoord, startYCoord] = docs.getCoords();
+    let [endXCoord, endYCoord] = docs.getCoords();
+    if (startXCoord === endXCoord && startYCoord === endYCoord) {
+        // We are at the end of the file, do nothing
+    }
+    else {
+        // Not at the end of the file, so move down and left 1
         docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-        let [middleXCoord, middleYCoord] = docs.getCoords();
         docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        let [endXCoord, endYCoord] = docs.getCoords();
-        if (endXCoord < middleXCoord) {
-            // This is the edge case if we're at the end of a file, undo our arrow left
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-        }
-    } else {
-        // We are on the end of a multiline or line
-        docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-        let [endXCoord, endYCoord] = docs.getCoords();
-        if (endXCoord === startXCoord && endYCoord === startYCoord) {
-            // We are at the end of a line, do nothing
-        } else {
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-            let [middleXCoord, middleYCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            let [endXCoord, endYCoord] = docs.getCoords();
-            if (endXCoord < middleXCoord) {
-                // This is the edge case if we're at the end of a file, undo our arrow left
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-            }
-        }
     }
 };
 
@@ -269,16 +248,7 @@ windowsVim.normal_keydown = function (e) {
 
     // Append at end of line
     if (e.key === "A" && windowsVim.currentSequence.length === 0) {
-        let cursorLocations = docs.getCursorLocations();
-        if (!cursorLocations[3]) {
-            // If we're not at the end of the file, move down and left
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-            let newCursorLocations = docs.getCursorLocations();
-            if (!newCursorLocations[3]) {
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }
-        }
-
+        windowsVim.moveToEndOfLine();
         windowsVim.clearData();
         windowsVim.switchToInsertMode();
         return true;
