@@ -154,6 +154,100 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 	el.dispatchEvent(key_event);
 };
 
+docs.pressSpecialKey = function (key) {
+	var el = document.getElementsByClassName("docs-texteventtarget-iframe")[0];
+	el = el.contentDocument;
+	let data = { key: key };
+	let isCommand = false;
+	switch (key) {
+		case "$":
+			data.keyCode = 36;
+			data.shiftKey = true;
+			data.code = "Digit4";
+			break;
+		case " ":
+			data.keyCode = 32;
+			data.code = "Space";
+			break;
+		case "Tab":
+			data.keyCode = 9;
+			data.code = "Tab";
+			isCommand = true;
+			break;
+		case "#":
+			data.keyCode = 35;
+			data.shiftKey = true;
+			data.code = "Digit3";
+			break;
+		case "%":
+			data.keyCode = 37;
+			data.shiftKey = true;
+			data.code = "Digit5";
+			break;
+		case "&":
+			data.keyCode = 38;
+			data.shiftKey = true;
+			data.code = "Digit7";
+			break;
+		case "*":
+			data.keyCode = 42;
+			data.shiftKey = true;
+			data.code = "Digit8";
+			break;
+		case "(":
+			data.keyCode = 40;
+			data.shiftKey = true;
+			data.code = "Digit9";
+			break;
+		case ")":
+			data.keyCode = 41;
+			data.shiftKey = true;
+			data.code = "Digit0";
+			break;
+		case "+":
+			data.keyCode = 43;
+			data.shiftKey = true;
+			data.code = "Equal";
+			break;
+		case "-":
+			data.keyCode = 45;
+			data.code = "Minus";
+			break;
+		case "!":
+			data.keyCode = 33;
+			data.shiftKey = true;
+			data.code = "Digit1";
+		case ",":
+			data.keyCode = 44;
+			data.code = "Comma";
+			break;
+		case ".":
+			data.keyCode = 46;
+			data.code = "Period";
+			break;
+		case "'":
+			data.keyCode = 39;
+			data.code = "Quote";
+			break;
+		case "\"":
+			data.keyCode = 34;
+			data.shiftKey = true;
+			data.code = "Quote";
+			break;
+	}
+
+	let key_event;
+	if (!isCommand) {
+		key_event = new KeyboardEvent("keypress", data);
+	}
+	else {
+		key_event = new KeyboardEvent("keydown", data);
+	}
+	key_event.docs_plus_ = true;
+
+	el.dispatchEvent(key_event);
+}
+
 // Pastes plain text into the document
 docs.pasteClipboardPlainText = async function () {
 	let data = new DataTransfer();

@@ -802,9 +802,20 @@ windowsVim.normal_keydown = function (e) {
 
     // r for replace command:
     if (
-        windowsVim.currentSequence[0] === "r" &&
-        windowsVim.currentSequence.length === 2
+        (windowsVim.currentSequence[0] === "r" &&
+        windowsVim.currentSequence.length === 2) || (windowsVim.currentSequence === "rTab")
     ) {
+        let keyCharacter = windowsVim.currentSequence.slice(1);
+
+        let keyFunc = docs.pressKey;
+        let keyFuncInput = windowsVim.currentSequence.charCodeAt(1);
+
+        if ("-,. '!#$%&*()+\“-".indexOf(keyCharacter) > -1 || keyCharacter === "Tab" || keyCharacter === "\"") {
+            // Instead of using the regular press Key, we need to handle edge cases of special keys
+            keyFunc = docs.pressSpecialKey;
+            keyFuncInput = keyCharacter; // We will pass in the actual char/string instead of the numeric code
+        }
+
         // if we're at the end of a line, r should go on the current line
         // if we're at the end of a multiline (fake) line, r can move to next multiline
         const numRepeats = parseInt(windowsVim.num) || 1;
@@ -825,7 +836,7 @@ windowsVim.normal_keydown = function (e) {
                 (leftYCoord === yCoord && leftXCoord === xCoord)
             ) {
                 // At the beginning of a line or multiline, no need for checking if we're at the end
-                docs.pressKey(windowsVim.currentSequence.charCodeAt(1));
+                keyFunc(keyFuncInput);
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
                 let rightYCoord = docs.getYCoord();
                 if (rightYCoord !== yCoord) {
@@ -843,11 +854,11 @@ windowsVim.normal_keydown = function (e) {
             let [newXCoord, newYCoord] = docs.getCoords();
             if (xCoord === newXCoord && yCoord === newYCoord) {
                 // We are at the end of the file, just add our word and chill
-                docs.pressKey(windowsVim.currentSequence.charCodeAt(1));
+                keyFunc(keyFuncInput);
             } else if (yCoord === newYCoord) {
                 // We are in the middle of the line somewhere or something, standard procedure
                 docs.pressKey(docs.codeFromKey("Backspace"));
-                docs.pressKey(windowsVim.currentSequence.charCodeAt(1));
+                keyFunc(keyFuncInput);
             } else {
                 // We've either passed a space or a return that has put us one multiline or line down
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -856,11 +867,11 @@ windowsVim.normal_keydown = function (e) {
                 let [finalXCoord, finalYCoord] = docs.getCoords();
                 if (finalXCoord === xCoord && finalYCoord === yCoord) {
                     // We are dealing with a "Return" and actual new line
-                    docs.pressKey(windowsVim.currentSequence.charCodeAt(1));
+                    keyFunc(keyFuncInput);
                 } else {
                     // We are dealing with a space and just a multiline
                     docs.pressKey(docs.codeFromKey("Backspace"));
-                    docs.pressKey(windowsVim.currentSequence.charCodeAt(1));
+                    keyFunc(keyFuncInput);
                 }
             }
         }
