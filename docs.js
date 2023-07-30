@@ -217,6 +217,7 @@ docs.pressSpecialKey = function (key) {
 			data.keyCode = 33;
 			data.shiftKey = true;
 			data.code = "Digit1";
+			break;
 		case ",":
 			data.keyCode = 44;
 			data.code = "Comma";

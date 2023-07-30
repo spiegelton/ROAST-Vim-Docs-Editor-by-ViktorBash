@@ -826,9 +826,20 @@ macVim.normal_keydown = function (e) {
 
 	// r for replace command:
 	if (
-		macVim.currentSequence[0] === "r" &&
-		macVim.currentSequence.length === 2
+		(macVim.currentSequence[0] === "r" &&
+		macVim.currentSequence.length === 2) || (macVim.currentSequence === "rTab")
 	) {
+		let keyCharacter = macVim.currentSequence.slice(1);
+
+		let keyFunc = docs.pressKey
+		let keyFuncInput = macVim.currentSequence.charCodeAt(1);
+
+        if ("-,. '!#$%&*()+\“-".indexOf(keyCharacter) > -1 || keyCharacter === "Tab" || keyCharacter === "\"") {
+            // Instead of using the regular press Key, we need to handle edge cases of special keys
+            keyFunc = docs.pressSpecialKey;
+            keyFuncInput = keyCharacter; // We will pass in the actual char/string instead of the numeric code
+        }
+
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 			// if we're at the end of a line, r should go on the current line
@@ -855,13 +866,13 @@ macVim.normal_keydown = function (e) {
 				if (rightYCoord !== yCoord) {
 					// Empty line
 					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+					keyFunc(keyFuncInput);
 				} else if (rightXCoord === xCoord && rightYCoord === yCoord) {
 					// We are at the end of the file on an empty line
-					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+					keyFunc(keyFuncInput);
 				} else {
 					docs.pressKey(docs.codeFromKey("Backspace"));
-					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+					keyFunc(keyFuncInput);
 				}
 			}
 			// We are not at the start of a file or line, so we have to check if we're at the end of a line,
@@ -872,11 +883,11 @@ macVim.normal_keydown = function (e) {
 				if (xCoord === newXCoord && yCoord === newYCoord) {
 					// We are at the end of the file, guaranteed to not be an empty line from above
 					// Don't backspace
-					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+					keyFunc(keyFuncInput);
 				} else if (yCoord === newYCoord) {
 					// We are in the middle of the line somewhere or something, standard procedure
 					docs.pressKey(docs.codeFromKey("Backspace"));
-					docs.pressKey(macVim.currentSequence.charCodeAt(1));
+					keyFunc(keyFuncInput);
 				} else {
 					// We've either passed a space or a return that has put us one multiline or line down
 					docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
@@ -884,13 +895,13 @@ macVim.normal_keydown = function (e) {
 					if (finalXCoord === xCoord && finalYCoord === yCoord) {
 						// We are dealing with a "Return" and actual new line
 						// Don't hit backspace since we're at the end of the line
-						docs.pressKey(macVim.currentSequence.charCodeAt(1));
+						keyFunc(keyFuncInput);
 					} else {
 						// We are dealing with a space and just a multiline
 						docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 						docs.pressKey(docs.codeFromKey("ArrowRight"));
 						docs.pressKey(docs.codeFromKey("Backspace"));
-						docs.pressKey(macVim.currentSequence.charCodeAt(1));
+						keyFunc(keyFuncInput);
 					}
 				}
 			}
