@@ -530,24 +530,31 @@ macVim.normal_keydown = function (e) {
 			let [startXCoord, startYCoord] = docs.getCoords();
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			let [midXCoord, midYCoord] = docs.getCoords();
+
 			if (startXCoord === midXCoord && startYCoord === midYCoord) {
-				// At the start of the file
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				docs.pressKey(docs.codeFromKey("Backspace"));
+				// At start of file on empty line
+				docs.pressKey(docs.codeFromKey("ArrowRight"))
+				docs.pressKey(docs.codeFromKey("Backspace"))
 			}
 			else if (startYCoord === midYCoord) {
-				// In the middle of a line or something
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
+
+				// Delete the line contents
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 				docs.pressKey(docs.codeFromKey("Backspace"));
+
+				// Delete the actual line/enter now
 				docs.pressKey(docs.codeFromKey("ArrowRight"));
 				docs.pressKey(docs.codeFromKey("Backspace"));
+
+				// Get to correct position
+				docs.pressKey(docs.codeFromKey("ArrowRight"))
 			}
 			else {
-				// We are on an empty line
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				docs.pressKey(docs.codeFromKey("Backspace"));
+				// On an empty line somewhere
+				docs.pressKey(docs.codeFromKey("ArrowRight"))
+				docs.pressKey(docs.codeFromKey("Backspace"))
+				docs.pressKey(docs.codeFromKey("ArrowRight"))
 			}
 		}
 		macVim.clearData();
