@@ -329,6 +329,8 @@ macVim.normal_keydown = function (e) {
 	}
 
 	if (e.key == "x" && macVim.currentSequence.length === 0) {
+		const numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
 		// if we're at the end of a line, r should go on the current line
 		// if we're at the end of a multiline (fake) line, r can move to next multiline
 		let [xCoord, yCoord] = docs.getCoords();
@@ -385,6 +387,7 @@ macVim.normal_keydown = function (e) {
 				}
 			}
 		}
+	}
 		macVim.clearData();
 		return true;
 	}
