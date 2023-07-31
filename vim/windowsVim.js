@@ -43,6 +43,7 @@ windowsVim.moveToEndOfLine = function () {
     }
     else {
         // Not at the end of the file, so move down and left 1
+        docs.pressKey(docs.codeFromKey("ArrowLeft"));
         docs.pressKey(docs.codeFromKey("ArrowDown"), true);
         docs.pressKey(docs.codeFromKey("ArrowLeft"));
     }
