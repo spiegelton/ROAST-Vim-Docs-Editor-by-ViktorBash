@@ -43,9 +43,15 @@ windowsVim.moveToEndOfLine = function () {
     }
     else {
         // Not at the end of the file, so move down and left 1
+
         docs.pressKey(docs.codeFromKey("ArrowLeft"));
         docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        let [initialXCoord, initialYCoord] = docs.getCoords();
         docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        let [finalXCoord, finalYCoord] = docs.getCoords();
+        if (initialYCoord === finalYCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+        }
     }
 };
 
@@ -70,6 +76,7 @@ windowsVim.moveToStartOfLine = function () {
 
 // Called in normal mode.
 windowsVim.normal_keydown = function (e) {
+    console.log("FUCK");
     if (e.key.match(/F\d+/)) {
         // Let function keys (F1 to F12), go through normally
         return true;
