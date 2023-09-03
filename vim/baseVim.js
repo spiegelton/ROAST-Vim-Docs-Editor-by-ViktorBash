@@ -50,6 +50,12 @@ baseVim.switchToNormalMode = function () {
 };
 
 baseVim.switchToVisualMode = function (isLineBased = false) {
+	if (isLineBased) {
+		this.visualModeIsLinedBased = true;
+	}
+	else {
+		this.visualModeIsLinedBased = false;
+	}
 	baseVim.currentSequence = "";
 	baseVim.mode = "visual";
 	baseVim.num = "";

@@ -8,7 +8,7 @@ let macVim = {
 };
 
 // List of shortcuts for visual mode that we will let pass through (ex: Command + B to bold)
-// NOTE: The letters have to be lowercase, even if shift=True is part of the combination, for some reason
+// NOTE: The letters have to be lowercase, even if shift=True is part of the combination for some reason
 macVim.visualShortcuts = [
 	// e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
 	["b", false, false, true, false], // Bold (Command + B)
@@ -19,6 +19,7 @@ macVim.visualShortcuts = [
     ["r", false, false, true, true], // Right-align text (Command + Shift + R)
     ["e", false, false, true, true], // Center-align text (Command + Shift + E)
     ["j", false, false, true, true], // Justify text (Command + Shift + J)
+	["a", false, false, true, false], // Select all (Command + A)
 ]
 
 macVim.normalShortcuts = [
@@ -28,6 +29,7 @@ macVim.normalShortcuts = [
     ["r", false, false, true, true], // Right-align text (Command + Shift + R)
     ["e", false, false, true, true], // Center-align text (Command + Shift + E)
     ["j", false, false, true, true], // Justify text (Command + Shift + J)
+	["a", false, false, true, false], // Select all (Command + A)
 ]
 
 
@@ -110,6 +112,11 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 		if (equal) {
+			if (e.key === "a" && e.metaKey === true) {
+				// Select all text --> Switch to visual mode
+				macVim.visualModeIsLinedBased = false;
+				macVim.switchToVisualMode();
+			}
 			macVim.clearData();
 			return true;
 		}
