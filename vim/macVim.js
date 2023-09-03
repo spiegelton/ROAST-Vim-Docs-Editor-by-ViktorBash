@@ -555,8 +555,8 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
-    // "dw"
-    if (e.key === "w" && macVim.currentSequence === "d") {
+    // "dw", "dW"
+    if ((e.key === "w" || e.key === "W") && macVim.currentSequence === "d") {
         const numRepeats = parseInt(macVim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
             docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
