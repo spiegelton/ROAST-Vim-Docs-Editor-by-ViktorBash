@@ -76,7 +76,6 @@ windowsVim.moveToStartOfLine = function () {
 
 // Called in normal mode.
 windowsVim.normal_keydown = function (e) {
-    console.log("FUCK");
     if (e.key.match(/F\d+/)) {
         // Let function keys (F1 to F12), go through normally
         return true;
