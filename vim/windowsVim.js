@@ -17,6 +17,7 @@ windowsVim.visualShortcuts = [
     ["L", false, true, false, true], //  Left-align text (Ctrl + Shift + L)
     ["R", false, true, false, true], // Right-align text (Ctrl + Shift + R)
     ["E", false, true, false, true], // Center-align text (Ctrl + Shift + E)
+    ["J", false, true, false, true], // Justify text (Ctrl + Shift + J)
 ]
 
 windowsVim.normalShortcuts = [
@@ -25,6 +26,7 @@ windowsVim.normalShortcuts = [
     ["L", false, true, false, true], //  Left-align text (Ctrl + Shift + L)
     ["R", false, true, false, true], // Right-align text (Ctrl + Shift + R)
     ["E", false, true, false, true], // Center-align text (Ctrl + Shift + E)
+    ["J", false, true, false, true], // Justify text (Ctrl + Shift + J)
 ]
 
 // Cannot be in baseVim for some reason
