@@ -19,10 +19,14 @@ chrome.runtime.onInstalled.addListener(function (details) {
 			}
 		})
 	}
-
-	// else if(details.reason == "update"){
-	//     // Extension updated
-	//     var thisVersion = chrome.runtime.getManifest().version;
-	//     console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
-	// }
+	else if(details.reason == "update"){
+	    // Extension updated
+		chrome.storage.sync.get("updateCheckbox", function(result) { 
+			if (result.updateCheckbox !== "false") {
+				// We do not open the popup if updateCheckbox = "false", because this means the user has opted
+				// to not receive pop-ups when the extension gets updated
+				chrome.tabs.create({ url: "changelog.html" });
+			}
+		});
+	}
 });
