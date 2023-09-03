@@ -114,6 +114,42 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
+    if (e.key === "ArrowLeft" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+        }
+        macVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowRight" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+        }
+        macVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowUp" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+        }
+        macVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowDown" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        }
+        macVim.clearData();
+        return true;
+    }
+
 	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
 		// Remove any saved queries that the user had
 		macVim.clearData();
@@ -1175,13 +1211,13 @@ macVim.visual_keydown = function (e) {
 	// Now we do checks that only apply to line-based visual mode, where we do not follow the norm
 	if (macVim.visualModeIsLinedBased) {
 		// Left and right traversal now do nothing
-		let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W"];
+		let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W", "ArrowLeft", "ArrowRight"];
 		if (doNothingKeys.includes(e.key) && macVim.currentSequence.length === 0) {
 			macVim.clearData();
 			return true;
 		}
 
-		if (e.key === "k" && macVim.currentSequence.length === 0) {
+		if ((e.key === "k" && macVim.currentSequence.length === 0) || (e.key === "ArrowUp" && macVim.currentSequence.length === 0)) {
 			const numRepeats = parseInt(macVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
@@ -1190,7 +1226,7 @@ macVim.visual_keydown = function (e) {
 			return true;
 		}
 
-		if (e.key === "j" && macVim.currentSequence.length === 0) {
+		if ((e.key === "j" && macVim.currentSequence.length === 0) || (e.key === "ArrowDown" && macVim.currentSequence.length === 0)) {
 			// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
 			const numRepeats = parseInt(macVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
@@ -1215,6 +1251,42 @@ macVim.visual_keydown = function (e) {
 			return true;
 		}
 	}
+
+    if (e.key === "ArrowLeft" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+        }
+        macVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowRight" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+        }
+        macVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowUp" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+        }
+        macVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowDown" && e.altKey === true && macVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(macVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+        }
+        macVim.clearData();
+        return true;
+    }
 	
 	// Page up/down if we are not line based visual mode
 	if (e.key === "d" && e.ctrlKey == true && macVim.currentSequence.length === 0) {
