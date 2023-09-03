@@ -24,6 +24,10 @@ let baseVim = {
 		U: [["Z", true]],
 		"{": [["ArrowUp", true]],
 		"}": [["ArrowDown", true]],
+		ArrowDown: [["ArrowDown"]],
+		ArrowUp: [["ArrowUp"]],
+		ArrowLeft: [["ArrowLeft"]],
+		ArrowRight: [["ArrowRight"]],
 
 	},
 	incompleteKeyMaps: ["g", "r", "d", "c", "y", "di", "ci"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here

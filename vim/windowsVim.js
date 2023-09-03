@@ -113,6 +113,42 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
+    if (e.key === "ArrowLeft" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+        }
+        windowsVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowRight" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+        }
+        windowsVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowUp" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+        }
+        windowsVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowDown" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+        }
+        windowsVim.clearData();
+        return true;
+    }
+
     if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
         // Remove any saved queries that the user had
         windowsVim.clearData();
@@ -1156,7 +1192,7 @@ windowsVim.visual_keydown = function (e) {
     // Now we do checks that only apply to line-based visual mode, where we do not follow the norm
     if (windowsVim.visualModeIsLinedBased) {
         // Left and right traversal now do nothing
-        let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W"];
+        let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W", "ArrowRight", "ArrowLeft"];
         if (
             doNothingKeys.includes(e.key) &&
             windowsVim.currentSequence.length === 0
@@ -1165,7 +1201,7 @@ windowsVim.visual_keydown = function (e) {
             return true;
         }
 
-        if (e.key === "k" && windowsVim.currentSequence.length === 0) {
+        if ((e.key === "k" && windowsVim.currentSequence.length === 0) || (e.key === "ArrowUp" && windowsVim.currentSequence.length === 0)) {
             const numRepeats = parseInt(windowsVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
@@ -1174,7 +1210,7 @@ windowsVim.visual_keydown = function (e) {
             return true;
         }
 
-        if (e.key === "j" && windowsVim.currentSequence.length === 0) {
+        if ((e.key === "j" && windowsVim.currentSequence.length === 0) || (e.key === "ArrowDown" && windowsVim.currentSequence.length === 0)) {
             const numRepeats = parseInt(windowsVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
                 docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
@@ -1206,6 +1242,43 @@ windowsVim.visual_keydown = function (e) {
             windowsVim.clearData();
             return true;
         }
+
+    }
+
+    if (e.key === "ArrowLeft" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+        }
+        windowsVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowRight" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+        }
+        windowsVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowUp" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+        }
+        windowsVim.clearData();
+        return true;
+    }
+
+    if (e.key === "ArrowDown" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
+        const numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
+            docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+        }
+        windowsVim.clearData();
+        return true;
     }
 
 	// Page up/page down if we are not line based visual mode
