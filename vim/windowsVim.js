@@ -104,6 +104,10 @@ windowsVim.normal_keydown = function (e) {
 			}
 		}
 		if (equal) {
+            if (e.key === "a" && e.ctrlKey === true) {
+                // Select all --> Switch to visual mode
+                windowsVim.switchToVisualMode();
+            }
 			windowsVim.clearData();
 			return true;
 		}
