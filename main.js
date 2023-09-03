@@ -40,90 +40,84 @@ if (user.paid) {
 
 function runVim() {
 
-	// These 2 variables help us switch to visual mode whenever the user clicks and drags in normal mode
-	let mouseDown = false;
-	let visualModeClassList = "kix-cursor docs-ui-unprintable"
-	let mouseDownCoords = [-1, -1];
-
+	let vimVariant;
 	if (docs.isMac) {
-		docs.keydown = function (e) {
-			if (macVim.mode == "insert") {
-				return macVim.insert_keydown(e);
-			}
-			if (macVim.mode == "normal") {
-				return macVim.normal_keydown(e);
-			}
-			if (macVim.mode == "visual") {
-				return macVim.visual_keydown(e);
-			}
-		};
-
-		// Add event listener to switch to visual mode automatically from normal mode
-		const userObserver = new MutationObserver((mutationsList) => {
-			mutationsList.forEach((mutation) => {
-				if (mouseDown && mutation.type === "attributes" && mutation.attributeName === "class" && docs.userCursor.classList.value === visualModeClassList && macVim.mode === "normal") {
-					macVim.switchToVisualMode();
-				}
-			})
-		});
-
-		const userObserverConfig = { attributes: true, attributeFilter: ['class'] }
-		userObserver.observe(docs.userCursor, userObserverConfig);
+		vimVariant = macVim;
 	}
 	else {
-		docs.keydown = function (e) {
-			if (windowsVim.mode == "insert") {
-				return windowsVim.insert_keydown(e);
-			}
-			if (windowsVim.mode == "normal") {
-				return windowsVim.normal_keydown(e);
-			}
-			if (windowsVim.mode == "visual") {
-				return windowsVim.visual_keydown(e);
-			}
-		};
-
-		// Add event listener to switch to visual mode automatically from normal mode
-		const userObserver = new MutationObserver((mutationsList) => {
-			mutationsList.forEach((mutation) => {
-				if (mouseDown && mutation.type === "attributes" && mutation.attributeName === "class" && docs.userCursor.classList.value === visualModeClassList && windowsVim.mode === "normal") {
-					windowsVim.switchToVisualMode();
-				}
-			})
-		});
-
-		const userObserverConfig = { attributes: true, attributeFilter: ['class'] }
-		userObserver.observe(docs.userCursor, userObserverConfig);
+		vimVariant = windowsVim;
 	}
-	// let area = document.querySelector(".kix-rotatingtilemanager.docs-ui-hit-region-surface")
 
-	window.addEventListener("mousedown", (event) => {
-		mouseDown = true;
-		mouseDownCoords = [event.clientX, event.clientY];
-	})
-
-	window.addEventListener("mouseup", (event) => {
-		mouseDown = false;
-		if (mouseDownCoords[0] === event.clientX && mouseDownCoords[1] === event.clientY)
-		{
-			// We clicked in place (didn't drag) --> Switch to normal if we were in visual mode
-			if (docs.isMac && macVim.mode === "visual") {
-				macVim.switchToNormalMode();
-
-			}
-			else if (!docs.isMac && windowsVim.mode === "visual") {
-				windowsVim.switchToNormalMode();
-			}
+	docs.keydown = function (e) {
+		if (vimVariant.mode == "insert") {
+			return vimVariant.insert_keydown(e);
 		}
+		if (vimVariant.mode == "normal") {
+			return vimVariant.normal_keydown(e);
+		}
+		if (vimVariant.mode == "visual") {
+			return vimVariant.visual_keydown(e);
+		}
+	};
 
-		// if (mouseDownCoords[0] !== event.clientY && mouseDownCoords[1] !== event.clientY) {
-		// 	if (docs.isMac && macVim.mode === "normal") {
-		// 		macVim.switchToVisualMode();
-		// 	}
-		// 	else if (!docs.isMac && windowsVim.mode === "normal") {
-		// 		windowsVim.switchToVisualMode();
-		// 	}
-		// }
-	});
+	// These 2 variables help us switch to visual mode whenever the user clicks and drags in normal mode
+	let mouseDown = false;
+	let mouseDownCoords = [-1, -1];
 
+	// For double click
+	let lastMouseUp = 0; // ms
+
+	// validMouseArea: 
+	// Clicks on the extreme far left or the extreme far right or the top menu bar are not registered, only clicks on the left, document, and right
+	// We don't want to change modes or do anything if the user is clicking some buttons on the top menu for instance
+	let validMouseArea = document.querySelector(".kix-rotatingtilemanager.docs-ui-hit-region-surface")
+
+	// Surprisingly, we also need to add a listener to the cursor caret, otherwise when the user clicks on their own cursor nothing will happen
+	let cursorArea = document.querySelector("#kix-current-user-cursor-caret");
+
+	let MAX_TIME_FOR_DOUBLE_CLICK = 400; // ms
+
+	let areasToListen = [validMouseArea, cursorArea];
+		areasToListen.forEach((area) => {
+
+			// Mouse down (Just used in mouse-up really to check if we dragged or not)
+			area.addEventListener("mousedown", (event) => {
+				mouseDown = true;
+				mouseDownCoords = [event.clientX, event.clientY];
+			});
+
+			// Mouse up (bulk of the logic)
+			area.addEventListener("mouseup", (event) => {
+				mouseDown = false;
+				let oldTime = lastMouseUp;
+				lastMouseUp = Date.now();
+
+				if (lastMouseUp - oldTime < MAX_TIME_FOR_DOUBLE_CLICK && mouseDownCoords[0] === event.clientX && mouseDownCoords[1] === event.clientY) {
+					// This is a double click, because the last click was less than 400 ms ago
+					console.log("Double Click")
+					if (vimVariant.mode === "normal") {
+						vimVariant.switchToVisualMode();
+					}
+				}
+				else if (mouseDownCoords[0] === event.clientX && mouseDownCoords[1] === event.clientY)
+				{
+					// We clicked in place (didn't drag) --> Switch to normal if we were in visual mode
+					console.log("Mouseup Click");
+					if (vimVariant.mode === "visual") {
+						vimVariant.switchToNormalMode();
+					}
+				}
+				else {
+					// We dragged
+					console.log("Mouseup Drag");
+					if (vimVariant.mode === "normal") {
+						vimVariant.switchToVisualMode();
+					}
+				}
+
+			});
+
+			
+		}
+	);
 }
