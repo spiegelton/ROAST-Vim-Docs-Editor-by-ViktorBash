@@ -610,8 +610,8 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    // "dw"
-    if (e.key === "w" && windowsVim.currentSequence === "d") {
+    // "dw", "dW"
+    if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence === "d") {
         const numRepeats = parseInt(windowsVim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
             docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
