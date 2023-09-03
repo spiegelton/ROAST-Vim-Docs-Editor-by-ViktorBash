@@ -14,11 +14,17 @@ windowsVim.visualShortcuts = [
 	["i", false, true, false, false], // Italic (Ctrl + I)
 	["%", true, false, false, true], // Strikethrough (Alt Shift 5)
     ["f", false, true, false, false], // Search (Ctrl + F)
+    ["L", false, true, false, true], //  Left-align text (Ctrl + Shift + L)
+    ["R", false, true, false, true], // Right-align text (Ctrl + Shift + R)
+    ["E", false, true, false, true], // Center-align text (Ctrl + Shift + E)
 ]
 
 windowsVim.normalShortcuts = [
 	// e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
     ["f", false, true, false, false], // Search (Ctrl + F)
+    ["L", false, true, false, true], //  Left-align text (Ctrl + Shift + L)
+    ["R", false, true, false, true], // Right-align text (Ctrl + Shift + R)
+    ["E", false, true, false, true], // Center-align text (Ctrl + Shift + E)
 ]
 
 // Cannot be in baseVim for some reason
