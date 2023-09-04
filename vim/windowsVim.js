@@ -612,25 +612,87 @@ windowsVim.normal_keydown = function (e) {
 
     // "dw", "dW"
     if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence === "d") {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+        // 2 potential choices/scenarios:
+
+        // 1:
+        // Determine if we are at the end of a line
+        // If we are at the end of a line, delete one character (or none if we are on an empty line)
+
+        // 2: 
+        // If we are not at the end of a line, proceed normally (highlight to the right, then hit delete)
+        // After: If we are not at the end of a line, arrow left back one to be on the right character
+
+        // Step 1: Determining if we are the end of a line
+        let [initialXCoord, initialYCoord] = docs.getCoords();
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        let [middleXCoord, middleYCoord] = docs.getCoords();
+        if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+            // We are at the end of the file (and line subsequently)
+            // Just backspace
             docs.pressKey(docs.codeFromKey("Backspace"));
         }
+        else if (initialYCoord !== middleYCoord) {
+            // We are at the end of a multiline or a line (we need to see which one)
+            // 1. Determine which one.
+            // 2. Then, take action
+            docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+            let [endXCoord, endYCoord] = docs.getCoords();
+            if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+                // We are at the end of a real line
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                let [afterBackspaceXCoord, afterBackspaceYCoord] = docs.getCoords();
+                if (afterBackspaceXCoord === endXCoord && afterBackspaceYCoord === endYCoord) {
+                    // We hit backspace but didn't change position --> We are at the start of the file on an empty line then
+                    // Let's move forward, and delete this empty line
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    // Now we actually deleted the empty line and are good to go
+                }
+                else if (afterBackspaceYCoord !== endYCoord) {
+                    // We just deleted an empty line, so we need to move down one so our cursor is in the right position
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+            }
+            else {
+                // We are on a multiline (fake) line
 
-        let [xCoord, yCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        let [newXCoord, newYCoord] = docs.getCoords();
-        if (xCoord === newXCoord && yCoord === newYCoord) {
-            // We are at the end of the file, do nothing
+                // Get back to the original position
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+                // Highlight and delete
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                docs.pressKey(docs.codeFromKey("Backspace"));
+            }
+
         }
         else {
+            // We are in the middle of a line
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+            docs.pressKey(docs.codeFromKey("Backspace"));
         }
 
         windowsVim.clearData();
         return true;
     }
+
+    // // "cw", "cW"
+    // if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence === "c") {
+    //     console.log("Test");
+    //     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+    //     docs.pressKey(docs.codeFromKey("Backspace"));
+
+    //     // If we are not at the end of the line now, 
+
+    //     docs.pressKey(docs.codeFromKey("Space"));
+
+    //     docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+    //     windowsVim.clearData();
+    //     return true;
+    // }
+
 
     // dd (delete whole line)
     if (e.key === "d" && windowsVim.currentSequence === "d") {
