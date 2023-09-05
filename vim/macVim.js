@@ -618,6 +618,11 @@ macVim.normal_keydown = function (e) {
 		return true;
     }
 
+	// // "cw", "cW"
+	// if ((e.key === "w" || e.key === "W") && macVim.currentSequence === "c") {
+		
+	// }
+
 	// dd
 	if (e.key === "d" && macVim.currentSequence === "d") {
 		const numRepeats = parseInt(macVim.num) || 1;
