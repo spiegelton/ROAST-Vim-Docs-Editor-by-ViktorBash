@@ -680,21 +680,108 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    // // "cw", "cW"
-    // if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence === "c") {
-    //     console.log("Test");
-    //     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-    //     docs.pressKey(docs.codeFromKey("Backspace"));
+    // "cw", "cW"
+    // Differences from "cw": 
+    // When on an empty line: We don't delete that line
+    // Ideally, we don't delete any whitespace (impossible on Windows though to implement this)
+    if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence === "c") {
+        let numRepeats = parseInt(windowsVim.num) || 1;
+        for (let i = 0; i < numRepeats; i++) {
 
-    //     // If we are not at the end of the line now, 
+            let performMultilineOperation = false;
+            // Step 1: Determining if we are the end of a line
+            let [initialXCoord, initialYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [middleXCoord, middleYCoord] = docs.getCoords();
+            if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+                // We are at the end of the file (and line subsequently)
+                // This means we should check first if the line is empty, and if it isn't, Backspace
 
-    //     docs.pressKey(docs.codeFromKey("Space"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (endYCoord !== initialYCoord) {
+                    // We went up a line, so we were on an empty line
+                    // Move back and do nothing
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+                else {
+                    // The line has stuff, so we can backspace after moving back to the original position
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+            }
+            else if (initialYCoord !== middleYCoord) {
+                // We are at the end of a multiline or a line (we need to see which one)
+                // 1. Determine which one.
+                // 2. Then, take action
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+                    // We are at the end of a real line
+                    // Before we hit backspace, let's check that we don't delete an empty line
 
-    //     docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    let [afterLeftXCoord, afterLeftYCoord] = docs.getCoords();
+                    if (afterLeftYCoord !== initialYCoord) {
+                        // We went up a line, so we were on an empty line
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    }
+                    else if (afterLeftYCoord === initialYCoord && afterLeftXCoord === initialXCoord) {
+                        // We are at the beginning of the file on an empty line, do nothing
+                    }
+                    else {
+                        // We were on a non-empty line, delete
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    }
+                }
+                else {
+                    // We are on a multiline (fake) line
 
-    //     windowsVim.clearData();
-    //     return true;
-    // }
+                    // Get back to the original position
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+                    // Highlight and delete
+                    performMultilineOperation = true;
+                }
+
+            }
+            else {
+                // We are in the middle of a line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                performMultilineOperation = true;
+            }
+
+            // docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+            // docs.pressKey(docs.codeFromKey("Backspace"));
+
+            if (performMultilineOperation) {
+                let [initialXPos, initialYPos] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [curXPos, curYPos] = docs.getCoords();
+
+                if (initialXPos === curXPos && initialYPos === curYPos) {
+                    docs.pressKey(docs.codeFromKey("Delete"))
+                }
+                else {
+                    while (curXPos !== initialXPos || curYPos !== initialYPos) {
+                        if (curYPos < initialYPos) {
+                            // In case of faultiness: This should never run but is a safeguard
+                            break;
+                        }
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        [curXPos, curYPos] = docs.getCoords();
+                    }
+                }
+            }
+        }
+
+        windowsVim.clearData();
+        windowsVim.switchToInsertMode();
+        return true;
+    }
 
 
     // dd (delete whole line)
