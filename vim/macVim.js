@@ -618,10 +618,93 @@ macVim.normal_keydown = function (e) {
 		return true;
     }
 
-	// // "cw", "cW"
-	// if ((e.key === "w" || e.key === "W") && macVim.currentSequence === "c") {
+	// "cw", "cW"
+    if ((e.key === "w" || e.key === "W") && macVim.currentSequence === "c") {
+        // 2 potential choices/scenarios:
+
+        // 1:
+        // Determine if we are at the end of a line
+        // If we are at the end of a line, delete one character (or none if we are on an empty line)
+
+        // 2:
+        // If we are not at the end of a line, proceed normally (highlight to the right, then hit delete)
+        // After: If we are not at the end of a line, arrow left back one to be on the right character
+
+		let numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			let onMultiLine = false;
+			let [initialXCoord, initialYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [middleXCoord, middleYCoord] = docs.getCoords();
+			if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+				// We are at the end of the file (and line subsequently)
+				// Now we check if we're on an empty line (if we are, we don't backspace anything)
+
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				let [endXCoord, endYCoord] = docs.getCoords();
+
+				if (endYCoord !== initialYCoord) {
+					// We were on an empty line at the end, just go back and be done (do nothing)
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				}
+				else {
+					// There is stuff on the line so we have to go back and delete it actually
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+			else if (initialYCoord !== middleYCoord) {
+				// Determine if we are at the end of a line or a multiline
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+				let [endXCoord, endYCoord] = docs.getCoords();
+				if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+					// We are at the end of a real line
+
+					// Just delete the last character then
+
+					// Now we check if the line is empty
+					// If it is: Do nothing
+					// If there is something: Delete it
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+					let [finalXCoord, finalYCoord] = docs.getCoords();
+					if (finalYCoord !== initialYCoord) {
+						// Was an empty line, go back and do nothing
+						docs.pressKey(docs.codeFromKey("ArrowRight"));
+					}
+					else if (finalYCoord === initialYCoord && finalXCoord === initialXCoord) {
+						// At the start of the file on an empty line, do nothing
+					}
+					else {
+						// Line had something on it, delete it
+						docs.pressKey(docs.codeFromKey("ArrowRight"));
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+				}
+				else {
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true); // Get back to original position
+					// We are at the end of a multiline
+
+					// Highlight and delete
+					onMultiLine = true;
+				}
+			}
+			else {
+				// On a multiline, highlight and delete
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				onMultiLine = true;
+			}
+
+			if (onMultiLine) {
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+				docs.pressKey(docs.codeFromKey("Backspace"));
+			}
+		}
+
+		macVim.clearData();
+		macVim.switchToInsertMode();
+		return true;
+    }
 		
-	// }
 
 	// dd
 	if (e.key === "d" && macVim.currentSequence === "d") {
