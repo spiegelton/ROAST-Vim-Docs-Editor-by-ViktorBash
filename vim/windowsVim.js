@@ -841,7 +841,7 @@ windowsVim.normal_keydown = function (e) {
     }
 
     // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky tricky
-    if (e.key === "w" && windowsVim.currentSequence === "di") {
+    if (e.key === "w" && (windowsVim.currentSequence === "di" || windowsVim.currentSequence === "ci")) {
         let numRepeats = parseInt(windowsVim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
             let atEndOfLine = false;
@@ -854,9 +854,6 @@ windowsVim.normal_keydown = function (e) {
             }
             else if (initialYCoord === middleYCoord) {
                 // In the middle of a line
-
-                // TODO: Known bug where if we are on the last word of a character before a period, only 1 character gets deleted
-
                 let [xCoord, yCoord] = docs.getCoords();
                 docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
 
@@ -924,7 +921,14 @@ windowsVim.normal_keydown = function (e) {
             }
         }
 
-        windowsVim.clearData();
+        if (windowsVim.currentSequence === "ci") {
+            windowsVim.currentSequence = "";
+            windowsVim.num = "";
+            windowsVim.switchToInsertMode();
+        }
+        else {
+            windowsVim.clearData();
+        }
         return true;
     }
 
