@@ -755,7 +755,7 @@ macVim.normal_keydown = function (e) {
 	}
 
 	// cc
-	if (e.key === "c" && macVim.currentSequence === "c") {
+	if ((e.key === "c" && macVim.currentSequence === "c") || (e.key === "S" && macVim.currentSequence.length === 0)) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 			macVim.moveToEndOfLine();
