@@ -901,7 +901,7 @@ windowsVim.normal_keydown = function (e) {
                 else {
                     docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
 
-                    // Delete stuff at the end of the line
+                    // Delete stuff at the end of the line 
                     docs.pressKey(docs.codeFromKey("x"));
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
@@ -932,53 +932,102 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    // daw, caw (delete the current word we're on, no spaces)
-    if (
-        (e.key === "w" && windowsVim.currentSequence === "da") ||
-        (e.key === "w" && windowsVim.currentSequence === "ca")
-    ) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
+    // daw, caw (delete the current word we're on, whitespace also gets deleted)
+    // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky tricky
+    if (e.key === "w" && (windowsVim.currentSequence === "da" || windowsVim.currentSequence === "ca")) {
+        let numRepeats = parseInt(windowsVim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
-            let cursorLocations = docs.getCursorLocations();
-            if (cursorLocations[0] && cursorLocations[1]) {
-                console.log("E");
-                // Do nothing, we're on an empty line
-                let [startXCoord, startYCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (startXCoord !== endXCoord || startYCoord !== endYCoord) {
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                }
-                else {
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let atEndOfLine = false;
+            let [initialXCoord, initialYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [middleXCoord, middleYCoord] = docs.getCoords();
+            if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+                // At end of the file
+                atEndOfLine = true;
+            }
+            else if (initialYCoord === middleYCoord) {
+                // In the middle of a line
+                let [xCoord, yCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
+
+                // Delete and put the space
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                let [newXCoord, newYCoord] = docs.getCoords();
+                if (xCoord === newXCoord && yCoord === newYCoord) {
+                    // We are on a space
                     docs.pressKey(docs.codeFromKey("Backspace"));
                 }
-            } else if (cursorLocations[0]) {
-                console.log("R");
-                // We're at the start of a line, so select right and delete
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
-            } else if (cursorLocations[0]) {
-                console.log("B");
-                // We're at the end of a line, so select left and delete
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
-            } else {
-                console.log("Y");
-                // We're in the middle somewhere, move right and then all the way to the start of the word
-                // then all the way to the right with highlighting, then delete
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), true, false);
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                else {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                    docs.pressKey(docs.codeFromKey("Backspace"))
+                }
+            }
+            else {
+                // We are at the end of a line or multiline
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+                    // At the end of a real line
+                    atEndOfLine = true;
+                }
+                else {
+                    // At the end of a multiline
+                    // By definition, the thing we are on is a space (so we can just do a simple backspace to delete it)
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+            }
+
+            if (atEndOfLine) {
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (endYCoord !== startYCoord) {
+                    // Empty line, delete it and make sure our cursor is on the next line down
+                    docs.pressKey(docs.codeFromKey("Delete"));
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+                else if (endYCoord === startYCoord && endXCoord === startXCoord) {
+                    // At start of file on an empty line
+                    docs.pressKey(docs.codeFromKey("Delete"));
+                }
+                else {
+                    docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
+
+                    // Delete stuff at the end of the line 
+                    docs.pressKey(docs.codeFromKey("x"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                    let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
+                    if (textSelected) {
+                        // No trailing space or period or anything to worry about
+                        docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+
+                        let [startPosXCoord, startPosYCoord] = docs.getCoords();
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        let [endPosXCoord, endPosYCoord] = docs.getCoords();
+                        if (startPosYCoord !== endPosYCoord) {
+                            docs.pressKey(docs.codeFromKey("Z"), true);
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        }
+                    }
+                    else {
+                        // There is a trailing space or period
+                        docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
+                        docs.pressKey(docs.codeFromKey("Backspace")); // Now backspace to delete the space or whatever it is
+                    }
+                }
             }
         }
 
-        if (windowsVim.currentSequence === "ci") {
+        if (windowsVim.currentSequence === "ca") {
             windowsVim.currentSequence = "";
             windowsVim.num = "";
             windowsVim.switchToInsertMode();
-        } else {
+        }
+        else {
             windowsVim.clearData();
         }
         return true;
