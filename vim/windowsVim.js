@@ -954,8 +954,10 @@ windowsVim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowRight"), true);
                 let [newXCoord, newYCoord] = docs.getCoords();
                 if (xCoord === newXCoord && yCoord === newYCoord) {
-                    // We are on a space
+                    // We are on a space, we have to delete the space, the word, and end up in the right position at the end
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("Backspace"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
                 else {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
