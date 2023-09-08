@@ -785,6 +785,96 @@ macVim.normal_keydown = function (e) {
 
 	}
 
+	// diw, ciw (don't delete spaces + other differences)
+	if (e.key === "w" && (macVim.currentSequence === "di" || macVim.currentSequence === "ci")) {
+		let numRepeats = parseInt(macVim.num) || 1;
+		for (let i = 0; i < numRepeats; i++) {
+			let atEndOfLine = false;
+			let [initialXCoord, initialYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [middleXCoord, middleYCoord] = docs.getCoords();
+			if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+				// End of file
+				atEndOfLine = true;
+			}
+			else if (initialYCoord === middleYCoord) {
+				// Middle of line
+				docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
+
+				// Get into position
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true)
+				let [endXCoord, endYCoord] = docs.getCoords();
+				if (endXCoord === middleXCoord && endYCoord === middleYCoord) {
+					// This means we were on a space --> delete
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+				else {
+					// We were on a character --> delete
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					docs.pressSpecialKey(" ");
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+			else {
+				// We are at the end of a line or multiline, we need to check which one
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+				let [endXCoord, endYCoord] = docs.getCoords();
+				if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+					// At the end of a line
+					atEndOfLine = true;
+				}
+				else {
+					// At the end of a multiline
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+					docs.pressKey(docs.codeFromKey("Delete"));
+				}
+			}
+
+			if (atEndOfLine) {
+				let [startXCoord, startYCoord] = docs.getCoords();
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				let [endXCoord, endYCoord] = docs.getCoords();
+				if (endYCoord !== startYCoord) {
+					// Empty line, do nothing (just go back)
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				}
+				else if (endYCoord === startYCoord && endXCoord === startXCoord) {
+					// At start of file on an empty line, do nothing
+				}
+				else {
+					// The line has stuff on it (regular case)
+					docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
+
+					// Delete stuff at the end of the line
+					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+					if (textNotSelected) {
+						// No trailing spaces to worry about or anything
+						docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+					else {
+						// Trailing spaces are currently highlighted, which we will destroy
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+				}
+				
+			}
+		}
+
+		if (macVim.currentSequence === "ci") {
+			macVim.currentSequence = "";
+			macVim.num = "";
+			macVim.switchToInsertMode();
+		}
+		else {
+			macVim.clearData();
+		}
+		return true;
+	}
+
 	// daw, caw
 	if (
 		(e.key === "w" && macVim.currentSequence === "da") ||
@@ -858,7 +948,6 @@ macVim.normal_keydown = function (e) {
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
 					let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
 					if (textNotSelected) {
-						console.log("AYYY");
 						// No trailing spaces to worry about or anything
 						docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
 						docs.pressKey(docs.codeFromKey("Backspace"));
