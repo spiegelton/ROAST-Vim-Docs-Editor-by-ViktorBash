@@ -785,35 +785,107 @@ macVim.normal_keydown = function (e) {
 
 	}
 
-	// diw, ciw
+	// daw, caw
 	if (
-		(e.key === "w" && macVim.currentSequence === "di") ||
-		(e.key === "w" && macVim.currentSequence === "ci")
+		(e.key === "w" && macVim.currentSequence === "da") ||
+		(e.key === "w" && macVim.currentSequence === "ca")
 	) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
-			let cursorLocations = docs.getCursorLocations();
-			if (cursorLocations[0] && cursorLocations[1]) {
-				// Do nothing, we're on an empty line
-			} else if (cursorLocations[0]) {
-				// We're at the start of a line, so select right and delete
-				docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
-			} else if (cursorLocations[0]) {
-				// We're at the end of a line, so select left and delete
-				docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
-			} else {
-				// We're in the middle somewhere, move right and then all the way to the start of the word
-				// then all the way to the right with highlighting, then delete
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				docs.pressKey(docs.codeFromKey("ArrowLeft"), true, false);
-				docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
+			let atEndOfLine = false;
+			let [initialXCoord, initialYCoord] = docs.getCoords();
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [middleXCoord, middleYCoord] = docs.getCoords();
+			if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+				// At end of file
+				atEndOfLine = true;
+			}
+			else if (initialYCoord === middleYCoord) {
+				// In the middle of a line
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+				// Get into position
+				docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true)
+				let [endXCoord, endYCoord] = docs.getCoords();
+				if (endXCoord === middleXCoord && endYCoord === middleYCoord) {
+					// This means we were on a space --> delete
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+				else {
+					// We were on a character --> delete
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+
+			}
+			else {
+				// We are at the end of a line or multiline, we need to check which one
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+				let [endXCoord, endYCoord] = docs.getCoords();
+				if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+					// At the end of a line
+					atEndOfLine = true;
+				}
+				else {
+					// At the end of a multiline
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+			}
+
+			if (atEndOfLine) {
+				let [startXCoord, startYCoord] = docs.getCoords();
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				let [endXCoord, endYCoord] = docs.getCoords();
+				if (endYCoord !== startYCoord) {
+					// Empty line
+					docs.pressKey(docs.codeFromKey("Delete"));
+					docs.pressKey(docs.codeFromKey("ArrowRight"));
+				}
+				else if (endYCoord === startYCoord && endXCoord === startXCoord) {
+					// At start of file on an empty line
+					docs.pressKey(docs.codeFromKey("Delete"));
+				}
+				else {
+					docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
+
+					// Delete stuff at the end of the line
+					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+					if (textNotSelected) {
+						console.log("AYYY");
+						// No trailing spaces to worry about or anything
+						docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+						docs.pressKey(docs.codeFromKey("Backspace"));
+
+						let [startXPosCoord, startYPosCoord] = docs.getCoords();
+						docs.pressKey(docs.codeFromKey("Backspace"));
+						let [endPosXCoord, endPosYCoord] = docs.getCoords();
+						if (startYPosCoord !== endPosYCoord) {
+							docs.pressKey(docs.codeFromKey("Z"), true);
+							docs.pressKey(docs.codeFromKey("Backspace"));
+						}
+					}
+					else {
+						// Trailing spaces are currently highlighted, which we will destroy
+						docs.pressKey(docs.codeFromKey("Backspace"));
+						docs.pressKey(docs.codeFromKey("Delete")); // **Different than Windows** Like actual vim, we now have to bring the previous line up
+
+						// Delete the next word on the next line as well (one arrow right for the enter, one for the actual word)
+						docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+						docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+				}
 			}
 		}
 
-		if (macVim.currentSequence === "ci") {
+		if (macVim.currentSequence === "ca") {
 			macVim.currentSequence = "";
 			macVim.num = "";
 			macVim.switchToInsertMode();
