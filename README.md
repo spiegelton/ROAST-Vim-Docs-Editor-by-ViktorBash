@@ -15,3 +15,9 @@ Project based off both repos below (which are both open source MIT license):
 
 - https://github.com/matthewsot/docs-plus
 - https://github.com/matthewsot/docs-vim
+
+
+
+### Not Used
+- Be in the `dist` directory
+terser bundle.js -c -m --mangle-props reserved=[$,macVim,baseVim,windowsVim,UI,docs,extpay,updateUIModeText,updateUISequenceText,import,ExtPay]
