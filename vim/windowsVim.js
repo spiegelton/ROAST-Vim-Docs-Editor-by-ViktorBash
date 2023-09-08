@@ -822,7 +822,7 @@ windowsVim.normal_keydown = function (e) {
 
     // cc (delete whole line and enter insert mode)
     // If just executed one time/loop, we delete everything on the line but not actually the line itself
-    if (e.key === "c" && windowsVim.currentSequence === "c") {
+    if ((e.key === "c" && windowsVim.currentSequence === "c") || (e.key === "S" && windowsVim.currentSequence.length === 0)) {
         // We are going to select text down, move right one arrow, select text up, and delete
         const numRepeats = parseInt(windowsVim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
