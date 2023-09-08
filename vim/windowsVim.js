@@ -976,7 +976,9 @@ windowsVim.normal_keydown = function (e) {
                     // At the end of a multiline
                     // By definition, the thing we are on is a space (so we can just do a simple backspace to delete it)
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("Backspace"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
             }
 
