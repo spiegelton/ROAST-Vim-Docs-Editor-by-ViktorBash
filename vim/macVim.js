@@ -380,7 +380,8 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	if (e.key == "x" && macVim.currentSequence.length === 0) {
+	// "x" and "s"
+	if ((e.key == "x" && macVim.currentSequence.length === 0) || (e.key === "s" && macVim.currentSequence.length === 0)) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 		// if we're at the end of a line, r should go on the current line
@@ -440,7 +441,15 @@ macVim.normal_keydown = function (e) {
 			}
 		}
 	}
-		macVim.clearData();
+
+		if (e.key === "x") {
+			macVim.clearData();
+		}
+		else {
+			macVim.currentSequence = "";
+			macVim.num = "";
+			macVim.switchToInsertMode();
+		}
 		return true;
 	}
 
