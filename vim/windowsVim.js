@@ -435,8 +435,9 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    // Delete the current character
-    if (e.key == "x" && windowsVim.currentSequence.length === 0) {
+    // Delete the current character (enter insert mode for "s")
+    // "x" and "s" commands
+    if ((e.key == "x" && windowsVim.currentSequence.length === 0) || (e.key === "s" && windowsVim.currentSequence.length === 0)) {
         const numRepeats = parseInt(windowsVim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
             // if we're at the end of a line, r should go on the current line
@@ -499,7 +500,16 @@ windowsVim.normal_keydown = function (e) {
             }
         }
 
-        windowsVim.clearData();
+        if (e.key === "x") {
+            windowsVim.clearData();
+        }
+        else {
+            // s
+            windowsVim.currentSequence = "";
+            windowsVim.num = "";
+            windowsVim.switchToInsertMode();
+        }
+
         return true;
     }
 
