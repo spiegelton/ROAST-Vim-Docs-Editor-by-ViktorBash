@@ -7,6 +7,9 @@ let macVim = {
 	__proto__: baseVim,
 };
 
+// On Mac just ArrowDown + ctrl won't actually bring you down a line after you have a line highlighted
+macVim.differentVisualKeyMaps["}"] = [["ArrowRight", true, true], ["ArrowDown", true, true]];
+
 // List of shortcuts for visual mode that we will let pass through (ex: Command + B to bold)
 // NOTE: The letters have to be lowercase, even if shift=True is part of the combination for some reason
 macVim.visualShortcuts = [
