@@ -613,16 +613,38 @@ macVim.normal_keydown = function (e) {
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true); // Get back to original position
 					// We are at the end of a multiline
 
-					// Highlight and delete
-					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-					docs.pressKey(docs.codeFromKey("Backspace"));
+					// Delete (just the space)
+					docs.pressKey(docs.codeFromKey("Delete"));
 				}
 			}
 			else {
 				// On a multiline
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
+
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+				if (textNotSelected) {
+					// Proceed normally, no chance it's a space
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+				else {
+					// Text is highlighted
+					// Need to check again
+					docs.pressKey(docs.codeFromKey("ArrowRight")); // Text is not highlighted after this
+					let [xPos, yPos] = docs.getCoords();
+					if (xPos === middleXCoord && yPos === middleYCoord) {
+						// If we moved only one place to the right --> On a space
+						// We are on a space
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+					else {
+						// Normal procedure
+						docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+				}
 			}
 		}
 
@@ -644,7 +666,6 @@ macVim.normal_keydown = function (e) {
 
 		let numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
-			let onMultiLine = false;
 			let [initialXCoord, initialYCoord] = docs.getCoords();
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			let [middleXCoord, middleYCoord] = docs.getCoords();
@@ -694,25 +715,44 @@ macVim.normal_keydown = function (e) {
 				}
 				else {
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true); // Get back to original position
-					// We are at the end of a multiline
+					// We are at the end of a multiline, so just delete the space
+					docs.pressKey(docs.codeFromKey("Delete"))
 
-					// Highlight and delete
-					onMultiLine = true;
 				}
 			}
 			else {
 				// On a multiline, highlight and delete
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				onMultiLine = true;
-			}
+				docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
 
-			if (onMultiLine) {
 				docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
+				docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+				let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+				if (textNotSelected) {
+					// Proceed normally, no chance it's a space
+					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+					docs.pressKey(docs.codeFromKey("Backspace"));
+				}
+				else {
+					// Text is highlighted
+					// Need to check again
+					docs.pressKey(docs.codeFromKey("ArrowRight")); // Text is not highlighted after this
+					let [xPos, yPos] = docs.getCoords();
+					if (xPos === middleXCoord && yPos === middleYCoord) {
+						// If we moved only one place to the right --> On a space
+						// We are on a space
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+					else {
+						// Normal procedure
+						docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+						docs.pressKey(docs.codeFromKey("Backspace"));
+					}
+				}
 			}
 		}
 
-		macVim.clearData();
+		macVim.currentSequence = "";
+		macVim.num = "";
 		macVim.switchToInsertMode();
 		return true;
     }
