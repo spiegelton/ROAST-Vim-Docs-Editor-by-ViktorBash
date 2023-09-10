@@ -871,8 +871,26 @@ windowsVim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowRight"), true);
                 let [newXCoord, newYCoord] = docs.getCoords();
                 if (xCoord === newXCoord && yCoord === newYCoord) {
-                    // We are on a space
-                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    // We are on a space potentially
+                    let [xPos, yPos] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    let [newXPos, newYPos] = docs.getCoords();
+
+                    if (xPos === newXPos && yPos === newYPos) {
+                        // Do nothing
+                    }
+                    else if (yPos !== newYPos) {
+                        // We were on the last character of a word or something (could also be a period or whatever),
+                        // so we delete that completely using highlighting
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    } 
+                    else {
+                        // We were actually on a space
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    }
                 }
                 else {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
@@ -943,7 +961,6 @@ windowsVim.normal_keydown = function (e) {
     }
 
     // daw, caw (delete the current word we're on, whitespace also gets deleted)
-    // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky tricky
     if (e.key === "w" && (windowsVim.currentSequence === "da" || windowsVim.currentSequence === "ca")) {
         let numRepeats = parseInt(windowsVim.num) || 1;
         for (let i = 0; i < numRepeats; i++) {
@@ -964,10 +981,29 @@ windowsVim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowRight"), true);
                 let [newXCoord, newYCoord] = docs.getCoords();
                 if (xCoord === newXCoord && yCoord === newYCoord) {
-                    // We are on a space, we have to delete the space, the word, and end up in the right position at the end
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    // On a space potentially
+                    let [xPos, yPos] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    let [newXPos, newYPos] = docs.getCoords();
+                    
+                    if (xPos === newXPos && yPos === newYPos) {
+                        // Do nothing
+                    }
+                    else if (yPos !== newYPos) {
+                        // We were on the last character of a word or something, so delete it
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        atEndOfLine = true;
+
+                    }
+                    else {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft")); // Reverse our last ArrowRight
+
+
+                        // We are on a space, we have to delete the space, the word, and end up in the right position at the end
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }
                 }
                 else {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
