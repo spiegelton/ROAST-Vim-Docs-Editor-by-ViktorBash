@@ -792,41 +792,42 @@ macVim.normal_keydown = function (e) {
 		return true;
 	}
 
-	// cc
+	// cc 
 	if ((e.key === "c" && macVim.currentSequence === "c") || (e.key === "S" && macVim.currentSequence.length === 0)) {
 		const numRepeats = parseInt(macVim.num) || 1;
 		for (let i = 0; i < numRepeats; i++) {
 			macVim.moveToEndOfLine();
 			let [startXCoord, startYCoord] = docs.getCoords();
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			let [midXCoord, midYCoord] = docs.getCoords();
-			if (startXCoord === midXCoord && startYCoord === midYCoord) {
-				// At the start of the file
-				if (i !== numRepeats - 1) {
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				}
-			}
-			else if (startYCoord === midYCoord) {
-				// In the middle of a line or something
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				if (i !== numRepeats - 1) {
-					docs.pressKey(docs.codeFromKey("ArrowRight"));
-					docs.pressKey(docs.codeFromKey("Backspace"));
-				}
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+			let [endXCoord, endYCoord] = docs.getCoords();
+			let atEndOfFile = false;
+			if (startXCoord === endXCoord && startYCoord === endYCoord) {
+				atEndOfFile = true;
 			}
 			else {
-				// We are on an empty line
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				if (i !== numRepeats - 1) {
-					docs.pressKey(docs.codeFromKey("ArrowRight"));
-					docs.pressKey(docs.codeFromKey("Backspace"));
-				}
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
+			
+			// The magic sauce
+			docs.pressSpecialKey(" ");
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+			docs.pressKey(docs.codeFromKey("Backspace"));
+
+			if (i < numRepeats - 1) {
+				// Actually delete the empty line now if we're not on the last iteration
+				if (atEndOfFile) {
+					docs.pressKey(docs.codeFromKey("Backspace"));
+					macVim.moveToStartOfLine();
+				}
+				else {
+					docs.pressKey(docs.codeFromKey("Delete"));
+				}
+				}
+
 		}
-		macVim.clearData();
+
+		macVim.currentSequence = "";
+		macVim.num = "";
 		macVim.switchToInsertMode();
 		return true;
 
