@@ -19,6 +19,16 @@ windowsVim.visualShortcuts = [
     ["E", false, true, false, true], // Center-align text (Ctrl + Shift + E)
     ["J", false, true, false, true], // Justify text (Ctrl + Shift + J)
     ["a", false, true, false, false], // Select all (Ctrl + a)
+    // Chrome shortcut for switching tabs
+    ["1", false, true, false, false], // Control + 1
+    ["2", false, true, false, false], // Control + 2
+    ["3", false, true, false, false], // Control + 3
+    ["4", false, true, false, false], // Control + 4
+    ["5", false, true, false, false], // Control + 5
+    ["6", false, true, false, false], // Control + 6
+    ["7", false, true, false, false], // Control + 7
+    ["8", false, true, false, false], // Control + 8
+    ["9", false, true, false, false], // Control + 9
 ]
 
 windowsVim.normalShortcuts = [
@@ -29,6 +39,16 @@ windowsVim.normalShortcuts = [
     ["E", false, true, false, true], // Center-align text (Ctrl + Shift + E)
     ["J", false, true, false, true], // Justify text (Ctrl + Shift + J)
     ["a", false, true, false, false], // Select all (Ctrl + a)
+    // Chrome shortcut for switching tabs
+    ["1", false, true, false, false], // Control + 1
+    ["2", false, true, false, false], // Control + 2
+    ["3", false, true, false, false], // Control + 3
+    ["4", false, true, false, false], // Control + 4
+    ["5", false, true, false, false], // Control + 5
+    ["6", false, true, false, false], // Control + 6
+    ["7", false, true, false, false], // Control + 7
+    ["8", false, true, false, false], // Control + 8
+    ["9", false, true, false, false], // Control + 9
 ]
 
 // Cannot be in baseVim for some reason
