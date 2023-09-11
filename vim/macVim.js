@@ -148,7 +148,6 @@ macVim.normal_keydown = function (e) {
 	}
 
 	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
-	console.log(checkIfNativeShortcut);
 
 	// Check if the native shortcut is in the normalShortcuts
 	for (let i = 0; i < macVim.normalShortcuts.length; i++) {
