@@ -787,6 +787,19 @@ macVim.normal_keydown = function (e) {
 				docs.pressKey(docs.codeFromKey("Delete"));
 			}
 
+			if (i === numRepeats - 1 && e.repeat === false) {
+				// Get rid of the highlighting of the deleted line (only if we're sure this is the last 'dd' and we're not spamming it)
+				let [curXPos, curYPos] = docs.getCoords();
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+				let [endXPos, endYPos] = docs.getCoords();
+				if (curXPos === endXPos && curYPos === endYPos) {
+				}
+				else {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+
+			}
+
 		}
 		macVim.clearData();
 		return true;
