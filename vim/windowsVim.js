@@ -29,6 +29,19 @@ windowsVim.visualShortcuts = [
     ["7", false, true, false, false], // Control + 7
     ["8", false, true, false, false], // Control + 8
     ["9", false, true, false, false], // Control + 9
+    // Bullet points
+    ["&", false, true, false, true], // Control + Shift + 7 (Numbered List)
+    ["*", false, true, false, true], // Control + Shift + 8 (Bulleted List)
+    ["(", false, true, false, true], // Control + Shift + 9 (Checklist List)
+    // Apply styling (title, heading 1, heading 2, etc)
+    ["0", true, true, false, false], // Alt + Ctrl + 0 (Normal text)
+    ["1", true, true, false, false], // Alt + Ctrl + 1 (Heading 1)
+    ["2", true, true, false, false], // Alt + Ctrl + 2 (Heading 2)
+    ["3", true, true, false, false], // Alt + Ctrl + 3 (Heading 3)
+    ["4", true, true, false, false], // Alt + Ctrl + 4 (Heading 4)
+    ["5", true, true, false, false], // Alt + Ctrl + 5 (Heading 5)
+    ["6", true, true, false, false], // Alt + Ctrl + 6 (Heading 6)
+
 ]
 
 windowsVim.normalShortcuts = [
@@ -49,6 +62,18 @@ windowsVim.normalShortcuts = [
     ["7", false, true, false, false], // Control + 7
     ["8", false, true, false, false], // Control + 8
     ["9", false, true, false, false], // Control + 9
+    // Bullet points
+    ["&", false, true, false, true], // Control + Shift + 7 (Numbered List)
+    ["*", false, true, false, true], // Control + Shift + 8 (Bulleted List)
+    ["(", false, true, false, true], // Control + Shift + 9 (Checklist List)
+    // Apply styling (title, heading 1, heading 2, etc)
+    ["0", true, true, false, false], // Alt + Ctrl + 0 (Normal text)
+    ["1", true, true, false, false], // Alt + Ctrl + 1 (Heading 1)
+    ["2", true, true, false, false], // Alt + Ctrl + 2 (Heading 2)
+    ["3", true, true, false, false], // Alt + Ctrl + 3 (Heading 3)
+    ["4", true, true, false, false], // Alt + Ctrl + 4 (Heading 4)
+    ["5", true, true, false, false], // Alt + Ctrl + 5 (Heading 5)
+    ["6", true, true, false, false], // Alt + Ctrl + 6 (Heading 6)
 ]
 
 // Cannot be in baseVim for some reason
