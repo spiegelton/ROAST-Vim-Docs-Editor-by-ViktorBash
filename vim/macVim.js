@@ -33,27 +33,51 @@ macVim.visualShortcuts = [
 	["7", false, false, true, false], // Command + 7
 	["8", false, false, true, false], // Command + 8
 	["9", false, false, true, false], // Command + 9
+    // Bullet points
+    ["7", false, false, true, true], // Control + Shift + 7 (Numbered List)
+    ["8", false, false, true, true], // Control + Shift + 8 (Bulleted List)
+    ["9", false, false, true, true], // Control + Shift + 9 (Checklist List)
+    // Apply styling (title, heading 1, heading 2, etc)
+    ["º", true, false, true, false], // Command + Option + 0 (Normal text)
+    ["¡", true, false, true, false], // Command + Option + 1 (Heading 1)
+    ["™", true, false, true, false], // Command + Option + 2 (Heading 2)
+    ["£", true, false, true, false], // Command + Option + 3 (Heading 3)
+    ["¢", true, false, true, false], // Command + Option + 4 (Heading 4)
+    ["∞", true, false, true, false], // Command + Option + 5 (Heading 5)
+    ["§", true, false, true, false], // Command + Option + 6 (Heading 6)
 ]
 
 macVim.normalShortcuts = [
-	// e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
+    // e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
     ["f", false, false, true, false], // Search (Command + F)
     ["l", false, false, true, true], //  Left-align text (Command + Shift + L)
     ["r", false, false, true, true], // Right-align text (Command + Shift + R)
     ["e", false, false, true, true], // Center-align text (Command + Shift + E)
     ["j", false, false, true, true], // Justify text (Command + Shift + J)
-	["a", false, false, true, false], // Select all (Command + A)
-	// Chrome shortcut for switching tabs
-	["1", false, false, true, false], // Command + 1
-	["2", false, false, true, false], // Command + 2
-	["3", false, false, true, false], // Command + 3
-	["4", false, false, true, false], // Command + 4
-	["5", false, false, true, false], // Command + 5
-	["6", false, false, true, false], // Command + 6
-	["7", false, false, true, false], // Command + 7
-	["8", false, false, true, false], // Command + 8
-	["9", false, false, true, false], // Command + 9
-]
+    ["a", false, false, true, false], // Select all (Command + A)
+    // Chrome shortcut for switching tabs
+    ["1", false, false, true, false], // Command + 1
+    ["2", false, false, true, false], // Command + 2
+    ["3", false, false, true, false], // Command + 3
+    ["4", false, false, true, false], // Command + 4
+    ["5", false, false, true, false], // Command + 5
+    ["6", false, false, true, false], // Command + 6
+    ["7", false, false, true, false], // Command + 7
+    ["8", false, false, true, false], // Command + 8
+    ["9", false, false, true, false], // Command + 9
+    // Bullet points
+    ["7", false, false, true, true], // Control + Shift + 7 (Numbered List)
+    ["8", false, false, true, true], // Control + Shift + 8 (Bulleted List)
+    ["9", false, false, true, true], // Control + Shift + 9 (Checklist List)
+    // Apply styling (title, heading 1, heading 2, etc)
+    ["º", true, false, true, false], // Command + Option + 0 (Normal text)
+    ["¡", true, false, true, false], // Command + Option + 1 (Heading 1)
+    ["™", true, false, true, false], // Command + Option + 2 (Heading 2)
+    ["£", true, false, true, false], // Command + Option + 3 (Heading 3)
+    ["¢", true, false, true, false], // Command + Option + 4 (Heading 4)
+    ["∞", true, false, true, false], // Command + Option + 5 (Heading 5)
+    ["§", true, false, true, false], // Command + Option + 6 (Heading 6)
+];
 
 
 // Cannot be in baseVim for some reason
@@ -124,6 +148,7 @@ macVim.normal_keydown = function (e) {
 	}
 
 	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
+	console.log(checkIfNativeShortcut);
 
 	// Check if the native shortcut is in the normalShortcuts
 	for (let i = 0; i < macVim.normalShortcuts.length; i++) {
