@@ -104,6 +104,10 @@ function runVim() {
 					if (vimVariant.mode === "visual") {
 						vimVariant.switchToNormalMode();
 					}
+					else if (vimVariant.mode === "normal") {
+						// If we clicked around in normal mode, we still need to resize the cursor caret
+						docs.setCursorWidth();
+					}
 				}
 				else {
 					// We dragged
