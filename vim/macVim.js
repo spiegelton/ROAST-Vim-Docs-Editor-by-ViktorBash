@@ -22,7 +22,17 @@ macVim.visualShortcuts = [
     ["r", false, false, true, true], // Right-align text (Command + Shift + R)
     ["e", false, false, true, true], // Center-align text (Command + Shift + E)
     ["j", false, false, true, true], // Justify text (Command + Shift + J)
-	["a", false, false, true, false], // Select all (Command + A)
+	["a", false, false, true, false], // Select all (Command + A),
+	// Chrome shortcut for switching tabs
+	["1", false, false, true, false], // Command + 1
+	["2", false, false, true, false], // Command + 2
+	["3", false, false, true, false], // Command + 3
+	["4", false, false, true, false], // Command + 4
+	["5", false, false, true, false], // Command + 5
+	["6", false, false, true, false], // Command + 6
+	["7", false, false, true, false], // Command + 7
+	["8", false, false, true, false], // Command + 8
+	["9", false, false, true, false], // Command + 9
 ]
 
 macVim.normalShortcuts = [
@@ -33,6 +43,16 @@ macVim.normalShortcuts = [
     ["e", false, false, true, true], // Center-align text (Command + Shift + E)
     ["j", false, false, true, true], // Justify text (Command + Shift + J)
 	["a", false, false, true, false], // Select all (Command + A)
+	// Chrome shortcut for switching tabs
+	["1", false, false, true, false], // Command + 1
+	["2", false, false, true, false], // Command + 2
+	["3", false, false, true, false], // Command + 3
+	["4", false, false, true, false], // Command + 4
+	["5", false, false, true, false], // Command + 5
+	["6", false, false, true, false], // Command + 6
+	["7", false, false, true, false], // Command + 7
+	["8", false, false, true, false], // Command + 8
+	["9", false, false, true, false], // Command + 9
 ]
 
 
