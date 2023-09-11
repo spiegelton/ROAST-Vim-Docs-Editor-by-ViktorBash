@@ -1465,8 +1465,8 @@ macVim.visual_keydown = function (e) {
 	}
 
 	if (e.key === "$" && macVim.currentSequence.length === 0) {
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 		macVim.clearData();
 		return true;
 	}
