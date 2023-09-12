@@ -428,8 +428,18 @@ macVim.normal_keydown = function (e) {
 	}
 
 	// "x" and "s"
-	if ((e.key == "x" && macVim.currentSequence.length === 0) || (e.key === "s" && macVim.currentSequence.length === 0)) {
-		const numRepeats = parseInt(macVim.num) || 1;
+	if ((e.key === "x" && macVim.currentSequence.length === 0) || (e.key === "s" && macVim.currentSequence.length === 0)) {
+		let numRepeats = parseInt(macVim.num) || 1;
+		if (e.repeat === false && numRepeats === 1) {
+			// If the user presses "Undo", we have still have text highlighted and be in normal mode --> 
+            let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+			if (!textNotSelected) {
+				// Text is selected
+				docs.pressKey(docs.codeFromKey("Backspace"));
+				numRepeats = 0; // Skip the for loop and go straight to the bottom
+			}
+		}
+
 		for (let i = 0; i < numRepeats; i++) {
 		// if we're at the end of a line, r should go on the current line
 		// if we're at the end of a multiline (fake) line, r can move to next multiline
