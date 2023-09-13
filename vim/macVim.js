@@ -435,7 +435,7 @@ macVim.normal_keydown = function (e) {
             let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
 			if (!textNotSelected) {
 				// Text is selected
-				docs.pressKey(docs.codeFromKey("Backspace"));
+				docs.contentDocument.execCommand("cut"); // Cut the text
 				numRepeats = 0; // Skip the for loop and go straight to the bottom
 			}
 		}

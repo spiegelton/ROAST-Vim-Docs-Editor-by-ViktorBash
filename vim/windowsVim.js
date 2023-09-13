@@ -483,7 +483,17 @@ windowsVim.normal_keydown = function (e) {
     // Delete the current character (enter insert mode for "s")
     // "x" and "s" commands
     if ((e.key == "x" && windowsVim.currentSequence.length === 0) || (e.key === "s" && windowsVim.currentSequence.length === 0)) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
+        let numRepeats = parseInt(windowsVim.num) || 1;
+        if (e.repeat === false && numRepeats === 1) {
+            // If the user presses "Undo", we still have text highlighted in normal mode to delete
+            let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
+            if (textSelected) {
+                // Text is selected
+                docs.contentDocument.execCommand("cut"); // Cut the text
+                numRepeats = 0; // Skip the for loop and go straight to the bottom
+            }
+
+        }
         for (let i = 0; i < numRepeats; i++) {
             // if we're at the end of a line, r should go on the current line
             // if we're at the end of a multiline (fake) line, r can move to next multiline
