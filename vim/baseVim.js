@@ -2,6 +2,7 @@ import { docs } from "../docs.js";
 import { updateUIModeText, updateUISequenceText } from "./UI.js";
 
 // baseVim is inherited by both macVim and windowsVim, and provides keyboard system agnostic functions/info
+const KEY_SEPARATOR = "•";
 
 let baseVim = {
 	// Main variables here
@@ -9,29 +10,7 @@ let baseVim = {
 	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
 	currentSequence: "", // Keep track of key sequences (ex: "gg")
 	visualModeIsLinedBased: false, // Whether visual mode is line based (V) or regular (v), this is set before calling switchToVisualMode()
-	// Basic commands have their keymaps here, instead of in the functions later on
-	keyMaps: {
-		Backspace: [["ArrowLeft"]],
-		b: [["ArrowLeft", true]], // ctrl + <-
-		B: [["ArrowLeft", true]], // ctrl + <-
-		h: [["ArrowLeft"]],
-		j: [["ArrowDown"]],
-		k: [["ArrowUp"]],
-		l: [["ArrowRight"]],
-		gg: [["Home", true]],
-		G: [["End", true]],
-		u: [["Z", true]],
-		U: [["Z", true]],
-		"{": [["ArrowUp", true]],
-		"}": [["ArrowDown", true]],
-		ArrowDown: [["ArrowDown"]],
-		ArrowUp: [["ArrowUp"]],
-		ArrowLeft: [["ArrowLeft"]],
-		ArrowRight: [["ArrowRight"]],
-		Backspace: [["ArrowLeft"]]
-
-	},
-	incompleteKeyMaps: ["g", "r", "d", "c", "y", "di", "ci", "da", "ca"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+	incompleteKeyMaps: ["g", "r", "d", "c", "y", "d" + KEY_SEPARATOR + "i", "c" + KEY_SEPARATOR + "i", "d" + KEY_SEPARATOR + "a", "c" + KEY_SEPARATOR + "a"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
 	// di for diw, ci for ciw
 	differentVisualKeyMaps: { // Some of the commands for the same key are different in visual mode, and if so, they are stored here
 		gg: [["Home", true, true]],
@@ -203,11 +182,21 @@ baseVim.paste = async function (e) {
 * Handles all keydown events in insert mode (basically only checks for escape/ctrl+c)
 */
 baseVim.insert_keydown = function (e) {
-	// Let all characters flow freely (except for escape)
-	if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
-		baseVim.switchToNormalMode();
-		return true;
+    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const keyMapI = this.keyMapI;
+	// Check if current key is part of a key map
+	switch (true) {
+        case (keyMapI.escape[0] === e.key && (keyMapI.escape[1] === true || keyMapI.escape[2] === modifierInput)):
+        case (keyMapI.ctrlC[0] === e.key && (keyMapI.ctrlC[1] === true || keyMapI.ctrlC[2] === modifierInput)):
+		{
+			e.preventDefault();
+    		e.stopPropagation();
+			baseVim.switchToNormalMode();
+			return true;
+		}
 	}
+
+	// If nothing in the switch statement runs, then we just let the key pass through
 };
 
 export { baseVim };

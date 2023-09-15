@@ -129,6 +129,8 @@ windowsVim.moveToStartOfLine = function () {
     }
 }
 
+const KEY_SEPARATOR = "•";
+
 // Called in normal mode.
 windowsVim.normal_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
@@ -158,7 +160,7 @@ windowsVim.normal_keydown = function (e) {
 		}
 	}
 
-
+    // Past this point we are controlling what happens 
     e.preventDefault();
     e.stopPropagation();
 
@@ -172,148 +174,7 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "ArrowLeft" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "ArrowRight" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "ArrowUp" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "ArrowDown" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
-        // Remove any saved queries that the user had
-        windowsVim.clearData();
-        return true;
-    }
-
-    // Search
-    if (e.key === "/" && windowsVim.currentSequence.length === 0) {
-	    docs.pressKey(docs.codeFromKey("f"), true);
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (
-        e.key === "d" &&
-        e.ctrlKey === true &&
-        windowsVim.currentSequence.length === 0
-    ) {
-        // Ctrl-d is page-down
-		docs.pressKey(docs.codeFromKey("PageDown"));
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (
-        e.key === "u" &&
-        e.ctrlKey === true &&
-        windowsVim.currentSequence.length === 0
-    ) {
-		// Ctrl-u is page-up
-		docs.pressKey(docs.codeFromKey("PageUp"));
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (
-        e.key === "r" &&
-        e.ctrlKey === true &&
-        windowsVim.currentSequence.length === 0
-    ) {
-        // Redo
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("Y"), true); // Ctrl + Y is redo on windows
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    // Paste (no support for numbers/pasting multiple times yet)
-    if (e.key === "p" && windowsVim.currentSequence.length === 0) {
-        windowsVim.paste(e); // All the cursor logic is in here
-        windowsVim.clearData();
-        return true;
-    }
-
-    // Paste before cursor now
-    if (e.key === "P" && windowsVim.currentSequence.length === 0) {
-        if (e.ctrlKey === false) {
-            // Paste with formatting
-            docs.contentDocument.execCommand("paste");
-            setTimeout(() => {
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }, 1);
-        } else {
-            // Paste without formatting
-            docs.pasteClipboardPlainText().then(() => {
-                setTimeout(() => {
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                }, 1);
-            });
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    // Go to insert mode where we are
-    if (e.key === "i" && windowsVim.currentSequence.length === 0) {
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    // Go to visual mode
-    if (e.key === "v" && windowsVim.currentSequence.length === 0) {
-        windowsVim.clearData();
-        windowsVim.visualModeIsLinedBased = false;
-        windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
-        return true;
-    }
-
-    // Go to visual line based mode (select the whole current line)
-    if (e.key === "V" && windowsVim.currentSequence.length === 0) {
-        let cursorLocations = docs.getCursorLocations();
-        if (!cursorLocations[0]) {
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-        }
-        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-        docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-
-        windowsVim.clearData();
-        windowsVim.visualModeIsLinedBased = true;
-        windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
-        return true;
-    }
-
+    // Check for numbers
     if (e.key.match(/\d+/) && windowsVim.currentSequence.length === 0) {
         if (e.key === "0" && windowsVim.num.length !== 0) {
             // 0 is part of the number being typed (ex: "100")
@@ -335,946 +196,10 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    // append
-    if (e.key === "a" && windowsVim.currentSequence.length === 0) {
-        let [initialXCoord, initialYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        let newYCoord = docs.getYCoord();
-        if (initialYCoord !== newYCoord) {
-            // We're either on a new multiline or a real new line, check which scenario and adjust accordingly
-            docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-            let [finalXCoord, finalYCoord] = docs.getCoords();
-            if (
-                finalXCoord === initialXCoord &&
-                finalYCoord === initialYCoord
-            ) {
-                // We've encountered a new line, we don't need to move the cursor anymore
-            } else {
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-            }
-        }
-
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    // Append at end of line
-    if (e.key === "A" && windowsVim.currentSequence.length === 0) {
-        windowsVim.moveToEndOfLine();
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    // Insert a new line above and go to insert mode
-    if (e.key === "O" && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        windowsVim.moveToStartOfLine();
-
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("Enter"));
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        }
-
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    // Insert a new line below and go to insert mode
-    if (e.key === "o" && windowsVim.currentSequence.length === 0) {
-        // Move to the end of the line and press enter
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        windowsVim.moveToEndOfLine();
-
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("Enter"));
-        }
-
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    // Insert at the beginning of the line
-    if (e.key === "I" && windowsVim.currentSequence.length === 0) {
-        let oldCoords = docs.userCursor.style.transform;
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        let newCoords = docs.userCursor.style.transform;
-        if (oldCoords === newCoords) {
-            // We are at the end of a file (which may be an empty line, so we have to test for that)
-            let initialYCoord = docs.getYCoord();
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            let finalYCoord = docs.getYCoord();
-
-            // We we are going to check Y-Values, if the y-value didn't change, hit arrow up
-            // If the y value did change, hit arrow right
-            if (initialYCoord === finalYCoord) {
-                // Y Coord didn't change, so we should get to the start of a line with arrow up
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            } else {
-                // Y Coord changed, so we were at the start of a line (so just go back)
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-            }
-        } else {
-            // We can just arrow up from here in all scenarios
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-        }
-
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    // Go to the last character in the next word
-    if (
-        (e.key === "E" || e.key === "e") &&
-        windowsVim.currentSequence.length === 0
-    ) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        // We do some optimization here to make it faster
-        for (let i = 0; i < numRepeats - 1; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-        }
-
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        let [startXCoord, startYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-        let [endXCoord, endYCoord] = docs.getCoords();
-        if (startXCoord === endXCoord && startYCoord === endYCoord) {
-            // End of file reached, do nothing
-        } else {
-            // Keep going like regular
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        }
-
-        windowsVim.clearData();
-        return true;
-    }
-
-    // Go to the end of the line
-    if (e.key === "$" && windowsVim.currentSequence.length === 0) {
-        let cursorLocations = docs.getCursorLocations();
-        docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-        if (!cursorLocations[3]) {
-            // If we're not at the end of a file, move back left
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        }
-
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (
-        (e.key === "w" || e.key === "W") &&
-        windowsVim.currentSequence.length === 0
-    ) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    // Delete the current character (enter insert mode for "s")
-    // "x" and "s" commands
-    if ((e.key == "x" && windowsVim.currentSequence.length === 0) || (e.key === "s" && windowsVim.currentSequence.length === 0)) {
-        let numRepeats = parseInt(windowsVim.num) || 1;
-        if (e.repeat === false && numRepeats === 1) {
-            // If the user presses "Undo", we still have text highlighted in normal mode to delete
-            let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
-            if (textSelected) {
-                // Text is selected
-                docs.contentDocument.execCommand("cut"); // Cut the text
-                numRepeats = 0; // Skip the for loop and go straight to the bottom
-            }
-
-        }
-        for (let i = 0; i < numRepeats; i++) {
-            // if we're at the end of a line, r should go on the current line
-            // if we're at the end of a multiline (fake) line, r can move to next multiline
-            let [xCoord, yCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
-            let [leftXCoord, leftYCoord] = docs.getCoords();
-
-            // IF: We are not at the start of the file, undo our arrow left with an arrow right
-            if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
-                // We are not at the beginning of the file, so undo our arrow right
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-            }
-            // IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
-            // about line ending stuff
-            if (
-                leftYCoord !== yCoord ||
-                (leftYCoord === yCoord && leftXCoord === xCoord)
-            ) {
-                // At the beginning of a line or multiline, no need for checking if we're at the end
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                let [rightXCoord, rightYCoord] = docs.getCoords();
-                // let rightYCoord = docs.getYCoord();
-                if (rightYCoord !== yCoord) {
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    break;
-                } else if (rightXCoord === xCoord && rightYCoord === yCoord) {
-                    // We are at the end of the file on an empty line, do nothing
-                    break;
-                } else {
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-            }
-
-            // We are not at the start of a file or line, so we have to check if we're at the end of a line,
-            // middle of a line, or end of a file
-            else {
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                let [newXCoord, newYCoord] = docs.getCoords();
-                if (xCoord === newXCoord && yCoord === newYCoord) {
-                    // We are at the end of the file, guaranteed to not be an empty line from above
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                } else if (yCoord === newYCoord) {
-                    // We are in the middle of the line somewhere or something, standard procedure
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                } else {
-                    // We've either passed a space or a return that has put us one multiline or line down
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                    let [finalXCoord, finalYCoord] = docs.getCoords();
-                    if (finalXCoord === xCoord && finalYCoord === yCoord) {
-                        // We are dealing with a "Return" and actual new line
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    } else {
-                        // We are dealing with a space and just a multiline
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    }
-                }
-            }
-        }
-
-        if (e.key === "x") {
-            windowsVim.clearData();
-        }
-        else {
-            // s
-            windowsVim.currentSequence = "";
-            windowsVim.num = "";
-            windowsVim.switchToInsertMode();
-        }
-
-        return true;
-    }
-
-    // ALL Support for d and c multiline commands here
-
-    // D, d$, C, c$ (delete to end of line)
-    if (
-        (e.key === "D" && windowsVim.currentSequence.length === 0) ||
-        (e.key === "$" && windowsVim.currentSequence === "d") ||
-        (e.key === "C" && windowsVim.currentSequence.length === 0) ||
-        (e.key === "$" && windowsVim.currentSequence === "c")
-    ) {
-        let [startXCoord, startYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        let [middleXCoord, middleYCoord] = docs.getCoords();
-        if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
-            // We are at the end of the file already, do nothing
-        } else if (startYCoord === middleYCoord) {
-            // We're in the middle of a line
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-            docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-            docs.pressKey(docs.codeFromKey("Backspace"));
-        } else {
-            // We are on the end of a multiline or line
-            docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-            let [endXCoord, endYCoord] = docs.getCoords();
-            if (endXCoord === startXCoord && endYCoord === startYCoord) {
-                // We are at the end of a line, do nothing
-            } else {
-                // We are on a multiline
-
-                // Get back to original position
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-
-                // Highlight
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
-            }
-        }
-
-        if (e.key === "C" || windowsVim.currentSequence === "c") {
-            windowsVim.num = "";
-            windowsVim.currentSequence = "";
-            windowsVim.switchToInsertMode();
-            return true;
-        }
-
-        windowsVim.clearData();
-        return true;
-    }
-
-    // d0, c0 (delete to beginning of line)
-    if (
-        (e.key === "0" && windowsVim.currentSequence === "d") ||
-        (e.key === "0" && windowsVim.currentSequence === "c")
-    ) {
-        let [startXCoord, startYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        let [middleXCoord, middleYCoord] = docs.getCoords();
-        if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
-            // At start of file, do nothing
-        } else if (startYCoord === middleYCoord) {
-            // In the middle of a line
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            docs.pressKey(docs.codeFromKey("Backspace"));
-        } else {
-            // At the start of a line or multiline, figure out which one and then act accordingly
-            let [tempXCoord, tempYCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            let [finalXCoord, finalYCoord] = docs.getCoords();
-            if (tempYCoord === finalYCoord && tempXCoord === finalXCoord) {
-                // The line above us was the start of the file on an empty line, so just go back (we only do
-                // one because the last ArrowLeft didn't do anything)
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-            } else if (tempYCoord !== finalYCoord) {
-                // The line above us is empty, so just get back (we were at the start of a line)
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-            } else {
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                let [finalXCoord, finalYCoord] = docs.getCoords();
-                if (
-                    finalXCoord === startXCoord &&
-                    finalYCoord === startYCoord
-                ) {
-                    // We were at the start of a multiline, so delete
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                } else {
-                    // We are at the start of a line, so just go back
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                }
-            }
-        }
-
-        if (windowsVim.currentSequence === "c") {
-            windowsVim.num = "";
-            windowsVim.currentSequence = "";
-            windowsVim.switchToInsertMode();
-        } else {
-            windowsVim.clearData();
-        }
-
-        return true;
-    }
-
-    // "dw", "dW"
-    if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence === "d") {
-        // 2 potential choices/scenarios:
-
-        // 1:
-        // Determine if we are at the end of a line
-        // If we are at the end of a line, delete one character (or none if we are on an empty line)
-
-        // 2: 
-        // If we are not at the end of a line, proceed normally (highlight to the right, then hit delete)
-        // After: If we are not at the end of a line, arrow left back one to be on the right character
-
-        let numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            // Step 1: Determining if we are the end of a line
-            let [initialXCoord, initialYCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            let [middleXCoord, middleYCoord] = docs.getCoords();
-            if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
-                // We are at the end of the file (and line subsequently)
-                // Just backspace
-                docs.pressKey(docs.codeFromKey("Backspace"));
-            }
-            else if (initialYCoord !== middleYCoord) {
-                // We are at the end of a multiline or a line (we need to see which one)
-                // 1. Determine which one.
-                // 2. Then, take action
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
-                    // We are at the end of a real line
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                    let [afterBackspaceXCoord, afterBackspaceYCoord] = docs.getCoords();
-                    if (afterBackspaceXCoord === endXCoord && afterBackspaceYCoord === endYCoord) {
-                        // We hit backspace but didn't change position --> We are at the start of the file on an empty line then
-                        // Let's move forward, and delete this empty line
-                        docs.pressKey(docs.codeFromKey("ArrowRight"));
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                        // Now we actually deleted the empty line and are good to go
-                    }
-                    else if (afterBackspaceYCoord !== endYCoord) {
-                        // We just deleted an empty line, so we need to move down one so our cursor is in the right position
-                        docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    }
-                }
-                else {
-                    // We are on a multiline (fake) line
-
-                    // Get back to the original position
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-
-                    // Highlight and delete
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-
-            }
-            else {
-                // We are in the middle of a line
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
-            }
-        }
-
-        windowsVim.clearData();
-        return true;
-    }
-
-    // "cw", "cW"
-    // Differences from "cw": 
-    // When on an empty line: We don't delete that line
-    // Ideally, we don't delete any whitespace (impossible on Windows though to implement this)
-    if ((e.key === "w" || e.key === "W") && windowsVim.currentSequence === "c") {
-        let numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-
-            let performMultilineOperation = false;
-            // Step 1: Determining if we are the end of a line
-            let [initialXCoord, initialYCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            let [middleXCoord, middleYCoord] = docs.getCoords();
-            if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
-                // We are at the end of the file (and line subsequently)
-                // This means we should check first if the line is empty, and if it isn't, Backspace
-
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (endYCoord !== initialYCoord) {
-                    // We went up a line, so we were on an empty line
-                    // Move back and do nothing
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                }
-                else {
-                    // The line has stuff, so we can backspace after moving back to the original position
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-            }
-            else if (initialYCoord !== middleYCoord) {
-                // We are at the end of a multiline or a line (we need to see which one)
-                // 1. Determine which one.
-                // 2. Then, take action
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
-                    // We are at the end of a real line
-                    // Before we hit backspace, let's check that we don't delete an empty line
-
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    let [afterLeftXCoord, afterLeftYCoord] = docs.getCoords();
-                    if (afterLeftYCoord !== initialYCoord) {
-                        // We went up a line, so we were on an empty line
-                        docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    }
-                    else if (afterLeftYCoord === initialYCoord && afterLeftXCoord === initialXCoord) {
-                        // We are at the beginning of the file on an empty line, do nothing
-                    }
-                    else {
-                        // We were on a non-empty line, delete
-                        docs.pressKey(docs.codeFromKey("ArrowRight"));
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    }
-                }
-                else {
-                    // We are on a multiline (fake) line
-
-                    // Get back to the original position
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-
-                    // Highlight and delete
-                    performMultilineOperation = true;
-                }
-
-            }
-            else {
-                // We are in the middle of a line
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                performMultilineOperation = true;
-            }
-
-            // docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-            // docs.pressKey(docs.codeFromKey("Backspace"));
-
-            if (performMultilineOperation) {
-                let [initialXPos, initialYPos] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                let [curXPos, curYPos] = docs.getCoords();
-
-                if (initialXPos === curXPos && initialYPos === curYPos) {
-                    docs.pressKey(docs.codeFromKey("Delete"))
-                }
-                else {
-                    while (curXPos !== initialXPos || curYPos !== initialYPos) {
-                        if (curYPos < initialYPos) {
-                            // In case of faultiness: This should never run but is a safeguard
-                            break;
-                        }
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                        [curXPos, curYPos] = docs.getCoords();
-                    }
-                }
-            }
-        }
-
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-
-    // dd (delete whole line)
-    if (e.key === "d" && windowsVim.currentSequence === "d") {
-        // We are going to select text down, move right one arrow, select text up, and delete
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            let cursorLocations = docs.getCursorLocations();
-            if (cursorLocations[3] && cursorLocations[0]) {
-                // We are at the end of a file on an empty line
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                break;
-            }
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            docs.pressKey(docs.codeFromKey("Backspace"));
-            if (cursorLocations[3]) {
-                // We are at the end of the file, so backspace again to remove the empty line we're on
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                break; // With dd we finish if we reach the end of the
-            }
-        }
-
-        windowsVim.clearData();
-        return true;
-    }
-
-    // cc (delete whole line and enter insert mode)
-    // If just executed one time/loop, we delete everything on the line but not actually the line itself
-    if ((e.key === "c" && windowsVim.currentSequence === "c") || (e.key === "S" && windowsVim.currentSequence.length === 0)) {
-        // We are going to select text down, move right one arrow, select text up, and delete
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            let cursorLocations = docs.getCursorLocations();
-            if (cursorLocations[3] && cursorLocations[0]) {
-                // We are at the end of a file on an empty line, do not delete
-                break;
-            }
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            docs.pressKey(docs.codeFromKey("Backspace"));
-            if (cursorLocations[3]) {
-                // We are at the end of the file, do not delete
-                break; // With dd we finish if we reach the end of the
-            }
-            if (i === numRepeats - 1) {
-                docs.pressKey(docs.codeFromKey("Enter"));
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }
-        }
-
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky tricky
-    if (e.key === "w" && (windowsVim.currentSequence === "di" || windowsVim.currentSequence === "ci")) {
-        let numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            let atEndOfLine = false;
-            let [initialXCoord, initialYCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            let [middleXCoord, middleYCoord] = docs.getCoords();
-            if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
-                // At end of the file
-                atEndOfLine = true;
-            }
-            else if (initialYCoord === middleYCoord) {
-                // In the middle of a line
-                let [xCoord, yCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
-
-                // Delete and put the space
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                let [newXCoord, newYCoord] = docs.getCoords();
-                if (xCoord === newXCoord && yCoord === newYCoord) {
-                    // We are on a space potentially
-                    let [xPos, yPos] = docs.getCoords();
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    let [newXPos, newYPos] = docs.getCoords();
-
-                    if (xPos === newXPos && yPos === newYPos) {
-                        // Do nothing
-                    }
-                    else if (yPos !== newYPos) {
-                        // We were on the last character of a word or something (could also be a period or whatever),
-                        // so we delete that completely using highlighting
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    } 
-                    else {
-                        // We were actually on a space
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    }
-                }
-                else {
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                    docs.pressSpecialKey(" ");
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"))
-                }
-            }
-            else {
-                // We are at the end of a line or multiline
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
-                    // At the end of a real line
-                    atEndOfLine = true;
-                }
-                else {
-                    // At the end of a multiline
-                    // By definition, the thing we are on is a space (so we can just do a simple backspace to delete it)
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-            }
-
-            if (atEndOfLine) {
-                let [startXCoord, startYCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (endYCoord !== startYCoord) {
-                    // Empty line, do nothing
-                    docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
-                }
-                else if (endYCoord === startYCoord && endXCoord === startXCoord) {
-                    // Do nothing, we are the start of a file on an empty line
-
-                }
-                else {
-                    docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
-
-                    // Delete stuff at the end of the line 
-                    docs.pressKey(docs.codeFromKey("x"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                    let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
-                    if (textSelected) {
-                        // No trailing space or period or anything to worry about
-                        docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    }
-                    else {
-                        // There is a trailing space or period
-                        docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
-                        docs.pressKey(docs.codeFromKey("Backspace")); // Now backspace to delete the space or whatever it is
-                    }
-                }
-            }
-        }
-
-        if (windowsVim.currentSequence === "ci") {
-            windowsVim.currentSequence = "";
-            windowsVim.num = "";
-            windowsVim.switchToInsertMode();
-        }
-        else {
-            windowsVim.clearData();
-        }
-        return true;
-    }
-
-    // daw, caw (delete the current word we're on, whitespace also gets deleted)
-    if (e.key === "w" && (windowsVim.currentSequence === "da" || windowsVim.currentSequence === "ca")) {
-        let numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            let atEndOfLine = false;
-            let [initialXCoord, initialYCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            let [middleXCoord, middleYCoord] = docs.getCoords();
-            if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
-                // At end of the file
-                atEndOfLine = true;
-            }
-            else if (initialYCoord === middleYCoord) {
-                // In the middle of a line
-                let [xCoord, yCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
-
-                // Delete and put the space
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                let [newXCoord, newYCoord] = docs.getCoords();
-                if (xCoord === newXCoord && yCoord === newYCoord) {
-                    // On a space potentially
-                    let [xPos, yPos] = docs.getCoords();
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    let [newXPos, newYPos] = docs.getCoords();
-                    
-                    if (xPos === newXPos && yPos === newYPos) {
-                        // Do nothing
-                    }
-                    else if (yPos !== newYPos) {
-                        // We were on the last character of a word or something, so delete it
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        atEndOfLine = true;
-
-                    }
-                    else {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft")); // Reverse our last ArrowRight
-
-
-                        // We are on a space, we have to delete the space, the word, and end up in the right position at the end
-                        docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }
-                }
-                else {
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                    docs.pressKey(docs.codeFromKey("Backspace"))
-                }
-            }
-            else {
-                // We are at the end of a line or multiline
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
-                    // At the end of a real line
-                    atEndOfLine = true;
-                }
-                else {
-                    // At the end of a multiline
-                    // By definition, the thing we are on is a space (so we can just do a simple backspace to delete it)
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                }
-            }
-
-            if (atEndOfLine) {
-                let [startXCoord, startYCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                let [endXCoord, endYCoord] = docs.getCoords();
-                if (endYCoord !== startYCoord) {
-                    // Empty line, delete it and make sure our cursor is on the next line down
-                    docs.pressKey(docs.codeFromKey("Delete"));
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                }
-                else if (endYCoord === startYCoord && endXCoord === startXCoord) {
-                    // At start of file on an empty line
-                    docs.pressKey(docs.codeFromKey("Delete"));
-                }
-                else {
-                    docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
-
-                    // Delete stuff at the end of the line 
-                    docs.pressKey(docs.codeFromKey("x"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                    let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
-                    if (textSelected) {
-                        // No trailing space or period or anything to worry about
-                        docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-
-                        let [startPosXCoord, startPosYCoord] = docs.getCoords();
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                        let [endPosXCoord, endPosYCoord] = docs.getCoords();
-                        if (startPosYCoord !== endPosYCoord) {
-                            docs.pressKey(docs.codeFromKey("Z"), true);
-                            docs.pressKey(docs.codeFromKey("Backspace"));
-                        }
-                    }
-                    else {
-                        // There is a trailing space or period
-                        docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
-                        docs.pressKey(docs.codeFromKey("Backspace")); // Now backspace to delete the space or whatever it is
-                    }
-                }
-            }
-        }
-
-        if (windowsVim.currentSequence === "ca") {
-            windowsVim.currentSequence = "";
-            windowsVim.num = "";
-            windowsVim.switchToInsertMode();
-        }
-        else {
-            windowsVim.clearData();
-        }
-        return true;
-    }
-
-
-    // y$ (copy to the end of the line)
-    if (e.key === "$" && windowsVim.currentSequence === "y") {
-        let [startXCoord, startYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        let [middleXCoord, middleYCoord] = docs.getCoords();
-        if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
-            // We are at the end of the file already, good to go
-            navigator.clipboard.writeText("");
-        } else if (startYCoord === middleYCoord) {
-            // We're in the middle of a line
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-            docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-            docs.contentDocument.execCommand("copy");
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        } else {
-            // We are on the end of a multiline or line
-            docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-            let [endXCoord, endYCoord] = docs.getCoords();
-            if (endXCoord === startXCoord && endYCoord === startYCoord) {
-                // We are at the end of a line, do nothing
-                navigator.clipboard.writeText("");
-            } else {
-                // We are on a multiline
-
-                // Get back to original position
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-
-                // Copy
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                docs.contentDocument.execCommand("copy");
-
-                // Put cursor back at original position
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }
-        }
-
-        windowsVim.clearData();
-        return true;
-    }
-
-    // y0 (copy to the start of the line)
-    if (e.key === "0" && windowsVim.currentSequence === "y") {
-        // Technically windowsVim will move up a line if you're at the start already, but that seems ugly, so we'll implement it
-        // slightly different on purpose.
-        let [startXCoord, startYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        let [middleXCoord, middleYCoord] = docs.getCoords();
-        if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
-            // At start of file, do nothing
-            navigator.clipboard.writeText("");
-        } else if (startYCoord === middleYCoord) {
-            // In the middle of a line
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            docs.contentDocument.execCommand("copy");
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        } else {
-            // At the start of a line or multiline, figure out which one and then act accordingly
-            let [tempXCoord, tempYCoord] = docs.getCoords();
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            let [finalXCoord, finalYCoord] = docs.getCoords();
-            if (tempYCoord === finalYCoord && tempXCoord === finalXCoord) {
-                // The line above us was the start of the file on an empty line, so just go back (we only do
-                // one because the last ArrowLeft didn't do anything)
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                navigator.clipboard.writeText("");
-            } else if (tempYCoord !== finalYCoord) {
-                // The line above us is empty, so just get back (we were at the start of a line)
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                navigator.clipboard.writeText("");
-            } else {
-                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                let [finalXCoord, finalYCoord] = docs.getCoords();
-                if (
-                    finalXCoord === startXCoord &&
-                    finalYCoord === startYCoord
-                ) {
-                    // We were at the start of a multiline, so copy
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                    docs.contentDocument.execCommand("copy");
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                } else {
-                    // We are at the start of a line, so just go back
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    navigator.clipboard.writeText("");
-                }
-            }
-        }
-
-        windowsVim.clearData();
-        return true;
-    }
-
-    // yy or Y (copy the whole line)
-    if (
-        (e.key === "y" && windowsVim.currentSequence === "y") ||
-        (e.key === "Y" && windowsVim.currentSequence === "")
-    ) {
-        windowsVim.copyWholeLine(); // All the heavy lifting in this
-        windowsVim.clearData();
-        return true;
-    }
-
-    windowsVim.currentSequence += e.key; // Add the current key to the sequence
-
-    // If the current sequence is in the keyMaps, then execute the command
-    if (windowsVim.currentSequence in windowsVim.keyMaps) {
-        windowsVim.keyMaps[windowsVim.currentSequence].forEach(
-            ([key, ...args]) => {
-                let numRepeats = parseInt(windowsVim.num) || 1;
-                // For 'gg' and 'G', we only want to run it once no matter what
-                if (
-                    windowsVim.currentSequence === "G" ||
-                    windowsVim.currentSequence === "gg"
-                ) {
-                    numRepeats = 1;
-                }
-
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey(key), ...args);
-                }
-            }
-        );
-        windowsVim.clearData();
-        return;
-    }
-
-    // r for replace command:
-    if (
-        (windowsVim.currentSequence[0] === "r" &&
-        windowsVim.currentSequence.length === 2) || (windowsVim.currentSequence === "rTab")
-    ) {
+    // r for replace command
+    if (windowsVim.currentSequence === "r")
+    {
+        windowsVim.currentSequence += e.key;
         let keyCharacter = windowsVim.currentSequence.slice(1);
 
         let keyFunc = docs.pressKey;
@@ -1347,6 +272,1224 @@ windowsVim.normal_keydown = function (e) {
         }
         windowsVim.clearData();
         return true;
+    }
+
+    // Past this point we add the key to the sequence, and then go checking if it matches any of the commands
+    // If it doesn't, after the switch statement we see if we are building up to a command or not
+
+    if (windowsVim.currentSequence.length === 0) {
+        windowsVim.currentSequence = e.key;
+    }
+    else {
+        windowsVim.currentSequence += KEY_SEPARATOR + e.key;
+    }
+
+
+    // Bit mask of what modifier keys are pressed
+    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const keyMapN = windowsVim.keyMapN;
+
+    switch (true) {
+        case (keyMapN.arrowLeft[0] === windowsVim.currentSequence && (keyMapN.arrowLeft[1] === true || keyMapN.arrowLeft[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowRight[0] === windowsVim.currentSequence && (keyMapN.arrowRight[1] === true || keyMapN.arrowRight[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowUp[0] === windowsVim.currentSequence && (keyMapN.arrowUp[1] === true || keyMapN.arrowUp[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowDown[0] === windowsVim.currentSequence && (keyMapN.arrowDown[1] === true || keyMapN.arrowDown[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.b[0] === windowsVim.currentSequence && (keyMapN.b[1] === true || keyMapN.b[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.B[0] === windowsVim.currentSequence && (keyMapN.B[1] === true || keyMapN.B[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.h[0] === windowsVim.currentSequence && (keyMapN.j[1] === true || keyMapN.j[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.j[0] === windowsVim.currentSequence && (keyMapN.j[1] === true || keyMapN.j[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.k[0] === windowsVim.currentSequence && (keyMapN.k[1] === true || keyMapN.k[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.l[0] === windowsVim.currentSequence && (keyMapN.l[1] === true || keyMapN.l[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.gg[0] === windowsVim.currentSequence && (keyMapN.gg[1] === true || keyMapN.gg[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Home"), true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN["{"][0] === windowsVim.currentSequence && (keyMapN["{"][1] === true || keyMapN["{"][2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN["}"][0] === windowsVim.currentSequence && (keyMapN["}"][1] === true || keyMapN["}"][2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN["}"][0] === windowsVim.currentSequence && (keyMapN["}"][1] === true || keyMapN["}"][2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowLeftCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowLeftCtrl[1] === true || keyMapN.arrowLeftCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowRightCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowRightCtrl[1] === true || keyMapN.arrowRightCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowDownCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowDownCtrl[1] === true || keyMapN.arrowDownCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowUpCtrl[1] === true || keyMapN.arrowUpCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowUpCtrl[1] === true || keyMapN.arrowUpCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.escape[0] === windowsVim.currentSequence && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+            {
+                // Remove any saved queries that the user had
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.ctrlC[0] === windowsVim.currentSequence && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+            {
+                // Remove any saved queries that the user had
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.slashSearch[0] === windowsVim.currentSequence && (keyMapN.slashSearch[1] === true || keyMapN.slashSearch[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("f"), true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.ctrlDPageDown[0] === windowsVim.currentSequence && (keyMapN.ctrlDPageDown[1] === true || keyMapN.ctrlDPageDown[2] === modifierInput)):
+            {
+                // Ctrl-d is page-down
+                docs.pressKey(docs.codeFromKey("PageDown"));
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.ctrlUPageUp[0] === windowsVim.currentSequence && (keyMapN.ctrlUPageUp[1] === true || keyMapN.ctrlUPageUp[2] === modifierInput)):
+            {
+                // Ctrl-u is page-up
+                docs.pressKey(docs.codeFromKey("PageUp"));
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.redo[0] === windowsVim.currentSequence && (keyMapN.redo[1] === true || keyMapN.redo[2] === modifierInput)):
+            {
+                // Redo
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("Y"), true); // Ctrl + Y is redo on windows
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.paste[0] === windowsVim.currentSequence && (keyMapN.paste[1] === true || keyMapN.paste[2] === modifierInput)):
+            {
+                // TODO: Fix
+                windowsVim.paste(e); // All the cursor logic is in here
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteNoFormatting[1] === true || keyMapN.pasteNoFormatting[2] === modifierInput)):
+            {
+                // TODO: Fix
+                windowsVim.paste(e); // All the cursor logic is in here
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursor[1] === true || keyMapN.pasteBeforeCursor[2] === modifierInput)):
+            {
+                // TODO: Fix
+                if (e.ctrlKey === false) {
+                    // Paste with formatting
+                    docs.contentDocument.execCommand("paste");
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }, 1);
+                } else {
+                    // Paste without formatting
+                    docs.pasteClipboardPlainText().then(() => {
+                        setTimeout(() => {
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        }, 1);
+                    });
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursorNoFormatting[1] === true || keyMapN.pasteBeforeCursorNoFormatting[2] === modifierInput)):
+            {
+                // TODO: Fix
+                if (e.ctrlKey === false) {
+                    // Paste with formatting
+                    docs.contentDocument.execCommand("paste");
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }, 1);
+                } else {
+                    // Paste without formatting
+                    docs.pasteClipboardPlainText().then(() => {
+                        setTimeout(() => {
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        }, 1);
+                    });
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapN.insert[0] === windowsVim.currentSequence && (keyMapN.insert[1] === true || keyMapN.insert[2] === modifierInput)):
+            {
+                // Go to insert mode where we are
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapN.enterVisual[0] === windowsVim.currentSequence && (keyMapN.enterVisual[1] === true || keyMapN.enterVisual[2] === modifierInput)):
+            {
+                // Go to visual mode
+                windowsVim.clearData();
+                windowsVim.visualModeIsLinedBased = false;
+                windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
+                return true;
+            }
+        case (keyMapN.enterVisualLine[0] === windowsVim.currentSequence && (keyMapN.enterVisualLine[1] === true || keyMapN.enterVisualLine[2] === modifierInput)):
+            {
+                // Go to visual line based mode (select the whole current line)
+                let cursorLocations = docs.getCursorLocations();
+                if (!cursorLocations[0]) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                }
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+
+                windowsVim.clearData();
+                windowsVim.visualModeIsLinedBased = true;
+                windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
+                return true;
+            }
+        case (keyMapN.append[0] === windowsVim.currentSequence && (keyMapN.append[1] === true || keyMapN.append[2] === modifierInput)): 
+            {
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let newYCoord = docs.getYCoord();
+                if (initialYCoord !== newYCoord) {
+                    // We're either on a new multiline or a real new line, check which scenario and adjust accordingly
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [finalXCoord, finalYCoord] = docs.getCoords();
+                    if (
+                        finalXCoord === initialXCoord &&
+                        finalYCoord === initialYCoord
+                    ) {
+                        // We've encountered a new line, we don't need to move the cursor anymore
+                    } else {
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    }
+                }
+
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapN.appendEndOfLine[0] === windowsVim.currentSequence && (keyMapN.appendEndOfLine[1] === true || keyMapN.appendEndOfLine[2] === modifierInput)): 
+        {
+                windowsVim.moveToEndOfLine();
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+        }
+        case (keyMapN.newLineAbove[0] === windowsVim.currentSequence && (keyMapN.newLineAbove[1] === true || keyMapN.newLineAbove[2] === modifierInput)): 
+        {
+            // Insert a new line above and go to insert mode
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            windowsVim.moveToStartOfLine();
+
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("Enter"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            }
+
+            windowsVim.clearData();
+            windowsVim.switchToInsertMode();
+            return true;
+        }
+        case (keyMapN.newLineBelow[0] === windowsVim.currentSequence && (keyMapN.newLineBelow[1] === true || keyMapN.newLineBelow[2] === modifierInput)): 
+        {
+            // Insert a new line below and go to insert mode
+            // Move to the end of the line and press enter
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            windowsVim.moveToEndOfLine();
+
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("Enter"));
+            }
+
+            windowsVim.clearData();
+            windowsVim.switchToInsertMode();
+            return true;
+        }
+        case (keyMapN.insertStartOfLine[0] === windowsVim.currentSequence && (keyMapN.insertStartOfLine[1] === true || keyMapN.insertStartOfLine[2] === modifierInput)): 
+        {
+            // Insert at the beginning of the line
+            let oldCoords = docs.userCursor.style.transform;
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let newCoords = docs.userCursor.style.transform;
+            if (oldCoords === newCoords) {
+                // We are at the end of a file (which may be an empty line, so we have to test for that)
+                let initialYCoord = docs.getYCoord();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let finalYCoord = docs.getYCoord();
+
+                // We we are going to check Y-Values, if the y-value didn't change, hit arrow up
+                // If the y value did change, hit arrow right
+                if (initialYCoord === finalYCoord) {
+                    // Y Coord didn't change, so we should get to the start of a line with arrow up
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                } else {
+                    // Y Coord changed, so we were at the start of a line (so just go back)
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+            } else {
+                // We can just arrow up from here in all scenarios
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+            }
+
+            windowsVim.clearData();
+            windowsVim.switchToInsertMode();
+            return true;
+        }
+        case (keyMapN.e[0] === windowsVim.currentSequence && (keyMapN.e[1] === true || keyMapN.e[2] === modifierInput)): 
+        case (keyMapN.E[0] === windowsVim.currentSequence && (keyMapN.E[1] === true || keyMapN.E[2] === modifierInput)): 
+        {
+            // Go to the last character in the next word
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            // We do some optimization here to make it faster
+            for (let i = 0; i < numRepeats - 1; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+            }
+
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+            let [endXCoord, endYCoord] = docs.getCoords();
+            if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                // End of file reached, do nothing
+            } else {
+                // Keep going like regular
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            }
+
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.endOfLine[0] === windowsVim.currentSequence && (keyMapN.endOfLine[1] === true || keyMapN.endOfLine[2] === modifierInput)): 
+        {
+            // Go to the end of the line
+            let cursorLocations = docs.getCursorLocations();
+            docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+            if (!cursorLocations[3]) {
+                // If we're not at the end of a file, move back left
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            }
+
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.w[0] === windowsVim.currentSequence && (keyMapN.w[1] === true || keyMapN.w[2] === modifierInput)): 
+        case (keyMapN.W[0] === windowsVim.currentSequence && (keyMapN.W[1] === true || keyMapN.W[2] === modifierInput)): 
+        {
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+            }
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.x[0] === windowsVim.currentSequence && (keyMapN.x[1] === true || keyMapN.x[2] === modifierInput)): 
+        case (keyMapN.s[0] === windowsVim.currentSequence && (keyMapN.s[1] === true || keyMapN.s[2] === modifierInput)): 
+        {
+            // Delete the current character (enter insert mode for "s")
+            // "x" and "s" commands
+            let numRepeats = parseInt(windowsVim.num) || 1;
+            if (e.repeat === false && numRepeats === 1) {
+                // If the user presses "Undo", we still have text highlighted in normal mode to delete
+                let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
+                if (textSelected) {
+                    // Text is selected
+                    docs.contentDocument.execCommand("cut"); // Cut the text
+                    numRepeats = 0; // Skip the for loop and go straight to the bottom
+                }
+
+            }
+            for (let i = 0; i < numRepeats; i++) {
+                // if we're at the end of a line, r should go on the current line
+                // if we're at the end of a multiline (fake) line, r can move to next multiline
+                let [xCoord, yCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+                let [leftXCoord, leftYCoord] = docs.getCoords();
+
+                // IF: We are not at the start of the file, undo our arrow left with an arrow right
+                if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
+                    // We are not at the beginning of the file, so undo our arrow right
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+                // IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
+                // about line ending stuff
+                if (
+                    leftYCoord !== yCoord ||
+                    (leftYCoord === yCoord && leftXCoord === xCoord)
+                ) {
+                    // At the beginning of a line or multiline, no need for checking if we're at the end
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    let [rightXCoord, rightYCoord] = docs.getCoords();
+                    // let rightYCoord = docs.getYCoord();
+                    if (rightYCoord !== yCoord) {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        break;
+                    } else if (rightXCoord === xCoord && rightYCoord === yCoord) {
+                        // We are at the end of the file on an empty line, do nothing
+                        break;
+                    } else {
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    }
+                }
+
+                // We are not at the start of a file or line, so we have to check if we're at the end of a line,
+                // middle of a line, or end of a file
+                else {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    let [newXCoord, newYCoord] = docs.getCoords();
+                    if (xCoord === newXCoord && yCoord === newYCoord) {
+                        // We are at the end of the file, guaranteed to not be an empty line from above
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    } else if (yCoord === newYCoord) {
+                        // We are in the middle of the line somewhere or something, standard procedure
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    } else {
+                        // We've either passed a space or a return that has put us one multiline or line down
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                        let [finalXCoord, finalYCoord] = docs.getCoords();
+                        if (finalXCoord === xCoord && finalYCoord === yCoord) {
+                            // We are dealing with a "Return" and actual new line
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        } else {
+                            // We are dealing with a space and just a multiline
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        }
+                    }
+                }
+            }
+
+            if (keyMapN.x[0] === windowsVim.currentSequence && (keyMapN.x[1] === true || keyMapN.x[2] === modifierInput)) {
+                windowsVim.clearData();
+            }
+            else {
+                // s
+                windowsVim.currentSequence = "";
+                windowsVim.num = "";
+                windowsVim.switchToInsertMode();
+            }
+
+            return true;
+        }
+        case (keyMapN.deleteToEndOfLine[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine[1] === true || keyMapN.deleteToEndOfLine[2] === modifierInput)): 
+        case (keyMapN.deleteToEndOfLine2[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine2[1] === true || keyMapN.deleteToEndOfLine2[2] === modifierInput)): 
+        case (keyMapN.deleteToEndOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)): 
+        case (keyMapN.deleteToEndOfLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)): 
+        {
+            // D, d$, C, c$ (delete to end of line)
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [middleXCoord, middleYCoord] = docs.getCoords();
+            if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+                // We are at the end of the file already, do nothing
+            } else if (startYCoord === middleYCoord) {
+                // We're in the middle of a line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                docs.pressKey(docs.codeFromKey("Backspace"));
+            } else {
+                // We are on the end of a multiline or line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (endXCoord === startXCoord && endYCoord === startYCoord) {
+                    // We are at the end of a line, do nothing
+                } else {
+                    // We are on a multiline
+
+                    // Get back to original position
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+                    // Highlight
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+            }
+
+            if ((keyMapN.deleteToEndOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput) || (
+                keyMapN.deleteToEndOfLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)
+            ))) 
+            {
+                windowsVim.num = "";
+                windowsVim.currentSequence = "";
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.deleteToStartOfLine[0] === windowsVim.currentSequence && (keyMapN.deleteToStartOfLine[1] === true || keyMapN.deleteToStartOfLine[2] === modifierInput)): 
+        case (keyMapN.deleteToStartOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToStartOfLineInsert[1] === true || keyMapN.deleteToStartOfLineInsert[2] === modifierInput)): 
+        {
+            // d0, c0 (delete to beginning of line)
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            let [middleXCoord, middleYCoord] = docs.getCoords();
+            if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+                // At start of file, do nothing
+            } else if (startYCoord === middleYCoord) {
+                // In the middle of a line
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                docs.pressKey(docs.codeFromKey("Backspace"));
+            } else {
+                // At the start of a line or multiline, figure out which one and then act accordingly
+                let [tempXCoord, tempYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [finalXCoord, finalYCoord] = docs.getCoords();
+                if (tempYCoord === finalYCoord && tempXCoord === finalXCoord) {
+                    // The line above us was the start of the file on an empty line, so just go back (we only do
+                    // one because the last ArrowLeft didn't do anything)
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                } else if (tempYCoord !== finalYCoord) {
+                    // The line above us is empty, so just get back (we were at the start of a line)
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                } else {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    let [finalXCoord, finalYCoord] = docs.getCoords();
+                    if (
+                        finalXCoord === startXCoord &&
+                        finalYCoord === startYCoord
+                    ) {
+                        // We were at the start of a multiline, so delete
+                        docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    } else {
+                        // We are at the start of a line, so just go back
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    }
+                }
+            }
+
+            if (keyMapN.deleteToStartOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToStartOfLineInsert[1] === true || keyMapN.deleteToStartOfLineInsert[2] === modifierInput)) {
+                windowsVim.num = "";
+                windowsVim.currentSequence = "";
+                windowsVim.switchToInsertMode();
+            } else {
+                windowsVim.clearData();
+            }
+
+            return true;
+        }
+        case (keyMapN.dw[0] === windowsVim.currentSequence && (keyMapN.dw[1] === true || keyMapN.dw[2] === modifierInput)): 
+        case (keyMapN.dW[0] === windowsVim.currentSequence && (keyMapN.dW[1] === true || keyMapN.dW[2] === modifierInput)): 
+        {
+            // "dw", "dW"
+            // 2 potential choices/scenarios:
+
+            // 1:
+            // Determine if we are at the end of a line
+            // If we are at the end of a line, delete one character (or none if we are on an empty line)
+
+            // 2: 
+            // If we are not at the end of a line, proceed normally (highlight to the right, then hit delete)
+            // After: If we are not at the end of a line, arrow left back one to be on the right character
+
+            let numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                // Step 1: Determining if we are the end of a line
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let [middleXCoord, middleYCoord] = docs.getCoords();
+                if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+                    // We are at the end of the file (and line subsequently)
+                    // Just backspace
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+                else if (initialYCoord !== middleYCoord) {
+                    // We are at the end of a multiline or a line (we need to see which one)
+                    // 1. Determine which one.
+                    // 2. Then, take action
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+                        // We are at the end of a real line
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        let [afterBackspaceXCoord, afterBackspaceYCoord] = docs.getCoords();
+                        if (afterBackspaceXCoord === endXCoord && afterBackspaceYCoord === endYCoord) {
+                            // We hit backspace but didn't change position --> We are at the start of the file on an empty line then
+                            // Let's move forward, and delete this empty line
+                            docs.pressKey(docs.codeFromKey("ArrowRight"));
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                            // Now we actually deleted the empty line and are good to go
+                        }
+                        else if (afterBackspaceYCoord !== endYCoord) {
+                            // We just deleted an empty line, so we need to move down one so our cursor is in the right position
+                            docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        }
+                    }
+                    else {
+                        // We are on a multiline (fake) line
+
+                        // Get back to the original position
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+                        // Highlight and delete
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    }
+
+                }
+                else {
+                    // We are in the middle of a line
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+            }
+
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.cw[0] === windowsVim.currentSequence && (keyMapN.cw[1] === true || keyMapN.cw[2] === modifierInput)): 
+        case (keyMapN.cW[0] === windowsVim.currentSequence && (keyMapN.cW[1] === true || keyMapN.cW[2] === modifierInput)): 
+        {
+            // "cw", "cW"
+            // Differences from "dw": 
+            // When on an empty line: We don't delete that line
+            // Ideally, we don't delete any whitespace
+            let numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+
+                let performMultilineOperation = false;
+                // Step 1: Determining if we are the end of a line
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let [middleXCoord, middleYCoord] = docs.getCoords();
+                if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+                    // We are at the end of the file (and line subsequently)
+                    // This means we should check first if the line is empty, and if it isn't, Backspace
+
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (endYCoord !== initialYCoord) {
+                        // We went up a line, so we were on an empty line
+                        // Move back and do nothing
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    }
+                    else {
+                        // The line has stuff, so we can backspace after moving back to the original position
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    }
+                }
+                else if (initialYCoord !== middleYCoord) {
+                    // We are at the end of a multiline or a line (we need to see which one)
+                    // 1. Determine which one.
+                    // 2. Then, take action
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+                        // We are at the end of a real line
+                        // Before we hit backspace, let's check that we don't delete an empty line
+
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        let [afterLeftXCoord, afterLeftYCoord] = docs.getCoords();
+                        if (afterLeftYCoord !== initialYCoord) {
+                            // We went up a line, so we were on an empty line
+                            docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        }
+                        else if (afterLeftYCoord === initialYCoord && afterLeftXCoord === initialXCoord) {
+                            // We are at the beginning of the file on an empty line, do nothing
+                        }
+                        else {
+                            // We were on a non-empty line, delete
+                            docs.pressKey(docs.codeFromKey("ArrowRight"));
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        }
+                    }
+                    else {
+                        // We are on a multiline (fake) line
+
+                        // Get back to the original position
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+                        // Highlight and delete
+                        performMultilineOperation = true;
+                    }
+
+                }
+                else {
+                    // We are in the middle of a line
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    performMultilineOperation = true;
+                }
+
+                // docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                // docs.pressKey(docs.codeFromKey("Backspace"));
+
+                if (performMultilineOperation) {
+                    let [initialXPos, initialYPos] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    let [curXPos, curYPos] = docs.getCoords();
+
+                    if (initialXPos === curXPos && initialYPos === curYPos) {
+                        docs.pressKey(docs.codeFromKey("Delete"))
+                    }
+                    else {
+                        while (curXPos !== initialXPos || curYPos !== initialYPos) {
+                            if (curYPos < initialYPos) {
+                                // In case of faultiness: This should never run but is a safeguard
+                                break;
+                            }
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                            [curXPos, curYPos] = docs.getCoords();
+                        }
+                    }
+                }
+            }
+
+            windowsVim.clearData();
+            windowsVim.switchToInsertMode();
+            return true;
+        }
+        case (keyMapN.deleteLine[0] === windowsVim.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)): 
+        {
+            // dd (delete whole line)
+            // We are going to select text down, move right one arrow, select text up, and delete
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                let cursorLocations = docs.getCursorLocations();
+                if (cursorLocations[3] && cursorLocations[0]) {
+                    // We are at the end of a file on an empty line
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    break;
+                }
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (cursorLocations[3]) {
+                    // We are at the end of the file, so backspace again to remove the empty line we're on
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    break; // With dd we finish if we reach the end of the
+                }
+            }
+
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.deleteLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteLineInsert[1] === true || keyMapN.deleteLineInsert[2] === modifierInput)): 
+        case (keyMapN.deleteLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)): 
+        {
+            // cc (delete whole line and enter insert mode)
+            // If just executed one time/loop, we delete everything on the line but not actually the line itself
+            // We are going to select text down, move right one arrow, select text up, and delete
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                let cursorLocations = docs.getCursorLocations();
+                if (cursorLocations[3] && cursorLocations[0]) {
+                    // We are at the end of a file on an empty line, do not delete
+                    break;
+                }
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (cursorLocations[3]) {
+                    // We are at the end of the file, do not delete
+                    break; // With dd we finish if we reach the end of the
+                }
+                if (i === numRepeats - 1) {
+                    docs.pressKey(docs.codeFromKey("Enter"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+            }
+
+            windowsVim.clearData();
+            windowsVim.switchToInsertMode();
+            return true;
+        }
+        case (keyMapN.deleteInnerWord[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWord[1] === true || keyMapN.deleteInnerWord[2] === modifierInput)): 
+        case (keyMapN.deleteInnerWordInsert[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)): 
+        {
+            // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky tricky
+            let numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                let atEndOfLine = false;
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let [middleXCoord, middleYCoord] = docs.getCoords();
+                if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+                    // At end of the file
+                    atEndOfLine = true;
+                }
+                else if (initialYCoord === middleYCoord) {
+                    // In the middle of a line
+                    let [xCoord, yCoord] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
+
+                    // Delete and put the space
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    let [newXCoord, newYCoord] = docs.getCoords();
+                    if (xCoord === newXCoord && yCoord === newYCoord) {
+                        // We are on a space potentially
+                        let [xPos, yPos] = docs.getCoords();
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        let [newXPos, newYPos] = docs.getCoords();
+
+                        if (xPos === newXPos && yPos === newYPos) {
+                            // Do nothing
+                        }
+                        else if (yPos !== newYPos) {
+                            // We were on the last character of a word or something (could also be a period or whatever),
+                            // so we delete that completely using highlighting
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        } 
+                        else {
+                            // We were actually on a space
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        }
+                    }
+                    else {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                        docs.pressSpecialKey(" ");
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"))
+                    }
+                }
+                else {
+                    // We are at the end of a line or multiline
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+                        // At the end of a real line
+                        atEndOfLine = true;
+                    }
+                    else {
+                        // At the end of a multiline
+                        // By definition, the thing we are on is a space (so we can just do a simple backspace to delete it)
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    }
+                }
+
+                if (atEndOfLine) {
+                    let [startXCoord, startYCoord] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (endYCoord !== startYCoord) {
+                        // Empty line, do nothing
+                        docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
+                    }
+                    else if (endYCoord === startYCoord && endXCoord === startXCoord) {
+                        // Do nothing, we are the start of a file on an empty line
+
+                    }
+                    else {
+                        docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
+
+                        // Delete stuff at the end of the line 
+                        docs.pressKey(docs.codeFromKey("x"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                        let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
+                        if (textSelected) {
+                            // No trailing space or period or anything to worry about
+                            docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        }
+                        else {
+                            // There is a trailing space or period
+                            docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
+                            docs.pressKey(docs.codeFromKey("Backspace")); // Now backspace to delete the space or whatever it is
+                        }
+                    }
+                }
+            }
+
+            if (keyMapN.deleteInnerWordInsert[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)) {
+                windowsVim.currentSequence = "";
+                windowsVim.num = "";
+                windowsVim.switchToInsertMode();
+            }
+            else {
+                windowsVim.clearData();
+            }
+            return true;
+        }
+        case (keyMapN.deleteWord[0] === windowsVim.currentSequence && (keyMapN.deleteWord[1] === true || keyMapN.deleteWord[2] === modifierInput)): 
+        case (keyMapN.deleteWordInsert[0] === windowsVim.currentSequence && (keyMapN.deleteWordInsert[1] === true || keyMapN.deleteWordInsert[2] === modifierInput)): 
+        {
+            // daw, caw (delete the current word we're on, whitespace also gets deleted)
+            let numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                let atEndOfLine = false;
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let [middleXCoord, middleYCoord] = docs.getCoords();
+                if (initialXCoord === middleXCoord && initialYCoord === middleYCoord) {
+                    // At end of the file
+                    atEndOfLine = true;
+                }
+                else if (initialYCoord === middleYCoord) {
+                    // In the middle of a line
+                    let [xCoord, yCoord] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to where we were
+
+                    // Delete and put the space
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    let [newXCoord, newYCoord] = docs.getCoords();
+                    if (xCoord === newXCoord && yCoord === newYCoord) {
+                        // On a space potentially
+                        let [xPos, yPos] = docs.getCoords();
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        let [newXPos, newYPos] = docs.getCoords();
+                        
+                        if (xPos === newXPos && yPos === newYPos) {
+                            // Do nothing
+                        }
+                        else if (yPos !== newYPos) {
+                            // We were on the last character of a word or something, so delete it
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                            atEndOfLine = true;
+
+                        }
+                        else {
+                            docs.pressKey(docs.codeFromKey("ArrowLeft")); // Reverse our last ArrowRight
+
+
+                            // We are on a space, we have to delete the space, the word, and end up in the right position at the end
+                            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        }
+                    }
+                    else {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                        docs.pressKey(docs.codeFromKey("Backspace"))
+                    }
+                }
+                else {
+                    // We are at the end of a line or multiline
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (endXCoord === initialXCoord && endYCoord === initialYCoord) {
+                        // At the end of a real line
+                        atEndOfLine = true;
+                    }
+                    else {
+                        // At the end of a multiline
+                        // By definition, the thing we are on is a space (so we can just do a simple backspace to delete it)
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }
+                }
+
+                if (atEndOfLine) {
+                    let [startXCoord, startYCoord] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (endYCoord !== startYCoord) {
+                        // Empty line, delete it and make sure our cursor is on the next line down
+                        docs.pressKey(docs.codeFromKey("Delete"));
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    }
+                    else if (endYCoord === startYCoord && endXCoord === startXCoord) {
+                        // At start of file on an empty line
+                        docs.pressKey(docs.codeFromKey("Delete"));
+                    }
+                    else {
+                        docs.pressKey(docs.codeFromKey("ArrowRight")); // Get back to where we were
+
+                        // Delete stuff at the end of the line 
+                        docs.pressKey(docs.codeFromKey("x"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                        let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
+                        if (textSelected) {
+                            // No trailing space or period or anything to worry about
+                            docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+
+                            let [startPosXCoord, startPosYCoord] = docs.getCoords();
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                            let [endPosXCoord, endPosYCoord] = docs.getCoords();
+                            if (startPosYCoord !== endPosYCoord) {
+                                docs.pressKey(docs.codeFromKey("Z"), true);
+                                docs.pressKey(docs.codeFromKey("Backspace"));
+                            }
+                        }
+                        else {
+                            // There is a trailing space or period
+                            docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
+                            docs.pressKey(docs.codeFromKey("Backspace")); // Now backspace to delete the space or whatever it is
+                        }
+                    }
+                }
+            }
+
+            if (keyMapN.deleteWordInsert[0] === windowsVim.currentSequence && (keyMapN.deleteWordInsert[1] === true || keyMapN.deleteWordInsert[2] === modifierInput)) {
+                windowsVim.currentSequence = "";
+                windowsVim.num = "";
+                windowsVim.switchToInsertMode();
+            }
+            else {
+                windowsVim.clearData();
+            }
+            return true;
+        }
+        case (keyMapN.copyToEndOfLine[0] === windowsVim.currentSequence && (keyMapN.copyToEndOfLine[1] === true || keyMapN.copyToEndOfLine[2] === modifierInput)): 
+        {
+            // y$ (copy to the end of the line)
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [middleXCoord, middleYCoord] = docs.getCoords();
+            if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
+                // We are at the end of the file already, good to go
+                navigator.clipboard.writeText("");
+            } else if (startYCoord === middleYCoord) {
+                // We're in the middle of a line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                docs.contentDocument.execCommand("copy");
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            } else {
+                // We are on the end of a multiline or line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (endXCoord === startXCoord && endYCoord === startYCoord) {
+                    // We are at the end of a line, do nothing
+                    navigator.clipboard.writeText("");
+                } else {
+                    // We are on a multiline
+
+                    // Get back to original position
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+                    // Copy
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                    docs.contentDocument.execCommand("copy");
+
+                    // Put cursor back at original position
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+            }
+
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.copyToStartOfLine[0] === windowsVim.currentSequence && (keyMapN.copyToStartOfLine[1] === true || keyMapN.copyToStartOfLine[2] === modifierInput)): 
+        {
+            // y0 (copy to the start of the line)
+            // Technically windowsVim will move up a line if you're at the start already, but that seems ugly, so we'll implement it
+            // slightly different on purpose.
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            let [middleXCoord, middleYCoord] = docs.getCoords();
+            if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+                // At start of file, do nothing
+                navigator.clipboard.writeText("");
+            } else if (startYCoord === middleYCoord) {
+                // In the middle of a line
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                docs.contentDocument.execCommand("copy");
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            } else {
+                // At the start of a line or multiline, figure out which one and then act accordingly
+                let [tempXCoord, tempYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [finalXCoord, finalYCoord] = docs.getCoords();
+                if (tempYCoord === finalYCoord && tempXCoord === finalXCoord) {
+                    // The line above us was the start of the file on an empty line, so just go back (we only do
+                    // one because the last ArrowLeft didn't do anything)
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    navigator.clipboard.writeText("");
+                } else if (tempYCoord !== finalYCoord) {
+                    // The line above us is empty, so just get back (we were at the start of a line)
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    navigator.clipboard.writeText("");
+                } else {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                    let [finalXCoord, finalYCoord] = docs.getCoords();
+                    if (
+                        finalXCoord === startXCoord &&
+                        finalYCoord === startYCoord
+                    ) {
+                        // We were at the start of a multiline, so copy
+                        docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                        docs.contentDocument.execCommand("copy");
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    } else {
+                        // We are at the start of a line, so just go back
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        navigator.clipboard.writeText("");
+                    }
+                }
+            }
+
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapN.copyWholeLine[0] === windowsVim.currentSequence && (keyMapN.copyWholeLine[1] === true || keyMapN.copyWholeLine[2] === modifierInput)): 
+        case (keyMapN.copyWholeLine2[0] === windowsVim.currentSequence && (keyMapN.copyWholeLine2[1] === true || keyMapN.copyWholeLine2[2] === modifierInput)): 
+        {
+            // yy or Y (copy the whole line)
+            windowsVim.copyWholeLine(); // All the heavy lifting in this
+            windowsVim.clearData();
+            return true;
+        }
+
+
     }
 
     if (
