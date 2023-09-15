@@ -6,18 +6,19 @@ const KEY_SEPARATOR = "•";
 
 let baseVim = {
 	// Main variables here
-	mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual"]
+	mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual", "visual_line"]
 	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
 	currentSequence: "", // Keep track of key sequences (ex: "gg")
-	visualModeIsLinedBased: false, // Whether visual mode is line based (V) or regular (v), this is set before calling switchToVisualMode()
 	incompleteKeyMaps: ["g", "r", "d", "c", "y", "d" + KEY_SEPARATOR + "i", "c" + KEY_SEPARATOR + "i", "d" + KEY_SEPARATOR + "a", "c" + KEY_SEPARATOR + "a"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
-	// di for diw, ci for ciw
-	differentVisualKeyMaps: { // Some of the commands for the same key are different in visual mode, and if so, they are stored here
-		gg: [["Home", true, true]],
-		G: [["End", true, true]],
-		e: [["ArrowRight", true, true]], // ctrl + ->
-		E: [["ArrowRight", true, true]], // ctrl + ->
-	},
+	incompleteKeyMapsV: [],
+	incompleteKeyMapsVLine: [],
+	differentVisualKeyMaps: {}, // TODO: Delete after it's reference gets deleted
+	// differentVisualKeyMaps: { // Some of the commands for the same key are different in visual mode, and if so, they are stored here
+	// 	gg: [["Home", true, true]],
+	// 	G: [["End", true, true]],
+	// 	e: [["ArrowRight", true, true]], // ctrl + ->
+	// 	E: [["ArrowRight", true, true]], // ctrl + ->
+	// },
 };
 
 baseVim.switchToNormalMode = function () {
@@ -29,25 +30,26 @@ baseVim.switchToNormalMode = function () {
 	docs.setCursorWidth();
 };
 
-baseVim.switchToVisualMode = function (isLineBased = false) {
-	if (isLineBased) {
-		this.visualModeIsLinedBased = true;
-	}
-	else {
-		this.visualModeIsLinedBased = false;
-	}
+baseVim.switchToVisualMode = function () {
 	baseVim.currentSequence = "";
 	baseVim.mode = "visual";
 	baseVim.num = "";
 	updateUISequenceText("");
-	if (!isLineBased) {
-		updateUIModeText("-- VISUAL --");
-	} else {
-		updateUIModeText("-- VISUAL LINE --");
-	}
+	updateUIModeText("-- VISUAL --");
+	docs.setCursorWidth(true);
 	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-	docs.setCursorWidth();
 };
+
+baseVim.switchToVisualLineMode = function () {
+	baseVim.currentSequence = "";
+	baseVim.mode = "visual_line";
+	baseVim.num = "";
+	updateUISequenceText("");
+	updateUIModeText("-- VISUAL LINE --");
+	docs.setCursorWidth(true);
+	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+	docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+}
 
 baseVim.switchToInsertMode = function () {
 	baseVim.currentSequence = "";

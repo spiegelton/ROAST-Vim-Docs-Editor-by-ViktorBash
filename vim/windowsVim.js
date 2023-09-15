@@ -1,10 +1,182 @@
-import { baseVim } from "./baseVim.js";
 import { docs } from "../docs.js";
 import { updateUIModeText, updateUISequenceText } from "./UI.js";
 
+const KEY_SEPARATOR = "•";
+
 let windowsVim = {
-    // windowsVim inherits from baseVim to get started
-    __proto__: baseVim,
+	// Main variables here
+	mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual", "visual_line"]
+	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
+	currentSequence: "", // Keep track of key sequences (ex: "gg")
+    // Note: There is no "incompleteKeyMapsI" because commands can be a max of 1 character in insert mode
+	incompleteKeyMaps: ["g", "r", "d", "c", "y", "d" + KEY_SEPARATOR + "i", "c" + KEY_SEPARATOR + "i", "d" + KEY_SEPARATOR + "a", "c" + KEY_SEPARATOR + "a"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
+	incompleteKeyMapsV: ["g"],
+	incompleteKeyMapsVLine: ["g"],
+	differentVisualKeyMaps: {}, // TODO: Delete after it's reference gets deleted
+	// differentVisualKeyMaps: { // Some of the commands for the same key are different in visual mode, and if so, they are stored here
+	// 	gg: [["Home", true, true]],
+	// 	G: [["End", true, true]],
+	// 	e: [["ArrowRight", true, true]], // ctrl + ->
+	// 	E: [["ArrowRight", true, true]], // ctrl + ->
+	// },
+};
+
+windowsVim.switchToNormalMode = function () {
+	windowsVim.currentSequence = "";
+	windowsVim.mode = "normal";
+	windowsVim.num = "";
+	updateUISequenceText("");
+	updateUIModeText("-- NORMAL --");
+	docs.setCursorWidth();
+};
+
+windowsVim.switchToVisualMode = function () {
+	windowsVim.currentSequence = "";
+	windowsVim.mode = "visual";
+	windowsVim.num = "";
+	updateUISequenceText("");
+	updateUIModeText("-- VISUAL --");
+	docs.setCursorWidth(true);
+	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+};
+
+windowsVim.switchToVisualLineMode = function () {
+	windowsVim.currentSequence = "";
+	windowsVim.mode = "visual_line";
+	windowsVim.num = "";
+	updateUISequenceText("");
+	updateUIModeText("-- VISUAL LINE --");
+	docs.setCursorWidth(true);
+	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+	docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+}
+
+windowsVim.switchToInsertMode = function () {
+	windowsVim.currentSequence = "";
+	windowsVim.mode = "insert";
+	windowsVim.num = "";
+	updateUISequenceText("");
+	updateUIModeText("-- INSERT --");
+	docs.setCursorWidth(true);
+};
+
+/*
+ * This function copies a whole line and keeps the cursor in the original position
+*/
+windowsVim.copyWholeLine = async function () {
+	let cursorLocations = docs.getCursorLocations();
+	if (cursorLocations[0] && cursorLocations[3]) {
+		// We are at the start of a line and at the end of the file, there's nothing
+		// really to copy besides a blank line
+		docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+		docs.contentDocument.execCommand("copy");
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+	} else {
+		let [xCoord, yCoord] = docs.getCoords(); // This is how we will know our original location
+
+		if (cursorLocations[0]) {
+			// We are at the start of a line, so move to the right so that going up works properly
+			docs.pressKey(docs.codeFromKey("ArrowRight"));
+		}
+
+		// Here we traverse up and select the whole section we were on and copy it
+		docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+		docs.contentDocument.execCommand("copy");
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // We are at the end, now we have to get back to our original location
+
+		let [newXCoord, newYCoord] = docs.getCoords();
+
+		let startTime = Date.now();
+		while (newXCoord !== xCoord || newYCoord !== yCoord) {
+			let curTime = Date.now();
+
+			if (curTime - startTime > 1500) {
+				// This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
+				// (1.5 seconds), we break out
+				break;
+			}
+			if (newYCoord < yCoord) {
+				docs.pressKey(docs.codeFromKey("ArrowDown"));
+			} else if (newYCoord > yCoord) {
+				docs.pressKey(docs.codeFromKey("ArrowUp"));
+			}
+
+			if (newXCoord < xCoord) {
+				docs.pressKey(docs.codeFromKey("ArrowRight"));
+			} else if (newXCoord > xCoord) {
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+
+			[newXCoord, newYCoord] = docs.getCoords();
+			newXCoord = parseInt(newXCoord);
+			newYCoord = parseInt(newYCoord);
+		}
+	}
+	windowsVim.num = "";
+	windowsVim.currentSequence = "";
+	updateUISequenceText("");
+	// Not updating cursor because we're at the same place
+};
+
+/*
+* Paste whatever is in the clipboard at the appropriate place (lot of logic to move the cursor around)
+* You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
+* with stuff like being at the end of a line or multiline
+*/
+windowsVim.paste = async function (e) {
+	// The main thing is to check that if we're at the end, are we at the end of a multiline or real line
+	let [xCoord, yCoord] = docs.getCoords();
+	docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+	let [leftXCoord, leftYCoord] = docs.getCoords();
+	if (leftXCoord === xCoord && leftYCoord === yCoord) {
+		// We are the start of a file
+		let startYCoord = docs.getYCoord();
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let endYCoord = docs.getYCoord();
+		if (startYCoord !== endYCoord) {
+			// We are at the start of an empty line, so don't move right actually
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+		}
+	} else {
+		docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our ArrowLeft because we're not at the start of the file
+		let yCoord = docs.getYCoord();
+		docs.pressKey(docs.codeFromKey("ArrowRight"));
+		let newYCoord = docs.getYCoord();
+		if (yCoord === newYCoord) {
+			// Either we are in the middle of a line or at the end of a file, good to go
+		} else {
+			// We are at the end of a multiline (fake line) or a real line,
+			// Even though we do the same thing for both scenarios, the below key movements are still necessary
+			// to either put us at the right position for either scenario
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+		}
+	}
+
+	// Now that we're in the right position, we can paste
+	let startCursorPosition = docs.userCursor.style.transform;
+	if (e.ctrlKey === false) {
+		await docs.contentDocument.execCommand("paste");
+		setTimeout(() => {
+			let endCursorPosition = docs.userCursor.style.transform;
+			// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
+			if (startCursorPosition !== endCursorPosition) {
+				docs.pressKey(docs.codeFromKey("ArrowLeft"));
+			}
+		}, 1);
+	} else {
+		await docs.pasteClipboardPlainText().then(() => {
+			setTimeout(() => {
+				let endCursorPosition = docs.userCursor.style.transform;
+				// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
+				if (startCursorPosition !== endCursorPosition) {
+					docs.pressKey(docs.codeFromKey("ArrowLeft"));
+				}
+			}, 1);
+		});
+	}
 };
 
 // List of shortcuts for visual mode that we will let pass through (ex: Command + B to bold)
@@ -76,7 +248,6 @@ windowsVim.normalShortcuts = [
     ["6", true, true, false, false], // Alt + Ctrl + 6 (Heading 6)
 ]
 
-// Cannot be in baseVim for some reason
 windowsVim.clearData = function () {
     windowsVim.num = "";
     windowsVim.currentSequence = "";
@@ -129,8 +300,6 @@ windowsVim.moveToStartOfLine = function () {
     }
 }
 
-const KEY_SEPARATOR = "•";
-
 // Called in normal mode.
 windowsVim.normal_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
@@ -153,7 +322,7 @@ windowsVim.normal_keydown = function (e) {
 		if (equal) {
             if (e.key === "a" && e.ctrlKey === true) {
                 // Select all --> Switch to visual mode
-                windowsVim.switchToVisualMode();
+                windowsVim.switchToVisualLineMode();
             }
 			windowsVim.clearData();
 			return true;
@@ -386,6 +555,12 @@ windowsVim.normal_keydown = function (e) {
                 windowsVim.clearData();
                 return true;
             }
+        case (keyMapN.G[0] === windowsVim.currentSequence && (keyMapN.G[1] === true || keyMapN.G[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("End"), true);
+                windowsVim.clearData();
+                return true;
+            }
         case (keyMapN["{"][0] === windowsVim.currentSequence && (keyMapN["{"][1] === true || keyMapN["{"][2] === modifierInput)):
             {
                 const numRepeats = parseInt(windowsVim.num) || 1;
@@ -566,7 +741,7 @@ windowsVim.normal_keydown = function (e) {
                 // Go to visual mode
                 windowsVim.clearData();
                 windowsVim.visualModeIsLinedBased = false;
-                windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
+                windowsVim.switchToVisualMode();
                 return true;
             }
         case (keyMapN.enterVisualLine[0] === windowsVim.currentSequence && (keyMapN.enterVisualLine[1] === true || keyMapN.enterVisualLine[2] === modifierInput)):
@@ -576,12 +751,9 @@ windowsVim.normal_keydown = function (e) {
                 if (!cursorLocations[0]) {
                     docs.pressKey(docs.codeFromKey("ArrowUp"), true);
                 }
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-
                 windowsVim.clearData();
                 windowsVim.visualModeIsLinedBased = true;
-                windowsVim.switchToVisualMode(windowsVim.visualModeIsLinedBased);
+                windowsVim.switchToVisualLineMode();
                 return true;
             }
         case (keyMapN.append[0] === windowsVim.currentSequence && (keyMapN.append[1] === true || keyMapN.append[2] === modifierInput)): 
@@ -1488,6 +1660,16 @@ windowsVim.normal_keydown = function (e) {
             windowsVim.clearData();
             return true;
         }
+        case (keyMapN.u[0] === windowsVim.currentSequence && (keyMapN.u[1] === true || keyMapN.u[2] === modifierInput)): 
+        case (keyMapN.U[0] === windowsVim.currentSequence && (keyMapN.U[1] === true || keyMapN.U[2] === modifierInput)): 
+        {
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("Z"), true);
+            }
+            windowsVim.clearData();
+            return true;
+        }
 
 
     }
@@ -1506,7 +1688,6 @@ windowsVim.normal_keydown = function (e) {
     return true;
 };
 
-// Called in visual mode.
 windowsVim.visual_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
         // Pass through any function keys.
@@ -1516,7 +1697,7 @@ windowsVim.visual_keydown = function (e) {
 	// Check if the key is a Google Docs native shortcut
 	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
 
-	// Check if the native shortcut is in the macVim.visualShortcuts
+	// Check if the native shortcut is in the windowsVim.visualShortcuts
 	for (let i = 0; i < windowsVim.visualShortcuts.length; i++) {
 		let equal = true;
 		for (let j = 0; j < windowsVim.visualShortcuts[i].length; j++) {
@@ -1531,7 +1712,6 @@ windowsVim.visual_keydown = function (e) {
 		}
 	}
 
-
     e.preventDefault();
     e.stopPropagation();
 
@@ -1545,96 +1725,7 @@ windowsVim.visual_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "Escape" || (e.key === "c" && e.ctrlKey === true)) {
-        // Escape visual mode.
-        docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-        // go to the right side when the left side could be a solution as well
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    if (
-        (e.key === "U" || e.key === "u") &&
-        windowsVim.currentSequence.length === 0 && !e.ctrlKey
-    ) {
-        // Escape visual mode
-        docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-        // go to the right side when the left side could be a solution as well
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    if (
-        e.key === "r" &&
-        e.ctrlKey === true &&
-        windowsVim.currentSequence.length === 0
-    ) {
-        // Escape visual mode
-        docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-        // go to the right side when the left side could be a solution as well
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    // Search
-    if (e.key === "/" && windowsVim.currentSequence.length === 0) {
-	    docs.pressKey(docs.codeFromKey("f"), true);
-        windowsVim.clearData();
-        return true;
-    }
-
-    // Paste after cursor
-    if (e.key === "p" && windowsVim.currentSequence.length === 0) {
-        // We have to first delete the highlighted text, then paste in the clipboard
-        docs.pressKey(docs.codeFromKey("Backspace"));
-        windowsVim.paste(e);
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    // Paste before cursor
-    if (e.key === "P" && windowsVim.currentSequence.length === 0) {
-        docs.pressKey(docs.codeFromKey("Backspace"));
-        if (e.ctrlKey == false) {
-            // Paste with formatting
-            docs.contentDocument.execCommand("paste");
-            setTimeout(() => {
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }, 1);
-        } else {
-            // Paste without formatting
-            docs.pasteClipboardPlainText().then(() => {
-                setTimeout(() => {
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                });
-            });
-        }
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    if (e.key === "I" && windowsVim.currentSequence.length === 0) {
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    if (
-        (e.key === "v" || e.key === "V") &&
-        windowsVim.currentSequence.length === 0
-    ) {
-        docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
+    // Check if it's a number
     if (e.key.match(/\d+/) && windowsVim.currentSequence.length === 0) {
         if (e.key === "0" && windowsVim.num.length !== 0) {
             // 0 is part of the number being typed (ex: "100")
@@ -1657,270 +1748,361 @@ windowsVim.visual_keydown = function (e) {
         return true;
     }
 
-    if (e.key === "A" && windowsVim.currentSequence.length === 0) {
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        if (windowsVim.visualModeIsLinedBased) {
-            let cursorLocations = docs.getCursorLocations();
-            if (!cursorLocations[3]) {
-                // If we're not at the end of a file, move left
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }
-        }
+    // Past this point we add the key to the sequence, and then go checking if it matches any of the commands in our switch statement
+    // If it doesn't, after the switch statement we see if we are building up to a command or not
 
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
+    if (windowsVim.currentSequence.length === 0) {
+        windowsVim.currentSequence = e.key;
+    }
+    else {
+        windowsVim.currentSequence += KEY_SEPARATOR + e.key;
     }
 
-    if (e.key === "$" && windowsVim.currentSequence.length === 0) {
-        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-        docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-        windowsVim.clearData();
-        return true;
-    }
+    // Bit mask of what modifier keys are pressed
+    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const keyMapV = windowsVim.keyMapV;
 
-    if (e.key === "x" && windowsVim.currentSequence.length === 0) {
-        docs.contentDocument.execCommand("cut");
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    if (e.key === "d" && windowsVim.currentSequence.length === 0 && !e.ctrlKey) {
-        docs.pressKey(docs.codeFromKey("Backspace"));
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    if (e.key === "c" && windowsVim.currentSequence.length === 0) {
-        docs.pressKey(docs.codeFromKey("Backspace"));
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    if (e.key === "D" && windowsVim.currentSequence.length === 0) {
-        docs.pressKey(docs.codeFromKey("Backspace"));
-        windowsVim.moveToEndOfLine();
-        let [startXCoord, startYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        let [midXCoord, midYCoord] = docs.getCoords();
-        if (startXCoord === midXCoord && startYCoord === midYCoord) {
-            // At the start of the file
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("Backspace"));
-        } else if (startYCoord === midYCoord) {
-            // In the middle of a line or something
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            docs.pressKey(docs.codeFromKey("Backspace"));
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("Backspace"));
-        } else {
-            // We are on an empty line
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("Backspace"));
-        }
-
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    if (e.key === "C" && windowsVim.currentSequence.length === 0) {
-        docs.pressKey(docs.codeFromKey("Backspace"));
-        windowsVim.moveToEndOfLine();
-        let [startXCoord, startYCoord] = docs.getCoords();
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        let [midXCoord, midYCoord] = docs.getCoords();
-        if (startXCoord === midXCoord && startYCoord === midYCoord) {
-            // Do nothing
-        } else if (startYCoord === midYCoord) {
-            // In the middle of a line or something
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            docs.pressKey(docs.codeFromKey("Backspace"));
-        } else {
-            // We are on an empty line
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-        }
-        windowsVim.clearData();
-        windowsVim.switchToInsertMode();
-        return true;
-    }
-
-    if (e.key === "y" && windowsVim.currentSequence.length === 0) {
-        docs.contentDocument.execCommand("copy");
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        windowsVim.clearData();
-        windowsVim.switchToNormalMode();
-        return true;
-    }
-
-    // Now we do checks that only apply to line-based visual mode, where we do not follow the norm
-    if (windowsVim.visualModeIsLinedBased) {
-        // Left and right traversal now do nothing
-        let doNothingKeys = ["h", "l", "b", "B", "e", "E", "w", "W", "ArrowRight", "ArrowLeft"];
-        if (
-            doNothingKeys.includes(e.key) &&
-            windowsVim.currentSequence.length === 0
-        ) {
-            windowsVim.clearData();
-            return true;
-        }
-
-        if ((e.key === "k" && windowsVim.currentSequence.length === 0) || (e.key === "ArrowUp" && windowsVim.currentSequence.length === 0)) {
-            const numRepeats = parseInt(windowsVim.num) || 1;
-            for (let i = 0; i < numRepeats; i++) {
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            }
-            windowsVim.clearData();
-            return true;
-        }
-
-        if ((e.key === "j" && windowsVim.currentSequence.length === 0) || (e.key === "ArrowDown" && windowsVim.currentSequence.length === 0)) {
-            const numRepeats = parseInt(windowsVim.num) || 1;
-            for (let i = 0; i < numRepeats; i++) {
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-            }
-            windowsVim.clearData();
-            return true;
-        }
-
-        if (
-            e.key === "d" &&
-            e.ctrlKey === true &&
-            windowsVim.currentSequence.length === 0
-        ) {
-            // Ctrl-d is page-down, so move down and then ensure we are still line-based
-			docs.pressKey(docs.codeFromKey("PageDown"), false, true);
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-            windowsVim.clearData();
-            return true;
-        }
-
-        if (
-            e.key === "u" &&
-            e.ctrlKey === true &&
-            windowsVim.currentSequence.length === 0
-        ) {
-            // Ctrl-u is page-up, so move up and then ensure we are still line-based
-			docs.pressKey(docs.codeFromKey("PageUp"), false, true);
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-            windowsVim.clearData();
-            return true;
-        }
-
-    }
-
-    if (e.key === "ArrowLeft" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "ArrowRight" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "ArrowUp" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "ArrowDown" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-	// Page up/page down if we are not line based visual mode
-	if (e.key === "d" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-		// Ctrl-d is page-down
-		docs.pressKey(docs.codeFromKey("PageDown"), false, true);
-		windowsVim.clearData();
-		return true;
-	}
-
-	if (e.key === "u" && e.ctrlKey === true && windowsVim.currentSequence.length === 0) {
-		// Ctrl-u is page-up
-		docs.pressKey(docs.codeFromKey("PageUp"), false, true);
-		windowsVim.clearData();
-		return true;
-	}
-
-    if (
-        (e.key === "w" || e.key === "W") &&
-        windowsVim.currentSequence.length === 0
-    ) {
-        const numRepeats = parseInt(windowsVim.num) || 1;
-        for (let i = 0; i < numRepeats; i++) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-            docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-        }
-        windowsVim.clearData();
-        return true;
-    }
-
-    if (e.key === "r" && windowsVim.currentSequence.length === 0) {
-        // Invalid
-        windowsVim.clearData();
-        return true;
-    }
-
-    windowsVim.currentSequence += e.key;
-
-    if (windowsVim.currentSequence in windowsVim.differentVisualKeyMaps) {
-        windowsVim.differentVisualKeyMaps[windowsVim.currentSequence].forEach(
-            ([key, ...args]) => {
+    switch (true) {
+        case (keyMapV.arrowLeft[0] === windowsVim.currentSequence && (keyMapV.arrowLeft[1] === true || keyMapV.arrowLeft[2] === modifierInput)):
+        case (keyMapV.backspace[0] === windowsVim.currentSequence && (keyMapV.backspace[1] === true || keyMapV.backspace[2] === modifierInput)):
+        case (keyMapV.h[0] === windowsVim.currentSequence && (keyMapV.h[1] === true || keyMapV.h[2] === modifierInput)):
+            {
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
-                    if (key.indexOf("Arrow") == 0) {
-                        // get the special keys pressed and default to false
-                        const keyArgs = [...args, false, false].slice(0, 2);
-                        keyArgs[1] = true;
-                        docs.pressKey(docs.codeFromKey(key), ...keyArgs);
-                    } else {
-                        docs.pressKey(docs.codeFromKey(key), ...args);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.arrowRight[0] === windowsVim.currentSequence && (keyMapV.arrowRight[1] === true || keyMapV.arrowRight[2] === modifierInput)):
+        case (keyMapV.l[0] === windowsVim.currentSequence && (keyMapV.l[1] === true || keyMapV.l[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.arrowUp[0] === windowsVim.currentSequence && (keyMapV.arrowUp[1] === true || keyMapV.arrowUp[2] === modifierInput)):
+        case (keyMapV.k[0] === windowsVim.currentSequence && (keyMapV.k[1] === true || keyMapV.k[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), false, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.arrowDown[0] === windowsVim.currentSequence && (keyMapV.arrowDown[1] === true || keyMapV.arrowDown[2] === modifierInput)):
+        case (keyMapV.j[0] === windowsVim.currentSequence && (keyMapV.j[1] === true || keyMapV.j[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), false, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.B[0] === windowsVim.currentSequence && (keyMapV.B[1] === true || keyMapV.B[2] === modifierInput)):
+        case (keyMapV.b[0] === windowsVim.currentSequence && (keyMapV.b[1] === true || keyMapV.b[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.gg[0] === windowsVim.currentSequence && (keyMapV.gg[1] === true || keyMapV.gg[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Home"), true, true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.G[0] === windowsVim.currentSequence && (keyMapV.G[1] === true || keyMapV.G[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("End"), true, true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV["{"][0] === windowsVim.currentSequence && (keyMapV["{"][1] === true || keyMapV["{"][2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV["}"][0] === windowsVim.currentSequence && (keyMapV["}"][1] === true || keyMapV["}"][2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.e[0] === windowsVim.currentSequence && (keyMapV.e[1] === true || keyMapV.e[2] === modifierInput)):
+        case (keyMapV.E[0] === windowsVim.currentSequence && (keyMapV.E[1] === true || keyMapV.E[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.escape[0] === windowsVim.currentSequence && (keyMapV.escape[1] === true || keyMapV.escape[2] === modifierInput)):
+        case (keyMapV.ctrlC[0] === windowsVim.currentSequence && (keyMapV.ctrlC[1] === true || keyMapV.ctrlC[2] === modifierInput)):
+            {
+                // Escape visual mode.
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                // go to the right side when the left side could be a solution as well
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.u[0] === windowsVim.currentSequence && (keyMapV.u[1] === true || keyMapV.u[2] === modifierInput)):
+        case (keyMapV.U[0] === windowsVim.currentSequence && (keyMapV.U[1] === true || keyMapV.U[2] === modifierInput)):
+            {
+                // Escape visual mode
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                // go to the right side when the left side could be a solution as well
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.redo[0] === windowsVim.currentSequence && (keyMapV.redo[1] === true || keyMapV.redo[2] === modifierInput)):
+            {
+                // Escape visual mode
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                // go to the right side when the left side could be a solution as well
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.slashSearch[0] === windowsVim.currentSequence && (keyMapV.slashSearch[1] === true || keyMapV.slashSearch[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("f"), true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.paste[0] === windowsVim.currentSequence && (keyMapV.paste[1] === true || keyMapV.paste[2] === modifierInput)):
+        case (keyMapV.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteNoFormatting[1] === true || keyMapV.pasteNoFormatting[2] === modifierInput)):
+            {
+                // We have to first delete the highlighted text, then paste in the clipboard
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.paste(e);
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursor[1] === true || keyMapV.pasteBeforeCursor[2] === modifierInput)):
+        case (keyMapV.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
+            {
+                // Paste before cursor
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (e.ctrlKey == false) {
+                    // Paste with formatting
+                    docs.contentDocument.execCommand("paste");
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }, 1);
+                } else {
+                    // Paste without formatting
+                    docs.pasteClipboardPlainText().then(() => {
+                        setTimeout(() => {
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        });
+                    });
+                }
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.insertStartOfHighlight[0] === windowsVim.currentSequence && (keyMapV.insertStartOfHighlight[1] === true || keyMapV.insertStartOfHighlight[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapV.exitVisualMode[0] === windowsVim.currentSequence && (keyMapV.exitVisualMode[1] === true || keyMapV.exitVisualMode[2] === modifierInput)):
+        case (keyMapV.exitVisualMode2[0] === windowsVim.currentSequence && (keyMapV.exitVisualMode2[1] === true || keyMapV.exitVisualMode2[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapV.appendEndOfHighlight[1] === true || keyMapV.appendEndOfHighlight[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                if (windowsVim.visualModeIsLinedBased) {
+                    let cursorLocations = docs.getCursorLocations();
+                    if (!cursorLocations[3]) {
+                        // If we're not at the end of a file, move left
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
                     }
                 }
+
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
             }
-        );
-        windowsVim.clearData();
-        return true;
-    } else if (windowsVim.currentSequence in windowsVim.keyMaps) {
-        windowsVim.keyMaps[windowsVim.currentSequence].forEach(
-            ([key, ...args]) => {
+        case (keyMapV.highlightToEndOfLine[0] === windowsVim.currentSequence && (keyMapV.highlightToEndOfLine[1] === true || keyMapV.highlightToEndOfLine[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.x[0] === windowsVim.currentSequence && (keyMapV.x[1] === true || keyMapV.x[2] === modifierInput)):
+            {
+                docs.contentDocument.execCommand("cut");
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.d[0] === windowsVim.currentSequence && (keyMapV.d[1] === true || keyMapV.d[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.c[0] === windowsVim.currentSequence && (keyMapV.c[1] === true || keyMapV.c[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapV.D[0] === windowsVim.currentSequence && (keyMapV.D[1] === true || keyMapV.D[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.moveToEndOfLine();
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [midXCoord, midYCoord] = docs.getCoords();
+                if (startXCoord === midXCoord && startYCoord === midYCoord) {
+                    // At the start of the file
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                } else if (startYCoord === midYCoord) {
+                    // In the middle of a line or something
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                } else {
+                    // We are on an empty line
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.C[0] === windowsVim.currentSequence && (keyMapV.C[1] === true || keyMapV.C[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.moveToEndOfLine();
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [midXCoord, midYCoord] = docs.getCoords();
+                if (startXCoord === midXCoord && startYCoord === midYCoord) {
+                    // Do nothing
+                } else if (startYCoord === midYCoord) {
+                    // In the middle of a line or something
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                } else {
+                    // We are on an empty line
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapV.y[0] === windowsVim.currentSequence && (keyMapV.y[1] === true || keyMapV.y[2] === modifierInput)):
+            {
+                docs.contentDocument.execCommand("copy");
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.arrowLeftCtrl[0] === windowsVim.currentSequence && (keyMapV.arrowLeftCtrl[1] === true || keyMapV.arrowLeftCtrl[2] === modifierInput)):
+            {
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
-                    // get the special keys pressed and default to false
-                    const keyArgs = [...args, false, false].slice(0, 2);
-                    keyArgs[1] = true;
-                    docs.pressKey(docs.codeFromKey(key), ...keyArgs);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
                 }
+                windowsVim.clearData();
+                return true;
             }
-        );
-        windowsVim.clearData();
-        return true;
+        case (keyMapV.arrowRightCtrl[0] === windowsVim.currentSequence && (keyMapV.arrowRightCtrl[1] === true || keyMapV.arrowRightCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.arrowDownCtrl[0] === windowsVim.currentSequence && (keyMapV.arrowDownCtrl[1] === true || keyMapV.arrowDownCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapV.arrowUpCtrl[1] === true || keyMapV.arrowUpCtrl[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.ctrlDPageDown[0] === windowsVim.currentSequence && (keyMapV.ctrlDPageDown[1] === true || keyMapV.ctrlDPageDown[2] === modifierInput)):
+            {
+                // Ctrl-d is page-down
+                docs.pressKey(docs.codeFromKey("PageDown"), false, true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.ctrlUPageUp[0] === windowsVim.currentSequence && (keyMapV.ctrlUPageUp[1] === true || keyMapV.ctrlUPageUp[2] === modifierInput)):
+            {
+                // Ctrl-u is page-up
+                docs.pressKey(docs.codeFromKey("PageUp"), false, true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapV.w[0] === windowsVim.currentSequence && (keyMapV.w[1] === true || keyMapV.w[2] === modifierInput)):
+        case (keyMapV.W[0] === windowsVim.currentSequence && (keyMapV.W[1] === true || keyMapV.W[2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
     }
 
+    // Check if we are building up to a command or if the sequence is invalid
     if (
         windowsVim.currentSequence.length !== 0 &&
         !windowsVim.incompleteKeyMaps.includes(windowsVim.currentSequence)
@@ -1932,6 +2114,314 @@ windowsVim.visual_keydown = function (e) {
 
     updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
     return true;
+
+}
+
+windowsVim.visual_line_keydown = function (e) {
+    if (e.key.match(/F\d+/)) {
+        // Pass through any function keys.
+        return true;
+    }
+
+	// Check if the key is a Google Docs native shortcut
+	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
+
+	// Check if the native shortcut is in the windowsVim.visualShortcuts
+	for (let i = 0; i < windowsVim.visualShortcuts.length; i++) {
+		let equal = true;
+		for (let j = 0; j < windowsVim.visualShortcuts[i].length; j++) {
+			if (windowsVim.visualShortcuts[i][j] !== checkIfNativeShortcut[j]) {
+				equal = false;
+				break;
+			}
+		}
+		if (equal) {
+			windowsVim.clearData();
+			return true;
+		}
+	}
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (
+        e.key === "Shift" ||
+        e.key === "Control" ||
+        e.key === "Alt" ||
+        e.key === "Meta"
+    ) {
+        // Shift by itself does nothing
+        return true;
+    }
+
+    // Check if it's a number
+    if (e.key.match(/\d+/) && windowsVim.currentSequence.length === 0) {
+        if (e.key === "0" && windowsVim.num.length !== 0) {
+            // 0 is part of the number being typed (ex: "100")
+            if (windowsVim.num.length < 3) {
+                // We don't want to crash, so max you can type in is a 3 digit number (999)
+                windowsVim.num += e.key;
+            }
+        } else if (e.key !== "0") {
+            // We have any digit besides 0 being typed (ex: "1" or "11")
+            if (windowsVim.num.length < 3) {
+                windowsVim.num += e.key;
+            }
+        } else {
+            // Do nothing (We are in visual LINE mode, so 0 shouldn't actually do anything)
+        }
+        updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+        docs.setCursorWidth();
+        return true;
+    }
+
+    // Past this point we add the key to the sequence, and then go checking if it matches any of the commands in our switch statement
+    // If it doesn't, after the switch statement we see if we are building up to a command or not
+
+    if (windowsVim.currentSequence.length === 0) {
+        windowsVim.currentSequence = e.key;
+    }
+    else {
+        windowsVim.currentSequence += KEY_SEPARATOR + e.key;
+    }
+
+    // Bit mask of what modifier keys are pressed
+    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const keyMapVLine = windowsVim.keyMapVLine;
+
+    // TODO: Add the switch with all of the potential commands
+    switch (true) {
+        case (keyMapVLine.arrowUp[0] === windowsVim.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
+        case (keyMapVLine.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)): 
+        case (keyMapVLine.k[0] === windowsVim.currentSequence && (keyMapVLine.k[1] === true || keyMapVLine.k[2] === modifierInput)): 
+        {
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+            }
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapVLine.arrowDown[0] === windowsVim.currentSequence && (keyMapVLine.arrowDown[1] === true || keyMapVLine.arrowDown[2] === modifierInput)): 
+        case (keyMapVLine.arrowDownCtrl[0] === windowsVim.currentSequence && (keyMapVLine.arrowDownCtrl[1] === true || keyMapVLine.arrowDownCtrl[2] === modifierInput)): 
+        case (keyMapVLine.j[0] === windowsVim.currentSequence && (keyMapVLine.j[1] === true || keyMapVLine.j[2] === modifierInput)): 
+        {
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+            }
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapVLine.ctrlDPageDown[0] === windowsVim.currentSequence && (keyMapVLine.ctrlDPageDown[1] === true || keyMapVLine.ctrlDPageDown[2] === modifierInput)): 
+        {
+            // Ctrl-d is page-down, so move down and then ensure we are still line-based
+			docs.pressKey(docs.codeFromKey("PageDown"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapVLine.ctrlUPageUp[0] === windowsVim.currentSequence && (keyMapVLine.ctrlUPageUp[1] === true || keyMapVLine.ctrlUPageUp[2] === modifierInput)): 
+        {
+            // Ctrl-u is page-up, so move up and then ensure we are still line-based
+			docs.pressKey(docs.codeFromKey("PageUp"), false, true);
+			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+            windowsVim.clearData();
+            return true;
+        }
+        case (keyMapVLine.gg[0] === windowsVim.currentSequence && (keyMapVLine.gg[1] === true || keyMapVLine.gg[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Home"), true, true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapVLine.G[0] === windowsVim.currentSequence && (keyMapVLine.G[1] === true || keyMapVLine.G[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("End"), true, true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapVLine["{"][0] === windowsVim.currentSequence && (keyMapVLine["{"][1] === true || keyMapVLine["{"][2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapVLine["}"][0] === windowsVim.currentSequence && (keyMapVLine["}"][1] === true || keyMapVLine["}"][2] === modifierInput)):
+            {
+                const numRepeats = parseInt(windowsVim.num) || 1;
+                for (let i = 0; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                }
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapVLine.escape[0] === windowsVim.currentSequence && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
+        case (keyMapVLine.ctrlC[0] === windowsVim.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
+            {
+                // Escape visual mode.
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                // go to the right side when the left side could be a solution as well
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.u[0] === windowsVim.currentSequence && (keyMapVLine.u[1] === true || keyMapVLine.u[2] === modifierInput)):
+        case (keyMapVLine.U[0] === windowsVim.currentSequence && (keyMapVLine.U[1] === true || keyMapVLine.U[2] === modifierInput)):
+            {
+                // Escape visual mode
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                // go to the right side when the left side could be a solution as well
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.redo[0] === windowsVim.currentSequence && (keyMapVLine.redo[1] === true || keyMapVLine.redo[2] === modifierInput)):
+            {
+                // Escape visual mode
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                // go to the right side when the left side could be a solution as well
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.slashSearch[0] === windowsVim.currentSequence && (keyMapVLine.slashSearch[1] === true || keyMapVLine.slashSearch[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("f"), true);
+                windowsVim.clearData();
+                return true;
+            }
+        case (keyMapVLine.paste[0] === windowsVim.currentSequence && (keyMapVLine.paste[1] === true || keyMapVLine.paste[2] === modifierInput)):
+        case (keyMapVLine.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
+            {
+                // We have to first delete the highlighted text, then paste in the clipboard
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.paste(e);
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursor[1] === true || keyMapVLine.pasteBeforeCursor[2] === modifierInput)):
+        case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
+            {
+                // Paste before cursor
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (e.ctrlKey == false) {
+                    // Paste with formatting
+                    docs.contentDocument.execCommand("paste");
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }, 1);
+                } else {
+                    // Paste without formatting
+                    docs.pasteClipboardPlainText().then(() => {
+                        setTimeout(() => {
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        });
+                    });
+                }
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.insertStartOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.insertStartOfHighlight[1] === true || keyMapVLine.insertStartOfHighlight[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapVLine.exitVisualMode[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualMode[1] === true || keyMapVLine.exitVisualMode[2] === modifierInput)):
+        case (keyMapVLine.exitVisualMode2[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualMode2[1] === true || keyMapVLine.exitVisualMode2[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                if (windowsVim.visualModeIsLinedBased) {
+                    let cursorLocations = docs.getCursorLocations();
+                    if (!cursorLocations[3]) {
+                        // If we're not at the end of a file, move left
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }
+                }
+
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapVLine.x[0] === windowsVim.currentSequence && (keyMapVLine.x[1] === true || keyMapVLine.x[2] === modifierInput)):
+            {
+                docs.contentDocument.execCommand("cut");
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.d[0] === windowsVim.currentSequence && (keyMapVLine.d[1] === true || keyMapVLine.d[2] === modifierInput)):
+        case (keyMapVLine.D[0] === windowsVim.currentSequence && (keyMapVLine.D[1] === true || keyMapVLine.D[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.c[0] === windowsVim.currentSequence && (keyMapVLine.c[1] === true || keyMapVLine.c[2] === modifierInput)):
+        case (keyMapVLine.C[0] === windowsVim.currentSequence && (keyMapVLine.C[1] === true || keyMapVLine.C[2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                windowsVim.clearData();
+                windowsVim.switchToInsertMode();
+                return true;
+            }
+        case (keyMapVLine.y[0] === windowsVim.currentSequence && (keyMapVLine.y[1] === true || keyMapVLine.y[2] === modifierInput)):
+            {
+                docs.contentDocument.execCommand("copy");
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                windowsVim.clearData();
+                windowsVim.switchToNormalMode();
+                return true;
+            }
+    }
+
+    // Check if we are building up to a command or if the sequence is invalid
+    if (
+        windowsVim.currentSequence.length !== 0 &&
+        !windowsVim.incompleteKeyMaps.includes(windowsVim.currentSequence)
+    ) {
+        // This means that the current sequence is invalid, so we have to reset it
+        windowsVim.num = "";
+        windowsVim.currentSequence = "";
+    }
+
+    updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+    return true;
+
+
+}
+
+windowsVim.insert_keydown = function (e) {
+    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const keyMapI = this.keyMapI;
+	// Check if current key is part of a key map
+	switch (true) {
+        case (keyMapI.escape[0] === e.key && (keyMapI.escape[1] === true || keyMapI.escape[2] === modifierInput)):
+        case (keyMapI.ctrlC[0] === e.key && (keyMapI.ctrlC[1] === true || keyMapI.ctrlC[2] === modifierInput)):
+		{
+			e.preventDefault();
+    		e.stopPropagation();
+			windowsVim.switchToNormalMode();
+			return true;
+		}
+	}
+
+	// If nothing in the switch statement runs, then we just let the key pass through
 };
 
 export { windowsVim };
