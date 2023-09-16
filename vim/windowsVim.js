@@ -12,13 +12,6 @@ let windowsVim = {
 	incompleteKeyMaps: ["g", "r", "d", "c", "y", "d" + KEY_SEPARATOR + "i", "c" + KEY_SEPARATOR + "i", "d" + KEY_SEPARATOR + "a", "c" + KEY_SEPARATOR + "a"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
 	incompleteKeyMapsV: ["g"],
 	incompleteKeyMapsVLine: ["g"],
-	differentVisualKeyMaps: {}, // TODO: Delete after it's reference gets deleted
-	// differentVisualKeyMaps: { // Some of the commands for the same key are different in visual mode, and if so, they are stored here
-	// 	gg: [["Home", true, true]],
-	// 	G: [["End", true, true]],
-	// 	e: [["ArrowRight", true, true]], // ctrl + ->
-	// 	E: [["ArrowRight", true, true]], // ctrl + ->
-	// },
 };
 
 windowsVim.switchToNormalMode = function () {
@@ -459,6 +452,7 @@ windowsVim.normal_keydown = function (e) {
     const keyMapN = windowsVim.keyMapN;
 
     switch (true) {
+        case (keyMapN.backspace[0] === windowsVim.currentSequence && (keyMapN.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
         case (keyMapN.arrowLeft[0] === windowsVim.currentSequence && (keyMapN.arrowLeft[1] === true || keyMapN.arrowLeft[2] === modifierInput)):
             {
                 const numRepeats = parseInt(windowsVim.num) || 1;
@@ -496,14 +490,6 @@ windowsVim.normal_keydown = function (e) {
                 return true;
             }
         case (keyMapN.b[0] === windowsVim.currentSequence && (keyMapN.b[1] === true || keyMapN.b[2] === modifierInput)):
-            {
-                const numRepeats = parseInt(windowsVim.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-                }
-                windowsVim.clearData();
-                return true;
-            }
         case (keyMapN.B[0] === windowsVim.currentSequence && (keyMapN.B[1] === true || keyMapN.B[2] === modifierInput)):
             {
                 const numRepeats = parseInt(windowsVim.num) || 1;
@@ -579,15 +565,6 @@ windowsVim.normal_keydown = function (e) {
                 windowsVim.clearData();
                 return true;
             }
-        case (keyMapN["}"][0] === windowsVim.currentSequence && (keyMapN["}"][1] === true || keyMapN["}"][2] === modifierInput)):
-            {
-                const numRepeats = parseInt(windowsVim.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-                }
-                windowsVim.clearData();
-                return true;
-            }
         case (keyMapN.arrowLeftCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowLeftCtrl[1] === true || keyMapN.arrowLeftCtrl[2] === modifierInput)):
             {
                 const numRepeats = parseInt(windowsVim.num) || 1;
@@ -611,15 +588,6 @@ windowsVim.normal_keydown = function (e) {
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
                     docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-                }
-                windowsVim.clearData();
-                return true;
-            }
-        case (keyMapN.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowUpCtrl[1] === true || keyMapN.arrowUpCtrl[2] === modifierInput)):
-            {
-                const numRepeats = parseInt(windowsVim.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
                 }
                 windowsVim.clearData();
                 return true;
