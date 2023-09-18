@@ -80,6 +80,10 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
                 return;
             }
 
+            if (keyMapStr === "keyMapI" && curSequence.length > 0) {
+                return;
+            }
+
             // Past this point the key is a valid keybinding that we need to handle it (record, update UIs)
 
             // Let's update the bitmask with any modifiers that were pressed
