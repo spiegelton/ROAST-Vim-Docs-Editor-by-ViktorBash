@@ -3,7 +3,7 @@ let insertElem = document.getElementById("insert");
 let visualElem = document.getElementById("visual");
 let visualLineElem = document.getElementById("visual-line");
 
-import { KEY_SEPARATOR, getUltimateKeyMapInCallback } from "./vim/keybindings.js";
+import { KEY_SEPARATOR, getUltimateKeyMapInCallback, getDefaultKeyBindings, saveKeyInKeyMap } from "./vim/keybindings.js";
 
 let block_clicks = false;
 
@@ -15,7 +15,7 @@ function getElements(intId) {
     return [selectedKey, saveButton, cancelButton, defaultButton];
 }
 
-function addHTML(elem, key, id) {
+function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     let bitmask = key[2];
 
     // Build the value of the current key (we need to remove the KEY_SEPARATOR character)
@@ -26,8 +26,8 @@ function addHTML(elem, key, id) {
         }
     }
 
-    let curSequence = "";
-    let oldDisplaySequence = curValue;
+    let curSequence = ""; // This comes into play when the user "saves" a new keymap value, and also
+    // for updating as they type
 
     let handleOnClick = function (e) {
         if (block_clicks) {
@@ -56,6 +56,25 @@ function addHTML(elem, key, id) {
     }
 
     let handleSave = function (e) {
+        block_clicks = false;
+        let [selectedKey, saveButton, cancelButton, defaultButton] = getElements(id);
+        saveButton.style.display = "none";
+        cancelButton.style.display = "none";
+        defaultButton.style.display = "none";
+
+        curValue = "";
+        for (let i = 0; i < curSequence.length; i++) {
+            if (curSequence[i] !== KEY_SEPARATOR) {
+                curValue += curSequence[i];
+            }
+        }
+        selectedKey.innerHTML = curValue;
+
+        // curSequence holds the new value in raw form
+        
+        saveKeyInKeyMap(keyMapStr, keyNameStr, curSequence, 0b000)
+        curSequence = "";
+        window.onkeydown = null;
     }
 
     let handleCancel = function (e) {
@@ -64,11 +83,35 @@ function addHTML(elem, key, id) {
         saveButton.style.display = "none";
         cancelButton.style.display = "none";
         defaultButton.style.display = "none";
-        selectedKey.innerHTML = oldDisplaySequence;
+        selectedKey.innerHTML = curValue;
+        curSequence = "";
+        window.onkeydown = null;
     }
 
     let handleDefault = function (e) {
+        block_clicks = false;
+        let [selectedKey, saveButton, cancelButton, defaultButton] = getElements(id);
+        saveButton.style.display = "none";
+        cancelButton.style.display = "none";
+        defaultButton.style.display = "none";
+        let defaultArr = getDefaultKeyBindings()[keyMapStr][keyNameStr];
+        let defaultRawValue = defaultArr[0];
+        let defaultDisplayValue = "";
 
+        // Build the default display value
+        for (let i = 0; i < defaultRawValue.length; i++) {
+            if (defaultRawValue[i] !== KEY_SEPARATOR) {
+                defaultDisplayValue += defaultRawValue[i];
+            }
+        }
+        
+        curSequence = "";
+        // Now we have displayed the default value
+        curValue = defaultDisplayValue;
+        selectedKey.innerHTML = curValue;
+
+        saveKeyInKeyMap(keyMapStr, keyNameStr, defaultRawValue, defaultArr[2])
+        window.onkeydown = null;
     }
 
     // Create the HTML elements (li, span, checkbox1, checkbox2, checkbox3, checkbox4)
@@ -161,7 +204,7 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 
     for (let i = 0; i < normalKeys.length; i++) {
         let key = keyMapN[normalKeys[i]]; // We now have the array holding the keymap's data
-        addHTML(normalElem, key, id);
+        addHTML(normalElem, key, id, "keyMapN", normalKeys[i]);
         id += 1;
     }
 
@@ -171,7 +214,7 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 
     for (let i = 0; i < insertKeys.length; i++) {
         let key = keyMapI[insertKeys[i]]; // We now have the array holding the keymap's data
-        addHTML(insertElem, key, id);
+        addHTML(insertElem, key, id, "keyMapI", insertKeys[i]);
         id += 1;
     }
 
@@ -181,7 +224,7 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 
     for (let i = 0; i < visualKeys.length; i++) {
         let key = keyMapV[visualKeys[i]]; // We now have the array holding the keymap's data
-        addHTML(visualElem, key, id);
+        addHTML(visualElem, key, id, "keyMapV", visualKeys[i]);
         id += 1;
     }
 
@@ -191,7 +234,7 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 
     for (let i = 0; i < visualLineKeys.length; i++) {
         let key = keyMapVLine[visualLineKeys[i]]; // We now have the array holding the keymap's data
-        addHTML(visualLineElem, key, id);
+        addHTML(visualLineElem, key, id, "keyMapVLine", visualLineKeys[i]);
         id += 1;
     }
 

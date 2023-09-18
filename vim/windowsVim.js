@@ -455,6 +455,7 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.backspace[0] === windowsVim.currentSequence && (keyMapN.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
         case (keyMapN.arrowLeft[0] === windowsVim.currentSequence && (keyMapN.arrowLeft[1] === true || keyMapN.arrowLeft[2] === modifierInput)):
             {
+                console.log("E");
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -567,6 +568,7 @@ windowsVim.normal_keydown = function (e) {
             }
         case (keyMapN.arrowLeftCtrl[0] === windowsVim.currentSequence && (keyMapN.arrowLeftCtrl[1] === true || keyMapN.arrowLeftCtrl[2] === modifierInput)):
             {
+                console.log("Woo");
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
