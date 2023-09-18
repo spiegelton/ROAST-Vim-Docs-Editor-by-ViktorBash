@@ -27,11 +27,7 @@ module.exports = {
   mode: 'production',
   entry: {
     main: [
-      "./docs.js",
       "./main.js",
-      "./vim/macVim.js",
-      "./vim/windowsVim.js",
-      "./vim/UI.js"
     ]
   },
   output: {
