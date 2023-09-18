@@ -1,7 +1,6 @@
 import { docs } from "../docs.js";
-import { updateUIModeText, updateUISequenceText } from "./UI.js";
-
-const KEY_SEPARATOR = "•";
+import { updateUIModeText, updateUISequenceText, getCleanedSequence } from "./UI.js";
+import { KEY_SEPARATOR } from "./keybindings.js";
 
 let windowsVim = {
 	// Main variables here
@@ -353,7 +352,7 @@ windowsVim.normal_keydown = function (e) {
             // else, 0 is the actual command (ex: "0"), so continue to down below
             windowsVim.moveToStartOfLine();
         }
-        updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+        updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
         docs.setCursorWidth();
         return true;
     }
@@ -1651,7 +1650,7 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+    updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
     docs.setCursorWidth();
     return true;
 };
@@ -1711,7 +1710,7 @@ windowsVim.visual_keydown = function (e) {
             docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
             docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
         }
-        updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+        updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
         docs.setCursorWidth();
         return true;
     }
@@ -2080,7 +2079,7 @@ windowsVim.visual_keydown = function (e) {
         windowsVim.currentSequence = "";
     }
 
-    updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+    updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
     return true;
 
 }
@@ -2138,7 +2137,7 @@ windowsVim.visual_line_keydown = function (e) {
         } else {
             // Do nothing (We are in visual LINE mode, so 0 shouldn't actually do anything)
         }
-        updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+        updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
         docs.setCursorWidth();
         return true;
     }
@@ -2368,7 +2367,7 @@ windowsVim.visual_line_keydown = function (e) {
         windowsVim.currentSequence = "";
     }
 
-    updateUISequenceText(windowsVim.num + windowsVim.currentSequence);
+    updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
     return true;
 
 

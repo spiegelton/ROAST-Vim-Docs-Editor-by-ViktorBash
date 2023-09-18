@@ -1,3 +1,5 @@
+import { KEY_SEPARATOR } from "./keybindings";
+
 // UISequenceContainer goes on the right and shows the current command if it's multiple characters
 const UIDocHead = document.querySelector("#kix-appview");
 const UISequenceContainer = document.createElement("div");
@@ -39,4 +41,11 @@ const updateUIModeText = function (text) {
 	UIModeContainer.innerHTML = "<span>" + text + "</span>";
 };
 
-export { updateUISequenceText, updateUIModeText };
+function getCleanedSequence(sequence) {
+	// This function takes in a sequence (ex: "d•w") and returns a cleaned version (ex: "dw")
+	// This is used to check if a keybinding is already taken or not
+	let cleanedSequence = sequence.replace(KEY_SEPARATOR, "");
+	return cleanedSequence;
+}
+
+export { updateUISequenceText, updateUIModeText, getCleanedSequence };

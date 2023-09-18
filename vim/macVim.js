@@ -1,7 +1,6 @@
 import { docs } from "../docs.js";
-import { updateUIModeText, updateUISequenceText } from "./UI.js";
-
-const KEY_SEPARATOR = "•";
+import { updateUIModeText, updateUISequenceText, getCleanedSequence } from "./UI.js";
+import { KEY_SEPARATOR } from "./keybindings.js";
 
 let macVim = {
 	// Main variables here
@@ -363,7 +362,7 @@ macVim.normal_keydown = function (e) {
 			// else, 0 is the actual command (ex: "0"), so continue to down below
 			macVim.moveToStartOfLine();
 		}
-		updateUISequenceText(macVim.num + macVim.currentSequence);
+		updateUISequenceText(macVim.num + getCleanedSequence(macVim.currentSequence));
 		docs.setCursorWidth();
 		return true;
 	}
@@ -1703,7 +1702,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
     }
 
 	// Basically catch here anything that is a valid keymap but is not fully finished typing yet (ex: "g", but not "gg" yet)
-    updateUISequenceText(this.num + this.currentSequence);
+    updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
     docs.setCursorWidth();
     return true;
 };
@@ -1758,7 +1757,7 @@ macVim.visual_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 		}
-		updateUISequenceText(macVim.num + macVim.currentSequence);
+		updateUISequenceText(macVim.num + getCleanedSequence(macVim.currentSequence));
 		docs.setCursorWidth();
 		return true;
 	}
@@ -2138,7 +2137,7 @@ macVim.visual_keydown = function (e) {
         this.currentSequence = "";
     }
 
-    updateUISequenceText(this.num + this.currentSequence);
+    updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
     return true;
 
 
@@ -2193,7 +2192,7 @@ macVim.visual_line_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 		}
-		updateUISequenceText(macVim.num + macVim.currentSequence);
+		updateUISequenceText(macVim.num + getCleanedSequence(macVim.currentSequence));
 		docs.setCursorWidth();
 		return true;
 	}
@@ -2422,7 +2421,7 @@ macVim.visual_line_keydown = function (e) {
         this.currentSequence = "";
     }
 
-    updateUISequenceText(this.num + this.currentSequence);
+    updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
     return true;
 };
 
