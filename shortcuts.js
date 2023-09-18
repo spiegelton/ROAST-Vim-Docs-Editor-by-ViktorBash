@@ -15,6 +15,18 @@ function getElements(intId) {
     return [selectedKey, saveButton, cancelButton, defaultButton];
 }
 
+function updateCheckboxes(intId, bitmask) {
+    let checkBox1 = document.querySelector("#checkbox-1-" + intId);
+    let checkBox2 = document.querySelector("#checkbox-2-" + intId);
+    let checkBox3 = document.querySelector("#checkbox-3-" + intId);
+    let checkBox4 = document.querySelector("#checkbox-4-" + intId);
+
+    checkBox1.checked = bitmask & 8 ? true : false;
+    checkBox2.checked = bitmask & 4 ? true : false;
+    checkBox3.checked = bitmask & 2 ? true : false;
+    checkBox4.checked = bitmask & 1 ? true : false;
+}
+
 function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     let bitmask = key[2];
 
@@ -27,6 +39,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     }
 
     let curSequence = ""; // This comes into play when the user "saves" a new keymap value, and also
+    let curBitmask = 0b000;
     // for updating as they type
 
     let handleOnClick = function (e) {
@@ -41,17 +54,33 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         cancelButton.style.display = "inline-block";
         defaultButton.style.display = "inline-block";
         
+        // This function handles the recording of a new keybinding, so it is very important
         window.onkeydown = function (e) {
             e.preventDefault();
             e.stopPropagation();
 
+            let not_allowed = ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "Control", "Shift", "Alt", "Meta"]
+            if (not_allowed.includes(e.key)) {
+                return;
+            }
+
+            // Past this point the key is a valid keybinding that we need to handle and record
+            let newBitmask = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+            curBitmask = curBitmask | newBitmask;
+
+            // Update checkboxes with the new bitmask
+
+            // Update text shown to the user (and the internal one with KEY_SEPARATOR)
             selectedKey.innerHTML += e.key;
             if (curSequence.length > 0) {
+                curBitmask = 0b000;
                 curSequence += KEY_SEPARATOR + e.key;
             }
             else {
                 curSequence = e.key;
             }
+
+            updateCheckboxes(id, curBitmask);
         }
     }
 
@@ -70,10 +99,12 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         }
         selectedKey.innerHTML = curValue;
 
+        bitmask = curBitmask;
+
         // curSequence holds the new value in raw form
-        
-        saveKeyInKeyMap(keyMapStr, keyNameStr, curSequence, 0b000)
+        saveKeyInKeyMap(keyMapStr, keyNameStr, curSequence, curBitmask);
         curSequence = "";
+        curBitmask = 0b000;
         window.onkeydown = null;
     }
 
@@ -85,6 +116,8 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         defaultButton.style.display = "none";
         selectedKey.innerHTML = curValue;
         curSequence = "";
+        curBitmask = 0b000;
+        updateCheckboxes(id, bitmask);
         window.onkeydown = null;
     }
 
@@ -106,9 +139,13 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         }
         
         curSequence = "";
+        curBitmask = "";
         // Now we have displayed the default value
         curValue = defaultDisplayValue;
         selectedKey.innerHTML = curValue;
+
+        bitmask = defaultArr[2];
+        updateCheckboxes(id, defaultArr[2]);
 
         saveKeyInKeyMap(keyMapStr, keyNameStr, defaultRawValue, defaultArr[2])
         window.onkeydown = null;
@@ -148,24 +185,28 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     checkbox1.type = "checkbox";
     checkbox1.checked = bitmask & 8 ? true : false;
     checkbox1.disabled = true;
+    checkbox1.id = "checkbox-1-" + id;
     li.appendChild(checkbox1);
 
     let checkbox2 = document.createElement("input");
     checkbox2.type = "checkbox";
     checkbox2.checked = bitmask & 4 ? true : false;
     checkbox2.disabled = true;
+    checkbox2.id = "checkbox-2-" + id;
     li.appendChild(checkbox2);
 
     let checkbox3 = document.createElement("input");
     checkbox3.type = "checkbox";
     checkbox3.checked = bitmask & 2 ? true : false;
     checkbox3.disabled = true;
+    checkbox3.id = "checkbox-3-" + id;
     li.appendChild(checkbox3);
 
     let checkbox4 = document.createElement("input");
     checkbox4.type = "checkbox";
     checkbox4.checked = bitmask & 1 ? true : false;
     checkbox4.disabled = true;
+    checkbox4.id = "checkbox-4-" + id;
     li.appendChild(checkbox4);
 
     let saveButton = document.createElement("button");
