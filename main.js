@@ -37,12 +37,12 @@ if (user.paid) {
 	}
 }
 
-// Get ultimateKeyMap from storage
-// if it doesn't exist: create a blank one with 3 empty objects (keymapN, I, V, VLine)
-// if it does exist: Great
-// Turn it into an object from a JSON string, then go through and set any keybindings that aren't present
-
+/*
+* Called when we verify that the user has access to the extension
+*/
 function runVim() {
+
+	// Create a copy of the vimVariant we want to run
 	let vimVariant;
 	if (docs.isMac) {
 		vimVariant = macVim;
@@ -51,17 +51,20 @@ function runVim() {
 		vimVariant = windowsVim;
 	}
 
+	// Now, we will populate the vimVariant with the user's keybindings
 	getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 		vimVariant.keyMapN = ultimateKeyMap.keyMapN;
 		vimVariant.keyMapI = ultimateKeyMap.keyMapI;
 		vimVariant.keyMapV = ultimateKeyMap.keyMapV;
 		vimVariant.keyMapVLine = ultimateKeyMap.keyMapVLine;
 
+		// After fetching the keybindings, we can start running Vim
 		continueRunVim(vimVariant);
 	})
 }
 
 function continueRunVim(vimVariant) {
+	// Hook up Vim to the keydown presses in the document
 	docs.keydown = function (e) {
 		if (vimVariant.mode == "insert") {
 			return vimVariant.insert_keydown(e);

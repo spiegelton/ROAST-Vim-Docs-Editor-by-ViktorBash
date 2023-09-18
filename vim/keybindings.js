@@ -1,18 +1,22 @@
-// The current keybindings get exported from this file as ultimateKeyMap
-// Also KEY_SEPARATOR is exported
-
+// The key separator used between keys in the keybinding (ex: "d•w" for delete word)
+// The character is U+0095, and can't appear itself as a key
 const KEY_SEPARATOR = "•";
 export { KEY_SEPARATOR };
 
-// Save a keybinding to the ultimateKeyMap in chrome.storage.sync
+// Save 1 keybinding to the ultimateKeyMap in chrome.storage.local
 export function saveKeyInKeyMap(keyMapStr, keyNameStr, keyValue, bitMask) {
+
+	// If the keybinding is multiple keys, ignore the modifier keys
 	let ignoreModifierKeys = false;
 	if (keyValue.includes(KEY_SEPARATOR)) {
 		ignoreModifierKeys = true;
 	}
+
+	// Build the actual entry
 	let keyArr = [keyValue, ignoreModifierKeys, bitMask];
 
 	getUltimateKeyMapInCallback(function (ultimateKeyMap) {
+		// Get the current keyMap, change the entry we want to, then save it back
 		ultimateKeyMap[keyMapStr][keyNameStr] = keyArr;
 
 		chrome.storage.local.set({
@@ -21,6 +25,10 @@ export function saveKeyInKeyMap(keyMapStr, keyNameStr, keyValue, bitMask) {
 	});
 }
 
+/*
+* Returns a keyMap object with the default keybindings for each mode
+* A few default keybindings are different for Mac vs Windows
+*/
 export function getDefaultKeyBindings() {
 	let keyMapN = {
 		// keybinding (with key separator), ignoreModifierKeys (boolean), bitmask (ctrl, shift, alt, meta), description
@@ -187,6 +195,7 @@ export function getDefaultKeyBindings() {
 	}
 
 
+	// Determine if the user is on a Mac or not
 	let macPlatforms = ["MacIntel", "MacPPC", "Mac68K", "iPhone", "iPad"];
 	let isMac = false;
 	if (macPlatforms.includes(navigator.platform)) {
@@ -217,10 +226,14 @@ export function getDefaultKeyBindings() {
 	}
 }
 
-// callback runs with ultimateKeyMap as the argument
+/*
+* Returns the current keymap of the user as a argument to a callback function
+* We first get the default keymap, then we go through and set any keybindings that are in the local storage keymap
+* After effectively "merging" both, we call the callback with the merged keymap as the argument
+*/
 export function getUltimateKeyMapInCallback(callback) {
 	chrome.storage.local.get("ultimateKeyMap", function (result) {
-		let savedKeyMap;
+		let savedKeyMap; // The version in storage
 		if (result.ultimateKeyMap === undefined) {
 			// No settings are saved or anything
 			savedKeyMap = {};
@@ -240,16 +253,20 @@ export function getUltimateKeyMapInCallback(callback) {
 			}
 		}
 
+		// This is the default keymap
 		let defaultKeyMap = getDefaultKeyBindings();
 
+		// Our outputKeyMap will be both keymaps merged
 		let outputKeyMap = {
 			keyMapN: {},
 			keyMapI: {},
 			keyMapV: {},
 			keyMapVLine: {},
 		}
-		// Now we can set the keybindings that aren't present
-		// We are going to loop through each keyMap (keyMapN, keyMapI, keyMapV, keyMapVLine), and set any keybindings that are in the storage keymap
+
+		// We are going to loop through each keyMap (keyMapN, keyMapI, keyMapV, keyMapVLine)
+		// In each keyMap, we will loop through each key entry and either populate outputKeyMap with the 
+		// saved keybinding if it exists or the default keybinding
 
 		// keyMapN
 		const keyMapNKeys = Object.keys(defaultKeyMap.keyMapN);
@@ -303,6 +320,8 @@ export function getUltimateKeyMapInCallback(callback) {
 			}
 		});
 
+		// Now, outputKeyMap is fully populated with the keybindings
+		// Call the callback function with outputKeyMap as an argument
         callback(outputKeyMap);
 
     });

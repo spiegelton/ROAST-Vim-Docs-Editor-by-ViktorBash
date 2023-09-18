@@ -1,4 +1,7 @@
 # IDE Files
 .vscode/
 
+# Addicted to seeing lines of code
+.VSCodeCounter/
+
 node_modules/
