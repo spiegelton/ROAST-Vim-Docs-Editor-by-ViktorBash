@@ -126,7 +126,7 @@ function continueRunVim(vimVariant) {
 				else if (mouseDownCoords[0] === event.clientX && mouseDownCoords[1] === event.clientY)
 				{
 					// We clicked in place (didn't drag) --> Switch to normal if we were in visual mode
-					if (vimVariant.mode === "visual") {
+					if (vimVariant.mode === "visual" || vimVariant.mode === "visual_line") {
 						vimVariant.switchToNormalMode();
 					}
 					else if (vimVariant.mode === "normal") {
