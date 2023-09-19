@@ -262,6 +262,10 @@ export function getUltimateKeyMapInCallback(callback) {
 			keyMapI: {},
 			keyMapV: {},
 			keyMapVLine: {},
+			incompleteKeyMapN: [],
+			// Note: no incompleteKeyMapI because keybindings in insert mode are limited to 1 key
+			incompleteKeyMapV: [],
+			incompleteKeyMapVLine: [],
 		}
 
 		// We are going to loop through each keyMap (keyMapN, keyMapI, keyMapV, keyMapVLine)
@@ -279,6 +283,16 @@ export function getUltimateKeyMapInCallback(callback) {
 				// Set the keybinding to the default
 				outputKeyMap.keyMapN[key] = defaultKeyMap.keyMapN[key];
 			}
+
+			// Add to incompleteKeyMapN if it's a multi-key keybinding
+			// EX: D*i*W gets D and D*I stored
+			let keyVal = outputKeyMap.keyMapN[key][0];
+			for (let i = 0; i < keyVal.length; i++) {
+				if (keyVal[i] === KEY_SEPARATOR) {
+					outputKeyMap.incompleteKeyMapN.push(keyVal.slice(0, i));
+				}
+			}
+			
 		});
 
 		// keyMapI
@@ -305,6 +319,14 @@ export function getUltimateKeyMapInCallback(callback) {
 				// Set the keybinding to the default
 				outputKeyMap.keyMapV[key] = defaultKeyMap.keyMapV[key];
 			}
+
+			// Add to incompleteKeyMapV if it's a multi-key keybinding
+			let keyVal = outputKeyMap.keyMapV[key][0];
+			for (let i = 0; i < keyVal.length; i++) {
+				if (keyVal[i] === KEY_SEPARATOR) {
+					outputKeyMap.incompleteKeyMapV.push(keyVal.slice(0, i));
+				}
+			}
 		});
 
 		// keyMapVLine
@@ -317,6 +339,14 @@ export function getUltimateKeyMapInCallback(callback) {
 			else {
 				// Set the keybinding to the default
 				outputKeyMap.keyMapVLine[key] = defaultKeyMap.keyMapVLine[key];
+			}
+
+			// Add to incompleteKeyMapVLine if it's a multi-key keybinding
+			let keyVal = outputKeyMap.keyMapVLine[key][0];
+			for (let i = 0; i < keyVal.length; i++) {
+				if (keyVal[i] === KEY_SEPARATOR) {
+					outputKeyMap.incompleteKeyMapVLine.push(keyVal.slice(0, i));
+				}
 			}
 		});
 

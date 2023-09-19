@@ -57,6 +57,11 @@ function runVim() {
 		vimVariant.keyMapI = ultimateKeyMap.keyMapI;
 		vimVariant.keyMapV = ultimateKeyMap.keyMapV;
 		vimVariant.keyMapVLine = ultimateKeyMap.keyMapVLine;
+		
+		// Set the incomplete keymap bindings now
+		vimVariant.incompleteKeyMapN = ultimateKeyMap.incompleteKeyMapN;
+		vimVariant.incompleteKeyMapV = ultimateKeyMap.incompleteKeyMapV;
+		vimVariant.incompleteKeyMapVLine = ultimateKeyMap.incompleteKeyMapVLine;
 
 		// After fetching the keybindings, we can start running Vim
 		continueRunVim(vimVariant);

@@ -8,9 +8,6 @@ let macVim = {
 	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
 	currentSequence: "", // Keep track of key sequences (ex: "gg")
     // Note: There is no "incompleteKeyMapsI" because commands can be a max of 1 character in insert mode
-	incompleteKeyMaps: ["g", "r", "d", "c", "y", "d" + KEY_SEPARATOR + "i", "c" + KEY_SEPARATOR + "i", "d" + KEY_SEPARATOR + "a", "c" + KEY_SEPARATOR + "a"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
-	incompleteKeyMapsV: ["g"],
-	incompleteKeyMapsVLine: ["g"],
 };
 
 macVim.switchToNormalMode = function () {
@@ -2130,7 +2127,7 @@ macVim.visual_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         this.currentSequence.length !== 0 &&
-        !this.incompleteKeyMaps.includes(this.currentSequence)
+        !this.incompleteKeyMapV.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.num = "";
@@ -2209,7 +2206,7 @@ macVim.visual_line_keydown = function (e) {
 
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
-    const keyMapV = this.keyMapV;
+    const keyMapVLine = this.keyMapVLine;
 
 	switch (true) {
         case (keyMapVLine.arrowUp[0] === this.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
@@ -2414,7 +2411,7 @@ macVim.visual_line_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         this.currentSequence.length !== 0 &&
-        !this.incompleteKeyMaps.includes(this.currentSequence)
+        !this.incompleteKeyMapVLine.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.num = "";

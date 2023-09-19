@@ -7,10 +7,6 @@ let windowsVim = {
 	mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual", "visual_line"]
 	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
 	currentSequence: "", // Keep track of key sequences (ex: "gg")
-    // Note: There is no "incompleteKeyMapsI" because commands can be a max of 1 character in insert mode
-	incompleteKeyMaps: ["g", "r", "d", "c", "y", "d" + KEY_SEPARATOR + "i", "c" + KEY_SEPARATOR + "i", "d" + KEY_SEPARATOR + "a", "c" + KEY_SEPARATOR + "a"], // Stores the starting substrings of multiline commands, ex: 'diw' would have 'di' and 'd' in here
-	incompleteKeyMapsV: ["g"],
-	incompleteKeyMapsVLine: ["g"],
 };
 
 windowsVim.switchToNormalMode = function () {
@@ -1643,7 +1639,7 @@ windowsVim.normal_keydown = function (e) {
 
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !windowsVim.incompleteKeyMaps.includes(windowsVim.currentSequence)
+        !windowsVim.incompleteKeyMapN.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.clearData();
@@ -2072,7 +2068,7 @@ windowsVim.visual_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !windowsVim.incompleteKeyMaps.includes(windowsVim.currentSequence)
+        !windowsVim.incompleteKeyMapV.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.num = "";
@@ -2156,7 +2152,6 @@ windowsVim.visual_line_keydown = function (e) {
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapVLine = windowsVim.keyMapVLine;
 
-    // TODO: Add the switch with all of the potential commands
     switch (true) {
         case (keyMapVLine.arrowUp[0] === windowsVim.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
         case (keyMapVLine.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)): 
@@ -2360,7 +2355,7 @@ windowsVim.visual_line_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !windowsVim.incompleteKeyMaps.includes(windowsVim.currentSequence)
+        !windowsVim.incompleteKeyMapVLine.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.num = "";
