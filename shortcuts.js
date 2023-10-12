@@ -308,6 +308,12 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     defaultButton.onclick = handleDefault;
     li.appendChild(defaultButton);
 
+    let descriptionSpan = document.createElement("span");
+    if (key.length === 4) {
+        descriptionSpan.innerHTML = "— " + key[3];
+    }
+    li.appendChild(descriptionSpan);
+
     // Now li has everything inside of it, so append it to it's parent element
     // (which is passed in as an argument to this function)
     elem.appendChild(li);
