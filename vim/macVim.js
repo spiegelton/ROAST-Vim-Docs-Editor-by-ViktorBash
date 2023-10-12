@@ -1691,7 +1691,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
     if (
         this.currentSequence.length !== 0 &&
-        !this.incompleteKeyMaps.includes(this.currentSequence)
+        !this.incompleteKeyMapN.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.clearData();
