@@ -100,7 +100,7 @@ export function getDefaultKeyBindings() {
 		copyWholeLine2: ["Y", false, 0b0100, "yank/copy the whole line"],
 		u: ["u", false, 0b0000, "undo"],
 		U: ["U", false, 0b0100, "undo"],
-		
+		replaceCharacter: ["r", true, 0b000, "replace a character"],
 	}
 
 	let keyMapI = {
@@ -288,10 +288,17 @@ export function getUltimateKeyMapInCallback(callback) {
 			// Add to incompleteKeyMapN if it's a multi-key keybinding
 			// EX: D*i*W gets D and D*I stored
 			let keyVal = outputKeyMap.keyMapN[key][0];
+			// Base case, checking and adding the incomplete key map
 			for (let i = 0; i < keyVal.length; i++) {
 				if (keyVal[i] === KEY_SEPARATOR) {
 					outputKeyMap.incompleteKeyMapN.push(keyVal.slice(0, i));
 				}
+			}
+
+			// Edge case: For the replace command we also want to just add the whole command as an
+			// incomplete key map
+			if (key === "replaceCharacter") {
+				outputKeyMap.incompleteKeyMapN.push(keyVal);
 			}
 			
 		});
