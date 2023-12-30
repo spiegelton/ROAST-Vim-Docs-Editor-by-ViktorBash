@@ -1686,29 +1686,6 @@ windowsVim.visual_keydown = function (e) {
         return true;
     }
 
-    // Check if it's a number
-    if (e.key.match(/\d+/) && windowsVim.currentSequence.length === 0) {
-        if (e.key === "0" && windowsVim.num.length !== 0) {
-            // 0 is part of the number being typed (ex: "100")
-            if (windowsVim.num.length < 3) {
-                // We don't want to crash, so max you can type in is a 3 digit number (999)
-                windowsVim.num += e.key;
-            }
-        } else if (e.key !== "0") {
-            // We have any digit besides 0 being typed (ex: "1" or "11")
-            if (windowsVim.num.length < 3) {
-                windowsVim.num += e.key;
-            }
-        } else {
-            docs.pressKey(docs.codeFromKey("Home"), false, true);
-            docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-        }
-        updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
-        docs.setCursorWidth();
-        return true;
-    }
-
     // Past this point we add the key to the sequence, and then go checking if it matches any of the commands in our switch statement
     // If it doesn't, after the switch statement we see if we are building up to a command or not
 
@@ -1723,9 +1700,16 @@ windowsVim.visual_keydown = function (e) {
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapV = windowsVim.keyMapV;
 
+    console.log(this.currentSequence);
     switch (true) {
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
             {
+                let regexNumMatch = /\d/;
+                if (regexNumMatch.test(this.currentSequence) && windowsVim.num !== "") {
+                    // If we are typing a number, we don't want to execute this command actually, but instead just keep typing our number
+                    break;
+                }
+
                 docs.pressKey(docs.codeFromKey("Home"), false, true);
                 docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);

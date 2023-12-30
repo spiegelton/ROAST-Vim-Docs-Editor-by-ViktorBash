@@ -1755,6 +1755,11 @@ macVim.visual_keydown = function (e) {
 	switch (true) {
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
             {
+                let regexNumMatch = /\d/;
+                if (regexNumMatch.test(this.currentSequence) && windowsVim.num !== "") {
+                    // If we are typing a number, we don't want to execute this command actually, but instead just keep typing our number
+                    break;
+                }
                 docs.pressKey(docs.codeFromKey("Home"), false, true);
                 docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
