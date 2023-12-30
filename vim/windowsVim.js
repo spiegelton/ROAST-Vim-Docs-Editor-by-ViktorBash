@@ -331,36 +331,14 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    // Check for numbers
-    if (e.key.match(/\d+/) && windowsVim.currentSequence.length === 0) {
-        if (e.key === "0" && windowsVim.num.length !== 0) {
-            // 0 is part of the number being typed (ex: "100")
-            if (windowsVim.num.length < 3) {
-                // We don't want to crash, so max you can type in is a 3 digit number (999)
-                windowsVim.num += e.key;
-            }
-        } else if (e.key !== "0") {
-            // We have any digit besides 0 being typed (ex: "1" or "11")
-            if (windowsVim.num.length < 3) {
-                windowsVim.num += e.key;
-            }
-        } else {
-            // else, 0 is the actual command (ex: "0"), so continue to down below
-            windowsVim.moveToStartOfLine();
-        }
-        updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
-        docs.setCursorWidth();
-        return true;
-    }
-
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapN = windowsVim.keyMapN;
 
     switch (true) {
-        // r for replace command
         case (keyMapN.replaceCharacter[0] === windowsVim.currentSequence && (keyMapN.replaceCharacter[1] === true || keyMapN.replaceCharacter[2] === modifierInput)):
             {
+                // r for replace command
                 let keyCharacter = e.key;
 
                 let keyFunc = docs.pressKey;
@@ -447,6 +425,18 @@ windowsVim.normal_keydown = function (e) {
     }
 
     switch (true) {
+        case (keyMapN["0"][0] === this.currentSequence && (keyMapN.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
+            {
+                let regexNumMatch = /\d/;
+                if (regexNumMatch.test(this.currentSequence) && windowsVim.num !== "") {
+                    // If we are typing a number, we don't want to execute this command actually, but instead just keep typing our number
+                    break;
+                }
+
+                windowsVim.moveToStartOfLine();
+                windowsVim.clearData();
+                return true;
+            }
         case (keyMapN.backspace[0] === windowsVim.currentSequence && (keyMapN.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
         case (keyMapN.arrowLeft[0] === windowsVim.currentSequence && (keyMapN.arrowLeft[1] === true || keyMapN.arrowLeft[2] === modifierInput)):
             {
@@ -1634,7 +1624,15 @@ windowsVim.normal_keydown = function (e) {
             return true;
         }
 
+    }
 
+    // Check for numbers
+    if (e.key.match(/\d+/) && this.currentSequence.length === 1) {
+        // We have a number
+        this.currentSequence = "";
+        if (this.num.length < 3) {
+            this.num += e.key;
+        }
     }
 
     if (
@@ -1726,6 +1724,17 @@ windowsVim.visual_keydown = function (e) {
     const keyMapV = windowsVim.keyMapV;
 
     switch (true) {
+        case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
+            {
+                docs.pressKey(docs.codeFromKey("Home"), false, true);
+                docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                this.clearData();
+                updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
+                docs.setCursorWidth();
+                return true;
+
+            }
         case (keyMapV.arrowLeft[0] === windowsVim.currentSequence && (keyMapV.arrowLeft[1] === true || keyMapV.arrowLeft[2] === modifierInput)):
         case (keyMapV.backspace[0] === windowsVim.currentSequence && (keyMapV.backspace[1] === true || keyMapV.backspace[2] === modifierInput)):
         case (keyMapV.h[0] === windowsVim.currentSequence && (keyMapV.h[1] === true || keyMapV.h[2] === modifierInput)):
@@ -2063,6 +2072,15 @@ windowsVim.visual_keydown = function (e) {
                 windowsVim.clearData();
                 return true;
             }
+    }
+
+    // Check for numbers
+    if (e.key.match(/\d+/) && this.currentSequence.length === 1) {
+        // We have a number
+        this.currentSequence = "";
+        if (this.num.length < 3) {
+            this.num += e.key;
+        }
     }
 
     // Check if we are building up to a command or if the sequence is invalid

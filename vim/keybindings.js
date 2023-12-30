@@ -101,6 +101,7 @@ export function getDefaultKeyBindings() {
 		u: ["u", false, 0b0000, "undo"],
 		U: ["U", false, 0b0100, "undo"],
 		replaceCharacter: ["r", true, 0b000, "replace a character"],
+		"0": ["0", false, 0b000, "go to start of line"],
 	}
 
 	let keyMapI = {
@@ -158,6 +159,7 @@ export function getDefaultKeyBindings() {
 		ctrlUPageUp: ["u", false, 0b1000],
 		w: ["w", false, 0b0000],
 		W: ["W", false, 0b0100],
+		"0": ["0", false, 0b000, "go to start of line"],
 	}
 
 	let keyMapVLine = {
