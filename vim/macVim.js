@@ -37,7 +37,6 @@ macVim.switchToVisualLineMode = function () {
 	updateUIModeText("-- VISUAL LINE --");
 	docs.setCursorWidth(true);
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-	docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
 }
 
 macVim.switchToInsertMode = function () {
