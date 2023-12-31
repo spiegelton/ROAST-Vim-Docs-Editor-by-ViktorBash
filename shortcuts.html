@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Vim Remappings</title>
-		<meta name="description" content="Vim Remappings" />
-		<link rel="stylesheet" href="mvp.css" />
-        <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css"/>
-	</head>
-	<style>
-		body {
-			font-size: 15px;
+    <head>
+        <title>Vim Remappings</title>
+        <meta name="description" content="Vim Remappings" />
+        <link rel="stylesheet" href="mvp.css" />
+        <link
+            rel="stylesheet"
+            href="font-awesome-4.7.0/css/font-awesome.min.css"
+        />
+    </head>
+    <style>
+        body {
+            font-size: 15px;
             text-align: center;
-		}
-		kbd {
-			background-color: #eeeeee;
-			padding: 4px;
-		}
-		li {
-			list-style: none;
-			text-align: left;
-		}
+        }
+        kbd {
+            background-color: #eeeeee;
+            padding: 4px;
+        }
+        li {
+            list-style: none;
+            text-align: left;
+        }
 
         input {
             display: inline-block;
@@ -28,7 +31,7 @@
         }
 
         .key-text {
-			background-color: #eeeeee;
+            background-color: #eeeeee;
             padding: 4px;
             border-radius: 3px;
             padding-right: 6px;
@@ -39,7 +42,8 @@
             margin: 0;
             border: none;
 
-            th, td {
+            th,
+            td {
                 text-align: left;
             }
 
@@ -49,13 +53,11 @@
 
             th:nth-child(2) {
                 min-width: 245px;
-                vertical-align: top;
             }
 
             td {
                 height: 40px;
             }
-
         }
 
         .fa {
@@ -85,7 +87,7 @@
             margin-right: 2px;
             margin-bottom: 2px;
             margin-top: 0;
-            vertical-align: topdd
+            vertical-align: topdd;
         }
 
         #reset-modal {
@@ -98,8 +100,8 @@
             width: 100%; /* Full width */
             height: 100%; /* Full height */
             overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            background-color: rgb(0, 0, 0); /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
         }
 
         #reset-modal-content {
@@ -143,28 +145,55 @@
             border: none;
         }
 
-	</style>
+        .question-mark-svg {
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: -5px;
+        }
 
-	<body>
-		<header>
+        .question-mark-svg:hover {
+            cursor: pointer;
+        }
+    </style>
+
+    <body>
+        <header>
             <h1>Remap Your Keys</h1>
-            <p><b>Ctrl, Shift, Alt</b> and <b>Cmd</b> key options don't matter for keybindings that are set to more than one character (for example: <kbd>diw</kbd> )</p>
-            <p>You can't set function keys (<b>F1-F12</b>) or modifier keys (<b>Control, Shift, Alt, Command/Meta</b>) as keybindings by themselves</p>
+            <p>
+                <b>Ctrl, Shift, Alt</b> and <b>Cmd</b> key options don't matter
+                for keybindings that are set to more than one character (for
+                example: <kbd>diw</kbd> )
+            </p>
+            <p>
+                You can't set function keys (<b>F1-F12</b>) or modifier keys (<b
+                    >Control, Shift, Alt, Command/Meta</b
+                >) as keybindings by themselves
+            </p>
             <p>Insert mode keybindings can be at most 1 key long</p>
-            
-        <button id="reset-btn">Reset All Keybindings</button>
+
+            <button id="reset-btn">Reset All Keybindings</button>
         </header>
 
         <div id="reset-modal">
             <div id="reset-modal-content">
-                <p id="reset-modal-content-text">Are you sure you want to reset all keybindings back to default?</p>
+                <p id="reset-modal-content-text">
+                    Are you sure you want to reset all keybindings back to
+                    default?
+                </p>
                 <button id="reset-modal-confirm-btn">Yes</button>
                 <button id="reset-modal-cancel-btn">Cancel</button>
             </div>
         </div>
 
-
-        <h2>Normal Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-normal"></i></h2>
+        <h2>
+            Normal Mode Keybindings
+            <i
+                class="fa fa-caret-down"
+                aria-hidden="true"
+                id="dropdown-normal"
+            ></i>
+        </h2>
         <table id="normal-table">
             <thead>
                 <th>Key</th>
@@ -173,13 +202,72 @@
                 <th>Shift</th>
                 <th>Alt</th>
                 <th>Cmd</th>
+                <th>
+                    <p>
+                        Cut Text
+                        <svg
+                            class="question-mark-svg"
+                            version="1.1"
+                            id="_x32_"
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 512 512"
+                            xml:space="preserve"
+                            width="20px"
+                            height="20px"
+                            fill="#FFFFFF"
+                        >
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            ></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <style type="text/css">
+                                    .st0 {
+                                        fill: #ffffff;
+                                    }
+                                </style>
+                                <g>
+                                    <path
+                                        class="st0"
+                                        d="M306.068,156.129c-6.566-5.771-14.205-10.186-22.912-13.244c-8.715-3.051-17.82-4.58-27.326-4.58 c-9.961,0-19.236,1.59-27.834,4.752c-8.605,3.171-16.127,7.638-22.576,13.41c-6.449,5.772-11.539,12.9-15.272,21.384 c-3.736,8.486-5.604,17.937-5.604,28.34h44.131c0-7.915,2.258-14.593,6.785-20.028c4.524-5.426,11.314-8.138,20.369-8.138 c8.598,0,15.328,2.661,20.197,7.974c4.864,5.322,7.297,11.942,7.297,19.856c0,3.854-0.965,7.698-2.887,11.543 c-1.922,3.854-4.242,7.586-6.959,11.197l-21.26,27.232c-4.527,5.884-16.758,22.908-16.758,40.316v10.187h44.129v-7.128 c0-2.938,0.562-5.996,1.699-9.168c1.127-3.162,6.453-10.904,8.268-13.168l21.264-28.243c4.752-6.333,8.705-12.839,11.881-19.518 c3.166-6.67,4.752-14.308,4.752-22.913c0-10.86-1.926-20.478-5.772-28.85C317.832,168.969,312.627,161.892,306.068,156.129z"
+                                    ></path>
+                                    <rect
+                                        x="234.106"
+                                        y="328.551"
+                                        class="st0"
+                                        width="46.842"
+                                        height="45.144"
+                                    ></rect>
+                                    <path
+                                        class="st0"
+                                        d="M256,0C114.613,0,0,114.615,0,256s114.613,256,256,256c141.383,0,256-114.615,256-256S397.383,0,256,0z M256,448c-105.871,0-192-86.131-192-192S150.129,64,256,64c105.867,0,192,86.131,192,192S361.867,448,256,448z"
+                                    ></path>
+                                </g>
+                            </g>
+                            <title>
+                                Some commands that remove text have the option
+                                to toggle either deleting the text or cutting
+                                the text to the clipboard
+                            </title>
+                        </svg>
+                    </p>
+                </th>
                 <th>Description</th>
             </thead>
-            <tbody id="normal">
-            </tbody>
+            <tbody id="normal"></tbody>
         </table>
 
-        <h2>Insert Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-insert"></i></h2>
+        <h2>
+            Insert Mode Keybindings
+            <i
+                class="fa fa-caret-down"
+                aria-hidden="true"
+                id="dropdown-insert"
+            ></i>
+        </h2>
         <table id="insert-table">
             <thead>
                 <th>Key</th>
@@ -188,13 +276,72 @@
                 <th>Shift</th>
                 <th>Alt</th>
                 <th>Cmd</th>
+                <th>
+                    <p>
+                        Cut Text
+                        <svg
+                            class="question-mark-svg"
+                            version="1.1"
+                            id="_x32_"
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 512 512"
+                            xml:space="preserve"
+                            width="20px"
+                            height="20px"
+                            fill="#FFFFFF"
+                        >
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            ></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <style type="text/css">
+                                    .st0 {
+                                        fill: #ffffff;
+                                    }
+                                </style>
+                                <g>
+                                    <path
+                                        class="st0"
+                                        d="M306.068,156.129c-6.566-5.771-14.205-10.186-22.912-13.244c-8.715-3.051-17.82-4.58-27.326-4.58 c-9.961,0-19.236,1.59-27.834,4.752c-8.605,3.171-16.127,7.638-22.576,13.41c-6.449,5.772-11.539,12.9-15.272,21.384 c-3.736,8.486-5.604,17.937-5.604,28.34h44.131c0-7.915,2.258-14.593,6.785-20.028c4.524-5.426,11.314-8.138,20.369-8.138 c8.598,0,15.328,2.661,20.197,7.974c4.864,5.322,7.297,11.942,7.297,19.856c0,3.854-0.965,7.698-2.887,11.543 c-1.922,3.854-4.242,7.586-6.959,11.197l-21.26,27.232c-4.527,5.884-16.758,22.908-16.758,40.316v10.187h44.129v-7.128 c0-2.938,0.562-5.996,1.699-9.168c1.127-3.162,6.453-10.904,8.268-13.168l21.264-28.243c4.752-6.333,8.705-12.839,11.881-19.518 c3.166-6.67,4.752-14.308,4.752-22.913c0-10.86-1.926-20.478-5.772-28.85C317.832,168.969,312.627,161.892,306.068,156.129z"
+                                    ></path>
+                                    <rect
+                                        x="234.106"
+                                        y="328.551"
+                                        class="st0"
+                                        width="46.842"
+                                        height="45.144"
+                                    ></rect>
+                                    <path
+                                        class="st0"
+                                        d="M256,0C114.613,0,0,114.615,0,256s114.613,256,256,256c141.383,0,256-114.615,256-256S397.383,0,256,0z M256,448c-105.871,0-192-86.131-192-192S150.129,64,256,64c105.867,0,192,86.131,192,192S361.867,448,256,448z"
+                                    ></path>
+                                </g>
+                            </g>
+                            <title>
+                                Some commands that remove text have the option
+                                to toggle either deleting the text or cutting
+                                the text to the clipboard
+                            </title>
+                        </svg>
+                    </p>
+                </th>
                 <th>Description</th>
             </thead>
-            <tbody id="insert">
-            </tbody>
+            <tbody id="insert"></tbody>
         </table>
 
-        <h2>Visual Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-visual"></i></h2>
+        <h2>
+            Visual Mode Keybindings
+            <i
+                class="fa fa-caret-down"
+                aria-hidden="true"
+                id="dropdown-visual"
+            ></i>
+        </h2>
         <table id="visual-table">
             <thead>
                 <th>Key</th>
@@ -203,13 +350,72 @@
                 <th>Shift</th>
                 <th>Alt</th>
                 <th>Cmd</th>
+                <th>
+                    <p>
+                        Cut Text
+                        <svg
+                            class="question-mark-svg"
+                            version="1.1"
+                            id="_x32_"
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 512 512"
+                            xml:space="preserve"
+                            width="20px"
+                            height="20px"
+                            fill="#FFFFFF"
+                        >
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            ></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <style type="text/css">
+                                    .st0 {
+                                        fill: #ffffff;
+                                    }
+                                </style>
+                                <g>
+                                    <path
+                                        class="st0"
+                                        d="M306.068,156.129c-6.566-5.771-14.205-10.186-22.912-13.244c-8.715-3.051-17.82-4.58-27.326-4.58 c-9.961,0-19.236,1.59-27.834,4.752c-8.605,3.171-16.127,7.638-22.576,13.41c-6.449,5.772-11.539,12.9-15.272,21.384 c-3.736,8.486-5.604,17.937-5.604,28.34h44.131c0-7.915,2.258-14.593,6.785-20.028c4.524-5.426,11.314-8.138,20.369-8.138 c8.598,0,15.328,2.661,20.197,7.974c4.864,5.322,7.297,11.942,7.297,19.856c0,3.854-0.965,7.698-2.887,11.543 c-1.922,3.854-4.242,7.586-6.959,11.197l-21.26,27.232c-4.527,5.884-16.758,22.908-16.758,40.316v10.187h44.129v-7.128 c0-2.938,0.562-5.996,1.699-9.168c1.127-3.162,6.453-10.904,8.268-13.168l21.264-28.243c4.752-6.333,8.705-12.839,11.881-19.518 c3.166-6.67,4.752-14.308,4.752-22.913c0-10.86-1.926-20.478-5.772-28.85C317.832,168.969,312.627,161.892,306.068,156.129z"
+                                    ></path>
+                                    <rect
+                                        x="234.106"
+                                        y="328.551"
+                                        class="st0"
+                                        width="46.842"
+                                        height="45.144"
+                                    ></rect>
+                                    <path
+                                        class="st0"
+                                        d="M256,0C114.613,0,0,114.615,0,256s114.613,256,256,256c141.383,0,256-114.615,256-256S397.383,0,256,0z M256,448c-105.871,0-192-86.131-192-192S150.129,64,256,64c105.867,0,192,86.131,192,192S361.867,448,256,448z"
+                                    ></path>
+                                </g>
+                            </g>
+                            <title>
+                                Some commands that remove text have the option
+                                to toggle either deleting the text or cutting
+                                the text to the clipboard
+                            </title>
+                        </svg>
+                    </p>
+                </th>
                 <th>Description</th>
             </thead>
-            <tbody id="visual">
-            </tbody>
+            <tbody id="visual"></tbody>
         </table>
 
-        <h2>Visual Line Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-visual-line"></i></h2>
+        <h2>
+            Visual Line Mode Keybindings
+            <i
+                class="fa fa-caret-down"
+                aria-hidden="true"
+                id="dropdown-visual-line"
+            ></i>
+        </h2>
         <table id="visual-line-table">
             <thead>
                 <th>Key</th>
@@ -218,13 +424,63 @@
                 <th>Shift</th>
                 <th>Alt</th>
                 <th>Cmd</th>
+                <th>
+                    <p>
+                        Cut Text
+                        <svg
+                            class="question-mark-svg"
+                            version="1.1"
+                            id="_x32_"
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 512 512"
+                            xml:space="preserve"
+                            width="20px"
+                            height="20px"
+                            fill="#FFFFFF"
+                        >
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            ></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <style type="text/css">
+                                    .st0 {
+                                        fill: #ffffff;
+                                    }
+                                </style>
+                                <g>
+                                    <path
+                                        class="st0"
+                                        d="M306.068,156.129c-6.566-5.771-14.205-10.186-22.912-13.244c-8.715-3.051-17.82-4.58-27.326-4.58 c-9.961,0-19.236,1.59-27.834,4.752c-8.605,3.171-16.127,7.638-22.576,13.41c-6.449,5.772-11.539,12.9-15.272,21.384 c-3.736,8.486-5.604,17.937-5.604,28.34h44.131c0-7.915,2.258-14.593,6.785-20.028c4.524-5.426,11.314-8.138,20.369-8.138 c8.598,0,15.328,2.661,20.197,7.974c4.864,5.322,7.297,11.942,7.297,19.856c0,3.854-0.965,7.698-2.887,11.543 c-1.922,3.854-4.242,7.586-6.959,11.197l-21.26,27.232c-4.527,5.884-16.758,22.908-16.758,40.316v10.187h44.129v-7.128 c0-2.938,0.562-5.996,1.699-9.168c1.127-3.162,6.453-10.904,8.268-13.168l21.264-28.243c4.752-6.333,8.705-12.839,11.881-19.518 c3.166-6.67,4.752-14.308,4.752-22.913c0-10.86-1.926-20.478-5.772-28.85C317.832,168.969,312.627,161.892,306.068,156.129z"
+                                    ></path>
+                                    <rect
+                                        x="234.106"
+                                        y="328.551"
+                                        class="st0"
+                                        width="46.842"
+                                        height="45.144"
+                                    ></rect>
+                                    <path
+                                        class="st0"
+                                        d="M256,0C114.613,0,0,114.615,0,256s114.613,256,256,256c141.383,0,256-114.615,256-256S397.383,0,256,0z M256,448c-105.871,0-192-86.131-192-192S150.129,64,256,64c105.867,0,192,86.131,192,192S361.867,448,256,448z"
+                                    ></path>
+                                </g>
+                            </g>
+                            <title>
+                                Some commands that remove text have the option
+                                to toggle either deleting the text or cutting
+                                the text to the clipboard
+                            </title>
+                        </svg>
+                    </p>
+                </th>
                 <th>Description</th>
             </thead>
-            <tbody id="visual-line">
-            </tbody>
+            <tbody id="visual-line"></tbody>
         </table>
-
     </body>
-	<script src="shortcuts.js" type="module"></script>
+    <script src="shortcuts.js" type="module"></script>
 </html>
-

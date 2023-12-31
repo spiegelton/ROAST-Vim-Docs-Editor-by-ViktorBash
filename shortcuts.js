@@ -37,6 +37,7 @@ function updateCheckboxes(intId, bitmask) {
 function addHTML(elem, key, id, keyMapStr, keyNameStr) {
 
     let bitmask = key[2]; // The saved bitmask for this keybinding
+    let checked = key[4]; // The saved cut text toggle for this keybinding
 
     // Build the value of the current key (we need to remove the KEY_SEPARATOR character)
     let curValue = ""; // The saved value for this keybinding, without KEY_SEPARATOR
@@ -133,7 +134,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         bitmask = curBitmask;
 
         // Save the new keybinding to chrome.storage.local with this function call
-        saveKeyInKeyMap(keyMapStr, keyNameStr, curSequence, curBitmask);
+        saveKeyInKeyMap(keyMapStr, keyNameStr, curSequence, curBitmask, checked);
 
         // Reset curSequence and curBitmask to empty values (for the next time the user goes to edit this keybinding)
         curSequence = "";
@@ -197,6 +198,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         // Reset the curSequence and curBitmask to empty values (for the next time the user goes to edit this keybinding)
         curSequence = "";
         curBitmask = "";
+        checked = defaultArr[4];
 
 
         // Update curValue to the correct value for the keybinding now, and update the UI too
@@ -210,10 +212,21 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         updateCheckboxes(id, defaultArr[2]);
 
         // Let's save to the backend now the default keybinding to make it final
-        saveKeyInKeyMap(keyMapStr, keyNameStr, defaultRawValue, defaultArr[2])
+        saveKeyInKeyMap(keyMapStr, keyNameStr, defaultRawValue, defaultArr[2], checked)
 
         // Let's terminate recording the keystrokes of the user
         window.onkeydown = null;
+    }
+
+    let handleCutText = function (e) {
+        checked = e.target.checked;
+        let sequence = "";
+        for (let i = 0; i < curValue.length; i++) {
+            sequence += curValue[i] + KEY_SEPARATOR;
+        }
+        sequence.slice(0, -1); // Remove the last KEY_SEPARATOR
+        console.log(checked);
+        saveKeyInKeyMap(keyMapStr, keyNameStr, sequence, bitmask, checked);
     }
 
     // Create the HTML elements (tr, span, checkbox1, checkbox2, checkbox3, checkbox4)
@@ -333,10 +346,19 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     checkbox4Col.appendChild(checkbox4);
     tr.appendChild(checkbox4Col);
 
-    let descriptionCol = document.createElement("td");
-    if (key.length === 4) {
-        descriptionCol.innerHTML = key[3];
+    // Cut text toggle
+    let cutTextCol = document.createElement("td");
+    if (key[4] !== null) {
+        let checkboxCutText = document.createElement("input");
+        checkboxCutText.type = "checkbox";
+        checkboxCutText.checked = key[4];
+        checkboxCutText.onclick = handleCutText;
+        cutTextCol.appendChild(checkboxCutText);
     }
+    tr.appendChild(cutTextCol);
+
+    let descriptionCol = document.createElement("td");
+    descriptionCol.innerHTML = key[3];
     tr.appendChild(descriptionCol);
 
     // Now tr has everything inside of it, so append it to it's parent element
