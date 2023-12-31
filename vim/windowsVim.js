@@ -1893,6 +1893,8 @@ windowsVim.visual_keydown = function (e) {
             }
         case (keyMapV.exitToVisualLineMode[0] === this.currentSequence && (keyMapV.exitToVisualLineMode[1] === true || keyMapV.exitToVisualLineMode[2] === modifierInput)):
             {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                windowsVim.moveToStartOfLine();
                 windowsVim.clearData();
                 windowsVim.switchToVisualLineMode();
                 return true;

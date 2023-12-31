@@ -1944,6 +1944,8 @@ macVim.visual_keydown = function (e) {
             }
         case (keyMapV.exitToVisualLineMode[0] === this.currentSequence && (keyMapV.exitToVisualLineMode[1] === true || keyMapV.exitToVisualLineMode[2] === modifierInput)):
             {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                this.moveToStartOfLine();
                 this.clearData();
                 this.switchToVisualLineMode();
                 return true;
