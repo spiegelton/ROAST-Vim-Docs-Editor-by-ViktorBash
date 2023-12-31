@@ -220,19 +220,20 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     // Then, we'll append them to the normalElem element (they will be in the DOM then)
 
     // Container (<tr>) for everything below
+    // We will add <td> (rows) to this container, and append the whole thing to the table at the end
     let tr = document.createElement("tr");
     tr.id = "tr-" + id;
 
-    // Text that shows the keybinding's value
-    let span = document.createElement("td");
-    let spanChild = document.createElement("span");
-    spanChild.id = "span-1-" + id;
-    spanChild.classList.add("key-text");
-    spanChild.innerHTML = curValue;
-    span.appendChild(spanChild);
-    tr.appendChild(span);
+    // Text that shows the keybinding's value (Column 1)
+    let keyBindingValueCol = document.createElement("td");
+    let keyBindingValue = document.createElement("span");
+    keyBindingValue.id = "span-1-" + id;
+    keyBindingValue.classList.add("key-text");
+    keyBindingValue.innerHTML = curValue;
+    keyBindingValueCol.appendChild(keyBindingValue);
+    tr.appendChild(keyBindingValueCol);
 
-    // Icon that acts as a button for editing the keybinding
+    // Pencil icon that acts as a button for editing the keybinding, made with an SVG
     let icon = document.createElement("svg");
     icon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     icon.setAttribute("fill", "#000000");
@@ -254,6 +255,17 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
 
     // saveButton, cancelButton, and defaultButton are buttons that are hidden by default
     // They are shown when the user clicks on the keybinding to edit it
+
+    // For some reason, the SVG moves 1 px up/down on toggle of the buttons
+    // For that reason, we add this button here (instead of using margin-right on the SVG container), so that the SVG doesn't move on toggle
+    // of the buttons. This blank button is invisible but still takes up space
+    let blankButton = document.createElement("button");
+    blankButton.textContent = "Hi";
+    blankButton.classList = "blank-button"; // In the CSS we use this to dictate that the button cursor on hover is default
+    // Make the button invisible but still take up space
+    blankButton.style.opacity = "0";
+
+    editCol.appendChild(blankButton);
 
     let saveButton = document.createElement("button");
     saveButton.id = "save-btn-" + id;
@@ -282,50 +294,50 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     // The value of checked or not depends on the bitmask
 
     // Ctrl
-    let checkbox1Container = document.createElement("td");
+    let checkbox1Col = document.createElement("td");
     let checkbox1 = document.createElement("input");
     checkbox1.type = "checkbox";
     checkbox1.checked = bitmask & 8 ? true : false;
     checkbox1.disabled = true;
     checkbox1.id = "checkbox-1-" + id;
-    checkbox1Container.appendChild(checkbox1);
-    tr.appendChild(checkbox1Container);
+    checkbox1Col.appendChild(checkbox1);
+    tr.appendChild(checkbox1Col);
 
     // Shift
-    let checkbox2Container = document.createElement("td");
+    let checkbox2Col = document.createElement("td");
     let checkbox2 = document.createElement("input");
     checkbox2.type = "checkbox";
     checkbox2.checked = bitmask & 4 ? true : false;
     checkbox2.disabled = true;
     checkbox2.id = "checkbox-2-" + id;
-    checkbox2Container.appendChild(checkbox2);
-    tr.appendChild(checkbox2Container);
+    checkbox2Col.appendChild(checkbox2);
+    tr.appendChild(checkbox2Col);
 
     // Alt
-    let checkbox3Container = document.createElement("td");
+    let checkbox3Col = document.createElement("td");
     let checkbox3 = document.createElement("input");
     checkbox3.type = "checkbox";
     checkbox3.checked = bitmask & 2 ? true : false;
     checkbox3.disabled = true;
     checkbox3.id = "checkbox-3-" + id;
-    checkbox3Container.appendChild(checkbox3);
-    tr.appendChild(checkbox3Container);
+    checkbox3Col.appendChild(checkbox3);
+    tr.appendChild(checkbox3Col);
 
     // Meta
-    let checkbox4Container = document.createElement("td");
+    let checkbox4Col = document.createElement("td");
     let checkbox4 = document.createElement("input");
     checkbox4.type = "checkbox";
     checkbox4.checked = bitmask & 1 ? true : false;
     checkbox4.disabled = true;
     checkbox4.id = "checkbox-4-" + id;
-    checkbox4Container.appendChild(checkbox4);
-    tr.appendChild(checkbox4Container);
+    checkbox4Col.appendChild(checkbox4);
+    tr.appendChild(checkbox4Col);
 
-    let descriptionSpan = document.createElement("td");
+    let descriptionCol = document.createElement("td");
     if (key.length === 4) {
-        descriptionSpan.innerHTML = "— " + key[3];
+        descriptionCol.innerHTML = key[3];
     }
-    tr.appendChild(descriptionSpan);
+    tr.appendChild(descriptionCol);
 
     // Now tr has everything inside of it, so append it to it's parent element
     // (which is passed in as an argument to this function)
@@ -387,7 +399,7 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
         id += 1;
     }
 
-    // Wire up collapsible buttons
+    // Wire up collapsible buttons to their respective tables
     let collapseAndTables = [
         [document.getElementById("dropdown-normal"), document.getElementById("normal-table")],
         [document.getElementById("dropdown-insert"), document.getElementById("insert-table")],
