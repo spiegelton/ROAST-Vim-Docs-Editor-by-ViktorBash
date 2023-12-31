@@ -1937,11 +1937,16 @@ macVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.exitVisualMode[0] === this.currentSequence && (keyMapV.exitVisualMode[1] === true || keyMapV.exitVisualMode[2] === modifierInput)):
-        case (keyMapV.exitVisualMode2[0] === this.currentSequence && (keyMapV.exitVisualMode2[1] === true || keyMapV.exitVisualMode2[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
                 macVim.clearData();
                 macVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.exitToVisualLineMode[0] === this.currentSequence && (keyMapV.exitToVisualLineMode[1] === true || keyMapV.exitToVisualLineMode[2] === modifierInput)):
+            {
+                this.clearData();
+                this.switchToVisualLineMode();
                 return true;
             }
         case (keyMapV.appendEndOfHighlight[0] === this.currentSequence && (keyMapV.appendEndOfHighlight[1] === true || keyMapV.appendEndOfHighlight[2] === modifierInput)):

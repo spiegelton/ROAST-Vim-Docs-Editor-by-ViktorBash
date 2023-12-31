@@ -152,7 +152,7 @@ export function getDefaultKeyBindings() {
 		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste before cursor with no formatting"],
 		insertStartOfHighlight: ["I", false, 0b0100, "Insert at start of highlight"],
 		exitVisualMode: ["v", false, 0b0000, "Exit to normal mode"],
-		exitVisualMode2: ["V", false, 0b0100, "Exit to normal mode"],
+		exitToVisualLineMode: ["V", false, 0b0100, "Exit to visual line mode"],
 		appendEndOfHighlight: ["A", false, 0b0100, "Append at end of highlight"],
 		highlightToEndOfLine: ["$", false, 0b0100, "Highlight to end of line"],
 		x: ["x", false, 0b0000, "Delete highlighted text"],

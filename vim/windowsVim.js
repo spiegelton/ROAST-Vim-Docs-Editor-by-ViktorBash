@@ -1700,7 +1700,6 @@ windowsVim.visual_keydown = function (e) {
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapV = windowsVim.keyMapV;
 
-    console.log(this.currentSequence);
     switch (true) {
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
             {
@@ -1886,11 +1885,16 @@ windowsVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.exitVisualMode[0] === windowsVim.currentSequence && (keyMapV.exitVisualMode[1] === true || keyMapV.exitVisualMode[2] === modifierInput)):
-        case (keyMapV.exitVisualMode2[0] === windowsVim.currentSequence && (keyMapV.exitVisualMode2[1] === true || keyMapV.exitVisualMode2[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
                 windowsVim.clearData();
                 windowsVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapV.exitToVisualLineMode[0] === this.currentSequence && (keyMapV.exitToVisualLineMode[1] === true || keyMapV.exitToVisualLineMode[2] === modifierInput)):
+            {
+                windowsVim.clearData();
+                windowsVim.switchToVisualLineMode();
                 return true;
             }
         case (keyMapV.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapV.appendEndOfHighlight[1] === true || keyMapV.appendEndOfHighlight[2] === modifierInput)):
