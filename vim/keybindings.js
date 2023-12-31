@@ -101,7 +101,7 @@ export function getDefaultKeyBindings() {
 		u: ["u", false, 0b0000, "undo"],
 		U: ["U", false, 0b0100, "undo"],
 		replaceCharacter: ["r", true, 0b000, "replace a character"],
-		"0": ["0", false, 0b000, "go to start of line"],
+		"0": ["0", false, 0b000, "go to start of line!!"],
 	}
 
 	let keyMapI = {
@@ -281,6 +281,7 @@ export function getUltimateKeyMapInCallback(callback) {
 			if (key in savedKeyMap.keyMapN) {
 				// Set the keybinding to the one in the storage keymap
 				outputKeyMap.keyMapN[key] = savedKeyMap.keyMapN[key];
+				outputKeyMap.keyMapN[key][3] = defaultKeyMap.keyMapN[key][3]; // Set the description to the default (in case it was updated)
 			}
 			else {
 				// Set the keybinding to the default
@@ -311,6 +312,7 @@ export function getUltimateKeyMapInCallback(callback) {
 			if (key in savedKeyMap.keyMapI) {
 				// Set the keybinding to the one in the storage keymap
 				outputKeyMap.keyMapI[key] = savedKeyMap.keyMapI[key];
+				outputKeyMap.keyMapI[key][3] = defaultKeyMap.keyMapI[key][3]; // Set the description to the default (in case it was updated)
 			}
 			else {
 				// Set the keybinding to the default
@@ -324,6 +326,7 @@ export function getUltimateKeyMapInCallback(callback) {
 			if (key in savedKeyMap.keyMapV) {
 				// Set the keybinding to the one in the storage keymap
 				outputKeyMap.keyMapV[key] = savedKeyMap.keyMapV[key];
+				outputKeyMap.keyMapV[key][3] = defaultKeyMap.keyMapV[key][3]; // Set the description to the default (in case it was updated)
 			}
 			else {
 				// Set the keybinding to the default
@@ -345,6 +348,7 @@ export function getUltimateKeyMapInCallback(callback) {
 			if (key in savedKeyMap.keyMapVLine) {
 				// Set the keybinding to the one in the storage keymap
 				outputKeyMap.keyMapVLine[key] = savedKeyMap.keyMapVLine[key];
+				outputKeyMap.keyMapVLine[key][3] = defaultKeyMap.keyMapVLine[key][3]; // Set the description to the default (in case it was updated)
 			}
 			else {
 				// Set the keybinding to the default

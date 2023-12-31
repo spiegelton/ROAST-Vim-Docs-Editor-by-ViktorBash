@@ -216,73 +216,41 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         window.onkeydown = null;
     }
 
-    // Create the HTML elements (li, span, checkbox1, checkbox2, checkbox3, checkbox4)
+    // Create the HTML elements (tr, span, checkbox1, checkbox2, checkbox3, checkbox4)
     // Then, we'll append them to the normalElem element (they will be in the DOM then)
 
-    // Container (<li>) for everything below
-    let li = document.createElement("li");
-    li.id = "li-" + id;
+    // Container (<tr>) for everything below
+    let tr = document.createElement("tr");
+    tr.id = "tr-" + id;
 
     // Text that shows the keybinding's value
-    let span = document.createElement("span");
-    span.id = "span-1-" + id;
-    span.classList.add("key");
-    span.innerHTML = curValue;
-    li.appendChild(span);
+    let span = document.createElement("td");
+    let spanChild = document.createElement("span");
+    spanChild.id = "span-1-" + id;
+    spanChild.classList.add("key-text");
+    spanChild.innerHTML = curValue;
+    span.appendChild(spanChild);
+    tr.appendChild(span);
 
     // Icon that acts as a button for editing the keybinding
     let icon = document.createElement("svg");
     icon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     icon.setAttribute("fill", "#000000");
-    icon.setAttribute("width", "20px");
-    icon.setAttribute("height", "20px");
+    icon.setAttribute("width", "24px");
+    icon.setAttribute("height", "24px");
     icon.setAttribute("viewBox", "0 0 24 24");
     icon.innerHTML = "<path d='M20.7,5.2a1.024,1.024,0,0,1,0,1.448L18.074,9.276l-3.35-3.35L17.35,3.3a1.024,1.024,0,0,1,1.448,0Zm-4.166,5.614-3.35-3.35L4.675,15.975,3,21l5.025-1.675Z'/>"
 
     // Container for the icon
+    let editCol = document.createElement("td");
     let iconContainer = document.createElement("span");
     iconContainer.classList.add("iconContainer");
-    iconContainer.width = "20px";
-    iconContainer.height = "20px";
+    iconContainer.width = "24px";
+    iconContainer.height = "24px";
     iconContainer.appendChild(icon); // icon is child of iconContainer
     iconContainer.innerHTML += "";
     iconContainer.onclick = handleOnClick;
-    li.appendChild(iconContainer);
-
-    // checkbox1, checkbox2, checkbox3, and checkbox4 are disabled checkboxes that show the current modifier keys for this keybinding
-    // The value of checked or not depends on the bitmask
-
-    // Ctrl
-    let checkbox1 = document.createElement("input");
-    checkbox1.type = "checkbox";
-    checkbox1.checked = bitmask & 8 ? true : false;
-    checkbox1.disabled = true;
-    checkbox1.id = "checkbox-1-" + id;
-    li.appendChild(checkbox1);
-
-    // Shift
-    let checkbox2 = document.createElement("input");
-    checkbox2.type = "checkbox";
-    checkbox2.checked = bitmask & 4 ? true : false;
-    checkbox2.disabled = true;
-    checkbox2.id = "checkbox-2-" + id;
-    li.appendChild(checkbox2);
-
-    // Alt
-    let checkbox3 = document.createElement("input");
-    checkbox3.type = "checkbox";
-    checkbox3.checked = bitmask & 2 ? true : false;
-    checkbox3.disabled = true;
-    checkbox3.id = "checkbox-3-" + id;
-    li.appendChild(checkbox3);
-
-    // Meta
-    let checkbox4 = document.createElement("input");
-    checkbox4.type = "checkbox";
-    checkbox4.checked = bitmask & 1 ? true : false;
-    checkbox4.disabled = true;
-    checkbox4.id = "checkbox-4-" + id;
-    li.appendChild(checkbox4);
+    editCol.appendChild(iconContainer);
 
     // saveButton, cancelButton, and defaultButton are buttons that are hidden by default
     // They are shown when the user clicks on the keybinding to edit it
@@ -292,31 +260,76 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     saveButton.innerHTML = "Save";
     saveButton.style.display = "none";
     saveButton.onclick = handleSave;
-    li.appendChild(saveButton);
+    editCol.appendChild(saveButton);
 
     let cancelButton = document.createElement("button");
     cancelButton.id = "cancel-btn-" + id;
     cancelButton.innerHTML = "Cancel";
     cancelButton.style.display = "none";
     cancelButton.onclick = handleCancel;
-    li.appendChild(cancelButton);
+    editCol.appendChild(cancelButton);
 
     let defaultButton = document.createElement("button");
     defaultButton.id = "edit-btn-" + id;
     defaultButton.innerHTML = "Default";
     defaultButton.style.display = "none";
     defaultButton.onclick = handleDefault;
-    li.appendChild(defaultButton);
+    editCol.appendChild(defaultButton);
 
-    let descriptionSpan = document.createElement("span");
+    tr.appendChild(editCol);
+
+    // checkbox1, checkbox2, checkbox3, and checkbox4 are disabled checkboxes that show the current modifier keys for this keybinding
+    // The value of checked or not depends on the bitmask
+
+    // Ctrl
+    let checkbox1Container = document.createElement("td");
+    let checkbox1 = document.createElement("input");
+    checkbox1.type = "checkbox";
+    checkbox1.checked = bitmask & 8 ? true : false;
+    checkbox1.disabled = true;
+    checkbox1.id = "checkbox-1-" + id;
+    checkbox1Container.appendChild(checkbox1);
+    tr.appendChild(checkbox1Container);
+
+    // Shift
+    let checkbox2Container = document.createElement("td");
+    let checkbox2 = document.createElement("input");
+    checkbox2.type = "checkbox";
+    checkbox2.checked = bitmask & 4 ? true : false;
+    checkbox2.disabled = true;
+    checkbox2.id = "checkbox-2-" + id;
+    checkbox2Container.appendChild(checkbox2);
+    tr.appendChild(checkbox2Container);
+
+    // Alt
+    let checkbox3Container = document.createElement("td");
+    let checkbox3 = document.createElement("input");
+    checkbox3.type = "checkbox";
+    checkbox3.checked = bitmask & 2 ? true : false;
+    checkbox3.disabled = true;
+    checkbox3.id = "checkbox-3-" + id;
+    checkbox3Container.appendChild(checkbox3);
+    tr.appendChild(checkbox3Container);
+
+    // Meta
+    let checkbox4Container = document.createElement("td");
+    let checkbox4 = document.createElement("input");
+    checkbox4.type = "checkbox";
+    checkbox4.checked = bitmask & 1 ? true : false;
+    checkbox4.disabled = true;
+    checkbox4.id = "checkbox-4-" + id;
+    checkbox4Container.appendChild(checkbox4);
+    tr.appendChild(checkbox4Container);
+
+    let descriptionSpan = document.createElement("td");
     if (key.length === 4) {
         descriptionSpan.innerHTML = "— " + key[3];
     }
-    li.appendChild(descriptionSpan);
+    tr.appendChild(descriptionSpan);
 
-    // Now li has everything inside of it, so append it to it's parent element
+    // Now tr has everything inside of it, so append it to it's parent element
     // (which is passed in as an argument to this function)
-    elem.appendChild(li);
+    elem.appendChild(tr);
 }
 
 // Here we call the function getUltimateKeyMapInCallback(), and pass in the callback function that
@@ -372,6 +385,31 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
         let key = keyMapVLine[visualLineKeys[i]]; // We now have the array holding the specific keybinding's data
         addHTML(visualLineElem, key, id, "keyMapVLine", visualLineKeys[i]);
         id += 1;
+    }
+
+    // Wire up collapsible buttons
+    let collapseAndTables = [
+        [document.getElementById("dropdown-normal"), document.getElementById("normal-table")],
+        [document.getElementById("dropdown-insert"), document.getElementById("insert-table")],
+        [document.getElementById("dropdown-visual"), document.getElementById("visual-table")],
+        [document.getElementById("dropdown-visual-line"), document.getElementById("visual-line-table")]
+    ]
+
+    for (let index = 0; index < collapseAndTables.length; index++) {
+        let collapseElem = collapseAndTables[index][0];
+        let table = collapseAndTables[index][1];
+
+        collapseElem.onclick = function (e) {
+            // When we click the toggle let's toggle the table's display and also how the toggle looks itself
+            if (table.style.display === "none") {
+                table.style.display = "inline-block";
+                collapseElem.classList = "fa fa-caret-down";
+            }
+            else {
+                table.style.display = "none";
+                collapseElem.classList = "fa fa-caret-right";
+            }
+        }
     }
 
 });

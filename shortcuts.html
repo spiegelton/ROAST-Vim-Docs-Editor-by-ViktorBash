@@ -4,10 +4,12 @@
 		<title>Vim Remappings</title>
 		<meta name="description" content="Vim Remappings" />
 		<link rel="stylesheet" href="mvp.css" />
+        <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css"/>
 	</head>
 	<style>
 		body {
 			font-size: 15px;
+            text-align: center;
 		}
 		kbd {
 			background-color: #eeeeee;
@@ -25,46 +27,128 @@
             margin-right: 8px;
         }
 
-        .key {
-            display: inline-block;
-            width: 150px;
-            border: 1px solid black;
-            height: 30px;
-            border-radius: 3px;
+        .key-text {
+			background-color: #eeeeee;
             padding: 4px;
+            border-radius: 3px;
+            padding-right: 6px;
+            padding-left: 6px;
         }
-        
-        .key:hover {
+
+        table {
+            margin: 0;
+            border: none;
+
+            th, td {
+                text-align: left;
+            }
+
+            th:first-child {
+                width: 200px;
+            }
+
+            th:nth-child(2) {
+                min-width: 245px;
+                vertical-align: top;
+            }
+
+            td {
+                height: 40px;
+            }
+
+        }
+
+        .fa {
             cursor: pointer;
         }
+
+        .iconContainer {
+            height: 24px;
+            width: 24px;
+            margin-right: 35px;
+        }
+
+        button {
+            padding-top: 1px;
+            padding-bottom: 1px;
+            padding-left: 2px;
+            padding-right: 2px;
+            margin-left: 2px;
+            margin-right: 2px;
+            margin-bottom: 0;
+            margin-top: 0;
+            vertical-align: topdd
+        }
+
 	</style>
 
 	<body>
 		<header>
             <h1>Remap Your Keys</h1>
-            <p>NOTE: <b>Ctrl, Shift, Alt and Cmd</b> key options don't matter for keybindings that are set to more than one character (for example: "diw")</p>
-            <p>NOTE: You can't set function keys (F1-F12) or modifier keys (Control, Shift, Alt, Command/Meta) as keybindings by themselves</p>
-            <p>NOTE: Insert mode keybindings can be at most 1 key long</p>
-			<ul id="normal">
-                <li>Key, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ctrl, Shift, Alt,&nbsp; Cmd</li>
-            </ul>
-
-            <h2>Insert Mode Keybindings</h2>
-            <ul id="insert">
-
-            </ul>
-
-            <h2>Visual Mode Keybindings</h2>
-            <ul id="visual">
-
-            </ul>
-
-            <h2>Visual Line Mode Keybindings</h2>
-            <ul id="visual-line">
-
-            </ul>
-
+            <p><b>Ctrl, Shift, Alt and Cmd</b> key options don't matter for keybindings that are set to more than one character (for example: <kbd>diw</kbd> )</p>
+            <p>You can't set function keys (F1-F12) or modifier keys (Control, Shift, Alt, Command/Meta) as keybindings by themselves</p>
+            <p>Insert mode keybindings can be at most 1 key long</p>
         </header>
+        <h2>Normal Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-normal"></i></h2>
+        <table id="normal-table">
+            <thead>
+                <th>Key</th>
+                <th>Edit</th>
+                <th>Ctrl</th>
+                <th>Shift</th>
+                <th>Alt</th>
+                <th>Cmd</th>
+                <th>Description</th>
+            </thead>
+            <tbody id="normal">
+            </tbody>
+        </table>
+
+        <h2>Insert Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-insert"></i></h2>
+        <table id="insert-table">
+            <thead>
+                <th>Key</th>
+                <th>Edit</th>
+                <th>Ctrl</th>
+                <th>Shift</th>
+                <th>Alt</th>
+                <th>Cmd</th>
+                <th>Description</th>
+            </thead>
+            <tbody id="insert">
+            </tbody>
+        </table>
+
+        <h2>Visual Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-visual"></i></h2>
+        <table id="visual-table">
+            <thead>
+                <th>Key</th>
+                <th>Edit</th>
+                <th>Ctrl</th>
+                <th>Shift</th>
+                <th>Alt</th>
+                <th>Cmd</th>
+                <th>Description</th>
+            </thead>
+            <tbody id="visual">
+            </tbody>
+        </table>
+
+        <h2>Visual Line Mode Keybindings <i class="fa fa-caret-down" aria-hidden="true" id="dropdown-visual-line"></i></h2>
+        <table id="visual-line-table">
+            <thead>
+                <th>Key</th>
+                <th>Edit</th>
+                <th>Ctrl</th>
+                <th>Shift</th>
+                <th>Alt</th>
+                <th>Cmd</th>
+                <th>Description</th>
+            </thead>
+            <tbody id="visual-line">
+            </tbody>
+        </table>
+
     </body>
 	<script src="shortcuts.js" type="module"></script>
 </html>
