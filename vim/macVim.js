@@ -1756,7 +1756,7 @@ macVim.visual_keydown = function (e) {
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
             {
                 let regexNumMatch = /\d/;
-                if (regexNumMatch.test(this.currentSequence) && windowsVim.num !== "") {
+                if (regexNumMatch.test(this.currentSequence) && this.num !== "") {
                     // If we are typing a number, we don't want to execute this command actually, but instead just keep typing our number
                     break;
                 }
@@ -1764,7 +1764,7 @@ macVim.visual_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
                 this.clearData();
-                updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
+                updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
                 docs.setCursorWidth();
                 return true;
 
