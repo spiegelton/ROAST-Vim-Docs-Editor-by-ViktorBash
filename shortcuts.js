@@ -214,6 +214,12 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         // Let's save to the backend now the default keybinding to make it final
         saveKeyInKeyMap(keyMapStr, keyNameStr, defaultRawValue, defaultArr[2], checked)
 
+        // Let's update the cut checkbox to show the correct value (if it exists)
+        let checkbox = document.getElementById("checkbox-cut-text-" + id);
+        if (checkbox !== null) {
+            checkbox.checked = checked;
+        }
+
         // Let's terminate recording the keystrokes of the user
         window.onkeydown = null;
     }
@@ -353,6 +359,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         checkboxCutText.type = "checkbox";
         checkboxCutText.checked = key[4];
         checkboxCutText.onclick = handleCutText;
+        checkboxCutText.id = "checkbox-cut-text-" + id;
         cutTextCol.appendChild(checkboxCutText);
     }
     tr.appendChild(cutTextCol);
