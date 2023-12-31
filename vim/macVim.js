@@ -2289,6 +2289,7 @@ macVim.visual_line_keydown = function (e) {
             }
         case (keyMapVLine.escape[0] === this.currentSequence && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
         case (keyMapVLine.ctrlC[0] === this.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
+        case (keyMapVLine.exitVisualLineMode[0] === this.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
             {
                 // Escape visual mode.
                 docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
@@ -2362,12 +2363,11 @@ macVim.visual_line_keydown = function (e) {
                 macVim.switchToInsertMode();
                 return true;
             }
-        case (keyMapVLine.exitVisualMode[0] === this.currentSequence && (keyMapVLine.exitVisualMode[1] === true || keyMapVLine.exitVisualMode[2] === modifierInput)):
-        case (keyMapVLine.exitVisualMode2[0] === this.currentSequence && (keyMapVLine.exitVisualMode2[1] === true || keyMapVLine.exitVisualMode2[2] === modifierInput)):
+        case (keyMapVLine.exitToVisualMode[0] === this.currentSequence && (keyMapVLine.exitToVisualMode[1] === true || keyMapVLine.exitToVisualMode[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
                 macVim.clearData();
-                macVim.switchToNormalMode();
+                macVim.switchToVisualMode();
                 return true;
             }
         case (keyMapVLine.appendEndOfHighlight[0] === this.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):

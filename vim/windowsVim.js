@@ -2229,6 +2229,7 @@ windowsVim.visual_line_keydown = function (e) {
             }
         case (keyMapVLine.escape[0] === windowsVim.currentSequence && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
         case (keyMapVLine.ctrlC[0] === windowsVim.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
+        case (keyMapVLine.exitVisualLineMode[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
             {
                 // Escape visual mode.
                 docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
@@ -2302,12 +2303,11 @@ windowsVim.visual_line_keydown = function (e) {
                 windowsVim.switchToInsertMode();
                 return true;
             }
-        case (keyMapVLine.exitVisualMode[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualMode[1] === true || keyMapVLine.exitVisualMode[2] === modifierInput)):
-        case (keyMapVLine.exitVisualMode2[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualMode2[1] === true || keyMapVLine.exitVisualMode2[2] === modifierInput)):
+        case (keyMapVLine.exitToVisualMode[0] === windowsVim.currentSequence && (keyMapVLine.exitToVisualMode[1] === true || keyMapVLine.exitToVisualMode[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
                 windowsVim.clearData();
-                windowsVim.switchToNormalMode();
+                windowsVim.switchToVisualMode();
                 return true;
             }
         case (keyMapVLine.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):
