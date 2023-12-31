@@ -3,7 +3,7 @@ let insertElem = document.getElementById("insert");
 let visualElem = document.getElementById("visual");
 let visualLineElem = document.getElementById("visual-line");
 
-import { KEY_SEPARATOR, getUltimateKeyMapInCallback, getDefaultKeyBindings, saveKeyInKeyMap } from "./vim/keybindings.js";
+import { KEY_SEPARATOR, getUltimateKeyMapInCallback, getDefaultKeyBindings, saveKeyInKeyMap, resetToDefaultKeyMap } from "./vim/keybindings.js";
 
 // If we are in the middle of recording a new keybinding, any clicks to other keybindings will be ignored until the 
 // user hits one of the following buttons: "Save", "Cancel" or "Default"
@@ -424,4 +424,37 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
         }
     }
 
+    // Reset button functionality
+    let resetButton = document.getElementById("reset-btn");
+    let resetModal = document.getElementById("reset-modal");
+    
+    let resetModalConfirmBtn = document.getElementById("reset-modal-confirm-btn");
+    let resetModalCancelBtn = document.getElementById("reset-modal-cancel-btn");
+
+    resetButton.onclick = function (e) {
+        resetModal.style.display = "block";
+    }
+
+    window.onclick = function (e) {
+        if (e.target === resetModal) {
+            resetModal.style.display = "none"; // Clicked anywhere outside of the modal-content, so close the modal
+        }
+        else if (e.target === resetModalCancelBtn) {
+            resetModal.style.display = "none"; // Clicked the cancel button, so close the modal
+        }
+        else if (e.target === resetModalConfirmBtn) {
+            resetModal.style.display = "none";
+            resetToDefaultKeyMap(function () {
+                // Inside of the callback function (clearing finished)
+
+                // Refresh the page to show the new keybindings
+                location.reload();
+
+            }); // in keybindings.js
+        }
+    }
+
+
 });
+
+// Any code outside of the function (here) will likely run before the keybindings are loaded in (bad)

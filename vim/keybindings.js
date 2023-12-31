@@ -14,6 +14,7 @@ export function saveKeyInKeyMap(keyMapStr, keyNameStr, keyValue, bitMask) {
 
 	// Build the actual entry
 	let keyArr = [keyValue, ignoreModifierKeys, bitMask];
+	// It is not necessary to save the description because when we load the keymap, we always are just using the default description
 
 	getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 		// Get the current keyMap, change the entry we want to, then save it back
@@ -23,6 +24,15 @@ export function saveKeyInKeyMap(keyMapStr, keyNameStr, keyValue, bitMask) {
 			"ultimateKeyMap": JSON.stringify(ultimateKeyMap)
 		})
 	});
+}
+
+export function resetToDefaultKeyMap(callback) {
+
+	// Clear local storage completely and then call the callback when done
+	// NOTE: The show updates toggle is stored in chrome.storage.sync, so it won't be cleared
+	chrome.storage.local.clear(function (result) {
+		callback();
+	})
 }
 
 /*
