@@ -1125,6 +1125,11 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.deleteToStartOfLine[0] === windowsVim.currentSequence && (keyMapN.deleteToStartOfLine[1] === true || keyMapN.deleteToStartOfLine[2] === modifierInput)): 
         case (keyMapN.deleteToStartOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToStartOfLineInsert[1] === true || keyMapN.deleteToStartOfLineInsert[2] === modifierInput)): 
         {
+            let shouldWeCut = keyMapN.deleteToStartOfLine[4];
+            if (keyMapN.deleteToStartOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToStartOfLineInsert[1] === true || keyMapN.deleteToStartOfLineInsert[2] === modifierInput)) {
+                shouldWeCut = keyMapN.deleteToStartOfLineInsert[4];
+            }
+
             // d0, c0 (delete to beginning of line)
             let [startXCoord, startYCoord] = docs.getCoords();
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -1135,7 +1140,7 @@ windowsVim.normal_keydown = function (e) {
                 // In the middle of a line
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                this.deleteOrCut(shouldWeCut);
             } else {
                 // At the start of a line or multiline, figure out which one and then act accordingly
                 let [tempXCoord, tempYCoord] = docs.getCoords();
@@ -1158,7 +1163,7 @@ windowsVim.normal_keydown = function (e) {
                     ) {
                         // We were at the start of a multiline, so delete
                         docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        this.deleteOrCut(shouldWeCut);
                     } else {
                         // We are at the start of a line, so just go back
                         docs.pressKey(docs.codeFromKey("ArrowRight"));
