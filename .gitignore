@@ -1,5 +1,6 @@
 # IDE Files
 .vscode/
+.idea/
 
 # Addicted to seeing lines of code
 .VSCodeCounter/
