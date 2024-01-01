@@ -230,8 +230,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         for (let i = 0; i < curValue.length; i++) {
             sequence += curValue[i] + KEY_SEPARATOR;
         }
-        sequence.slice(0, -1); // Remove the last KEY_SEPARATOR
-        console.log(checked);
+        sequence = sequence.slice(0, -1); // Remove the last KEY_SEPARATOR
         saveKeyInKeyMap(keyMapStr, keyNameStr, sequence, bitmask, checked);
     }
 

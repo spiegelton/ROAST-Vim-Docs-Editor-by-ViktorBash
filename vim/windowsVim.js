@@ -107,6 +107,45 @@ windowsVim.copyWholeLine = async function () {
 	// Not updating cursor because we're at the same place
 };
 
+windowsVim.moveToCoords = function (xCoord, yCoord) {
+    let [newXCoord, newYCoord] = docs.getCoords();
+
+    let startTime = Date.now();
+    while (newXCoord !== xCoord || newYCoord !== yCoord) {
+        let curTime = Date.now();
+
+        if (curTime - startTime > 1500) {
+            // This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
+            // (1.5 seconds), we break out
+            break;
+        }
+        if (newYCoord < yCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowDown"));
+        } else if (newYCoord > yCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowUp"));
+        }
+
+        if (newXCoord < xCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+        } else if (newXCoord > xCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+
+        [newXCoord, newYCoord] = docs.getCoords();
+    }
+}
+
+windowsVim.deleteOrCutAndUndo = function(shouldWeCut) {
+    if (shouldWeCut === true) {
+        docs.contentDocument.execCommand("cut");
+        docs.contentDocument.execCommand("undo")
+    }
+    else {
+        docs.pressKey(docs.codeFromKey("Backspace"));
+        docs.pressKey(docs.codeFromKey("Z"), true);
+    }
+}
+
 /*
 * Paste whatever is in the clipboard at the appropriate place (lot of logic to move the cursor around)
 * You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
@@ -851,77 +890,144 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.x[0] === windowsVim.currentSequence && (keyMapN.x[1] === true || keyMapN.x[2] === modifierInput)): 
         case (keyMapN.s[0] === windowsVim.currentSequence && (keyMapN.s[1] === true || keyMapN.s[2] === modifierInput)): 
         {
+            let shouldWeCut = keyMapN.x[4];
+            if (keyMapN.s[0] === windowsVim.currentSequence && (keyMapN.s[1] === true || keyMapN.s[2] === modifierInput)) {
+                shouldWeCut = keyMapN.s[4];
+            }
             // Delete the current character (enter insert mode for "s")
             // "x" and "s" commands
             let numRepeats = parseInt(windowsVim.num) || 1;
-            if (e.repeat === false && numRepeats === 1) {
+
+            if (e.repeat === false && numRepeats === 1 && docs.isTextSelected()) {
                 // If the user presses "Undo", we still have text highlighted in normal mode to delete
-                let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
-                if (textSelected) {
-                    // Text is selected
-                    docs.contentDocument.execCommand("cut"); // Cut the text
-                    numRepeats = 0; // Skip the for loop and go straight to the bottom
-                }
-
+                this.deleteOrCut(keyMapN.x[4]);
+                numRepeats = 0; // Skip the logic and go straight to the bottom
             }
-            for (let i = 0; i < numRepeats; i++) {
-                // if we're at the end of a line, r should go on the current line
-                // if we're at the end of a multiline (fake) line, r can move to next multiline
-                let [xCoord, yCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
-                let [leftXCoord, leftYCoord] = docs.getCoords();
+            
+            // We can only delete stuff on the current line
+            // We will move right as much as possible, and then move left if we still need to delete more
+            let [startXCoord, startYCoord] = docs.getCoords();
+            
+            let counter = numRepeats;
+            let rightCounter = 0; // How many characters to move to the right
+            let leftCounter = 0; // How many characters to move to the left
 
-                // IF: We are not at the start of the file, undo our arrow left with an arrow right
-                if (xCoord !== leftXCoord || yCoord !== leftYCoord) {
-                    // We are not at the beginning of the file, so undo our arrow right
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+            while (counter > 0) {
+                let [curXCoord, curYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let [newXCoord, newYCoord] = docs.getCoords();
+                if (curXCoord === newXCoord && curYCoord === newYCoord) {
+                    // At the end of the file, do nothing
+                    break; // Don't change counters or anything since we didn't actually move
                 }
-                // IF: We are at the start of a line OR at the start of a file, we can just replace the character without worrying
-                // about line ending stuff
-                if (
-                    leftYCoord !== yCoord ||
-                    (leftYCoord === yCoord && leftXCoord === xCoord)
-                ) {
-                    // At the beginning of a line or multiline, no need for checking if we're at the end
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    let [rightXCoord, rightYCoord] = docs.getCoords();
-                    // let rightYCoord = docs.getYCoord();
-                    if (rightYCoord !== yCoord) {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                else if (newYCoord !== curYCoord) {
+                    // We are on a new line (potentially), so we need to test and take appropriate action
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [finalXCoord, finalYCoord] = docs.getCoords();
+                    if (finalXCoord === curXCoord && finalYCoord === curYCoord) {
+                        // We are on a new line, so we're done now and moving to the next stage
                         break;
-                    } else if (rightXCoord === xCoord && rightYCoord === yCoord) {
-                        // We are at the end of the file on an empty line, do nothing
-                        break;
-                    } else {
-                        docs.pressKey(docs.codeFromKey("Backspace"));
                     }
-                }
-
-                // We are not at the start of a file or line, so we have to check if we're at the end of a line,
-                // middle of a line, or end of a file
-                else {
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    let [newXCoord, newYCoord] = docs.getCoords();
-                    if (xCoord === newXCoord && yCoord === newYCoord) {
-                        // We are at the end of the file, guaranteed to not be an empty line from above
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    } else if (yCoord === newYCoord) {
-                        // We are in the middle of the line somewhere or something, standard procedure
-                        docs.pressKey(docs.codeFromKey("Backspace"));
-                    } else {
-                        // We've either passed a space or a return that has put us one multiline or line down
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    else {
+                        // We are on a multiline, keep going
                         docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                        let [finalXCoord, finalYCoord] = docs.getCoords();
-                        if (finalXCoord === xCoord && finalYCoord === yCoord) {
-                            // We are dealing with a "Return" and actual new line
-                            docs.pressKey(docs.codeFromKey("Backspace"));
-                        } else {
-                            // We are dealing with a space and just a multiline
-                            docs.pressKey(docs.codeFromKey("Backspace"));
-                        }
+                        counter--;
+                        rightCounter++;
                     }
+                }
+                else {
+                    // Middle of a line, all is well
+                    counter--;
+                    rightCounter++;
+                }
+            }
+
+            if (counter > 0) {
+                // Traverse to start coords
+                this.moveToCoords(startXCoord, startYCoord);
+            }
+
+            let deleteWholeLine = false;
+
+            while (counter > 0) {
+                // Traverse left counting as much as we can until we hit the start of the line
+                let [curXCoord, curYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [newXCoord, newYCoord] = docs.getCoords();
+
+                if (curXCoord === newXCoord && curYCoord === newYCoord) {
+                    // We reached the start of the file, we are done
+                    deleteWholeLine = true;
+                    break;
+                }
+                else if (newYCoord !== curYCoord) {
+                    // We are on a new line (potentially), so we need to test and take appropriate action
+                    let [midXCoord, midYCoord] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [endXCoord, endYCoord] = docs.getCoords();
+                    if (midXCoord === endXCoord && midYCoord === endYCoord) {
+                        // We are on a new line, so we're done now and moving to the next stage
+                        deleteWholeLine = true;
+                        docs.pressKey(docs.codeFromKey("ArrowRight")); // Leaving the cursor at the start of the line
+                        break;
+                    }
+                    else {
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        counter--;
+                        leftCounter++;
+                    }
+                }
+                else {
+                    // Middle of a line, all is well
+                    counter--;
+                    leftCounter++;
+                }
+                
+            }
+
+            // Now time to highlight what we are going to delete
+            // The reason we have a separate scenario for deleting the whole line is an optimization (it's faster than just
+            // highlighting key by key)
+            if (leftCounter === 0 && rightCounter > 0) {
+                while (rightCounter > 0) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                    rightCounter--;
+                }
+
+                // Only delete based whether or not text is selected
+                if (docs.isTextSelected()) {
+                    this.deleteOrCutAndUndo(shouldWeCut);
+                    // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
+                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+            }
+            else if (deleteWholeLine) {
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true)
+
+                // Only delete based whether or not text is selected
+                if (docs.isTextSelected()) {
+                    this.deleteOrCutAndUndo(shouldWeCut);
+                    // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
+                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+            }
+            else {
+                // We are going to higlight
+                let ultimateCounter = rightCounter + leftCounter;
+                while (ultimateCounter > 0) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                    ultimateCounter--;
+                }
+                if (docs.isTextSelected()) {
+                    this.deleteOrCutAndUndo(shouldWeCut);
+                    // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
+                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
+                    docs.pressKey(docs.codeFromKey("Backspace"));
                 }
             }
 

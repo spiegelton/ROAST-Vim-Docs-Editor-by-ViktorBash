@@ -155,6 +155,9 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
 	el.dispatchEvent(key_event);
 };
 
+// Used when we're deleting/undoing or stuff and need to add a placeholder to the document that we will then delete
+docs.placeHolderKey = "_";  // Can't be a special character/key
+
 docs.pressSpecialKey = function (key) {
 	var el = document.getElementsByClassName("docs-texteventtarget-iframe")[0];
 	el = el.contentDocument;
@@ -377,6 +380,10 @@ docs.getCoords = function () {
 	let xCoord = coords.slice(10, xIndex);
 	let yCoord = coords.slice(xIndex + 4, coords.length - 3);
 	return [parseInt(xCoord), parseInt(yCoord)];
+}
+
+docs.isTextSelected = function () {
+	return docs.contentDocument.getSelection(0).getRangeAt(0).endOffset !== 0;
 }
 
 
