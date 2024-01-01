@@ -135,6 +135,19 @@ windowsVim.moveToCoords = function (xCoord, yCoord) {
     }
 }
 
+// shouldWeCut is boolean
+windowsVim.deleteOrCut = function(shouldWeCut) {
+    if (shouldWeCut === true) {
+        docs.contentDocument.execCommand("cut");
+    }
+    else {
+        docs.pressKey(docs.codeFromKey("Backspace"));
+    }
+}
+
+// shouldWeCut is boolean
+// There are 2 ways to undo and which one is the correct one to do depends on whether you deleted (Backspaceed) or cut the text
+// Consequently this function does both since undo depends on how you deleted/cut the text
 windowsVim.deleteOrCutAndUndo = function(shouldWeCut) {
     if (shouldWeCut === true) {
         docs.contentDocument.execCommand("cut");
@@ -145,6 +158,7 @@ windowsVim.deleteOrCutAndUndo = function(shouldWeCut) {
         docs.pressKey(docs.codeFromKey("Z"), true);
     }
 }
+
 
 /*
 * Paste whatever is in the clipboard at the appropriate place (lot of logic to move the cursor around)
@@ -1048,6 +1062,19 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.deleteToEndOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)): 
         case (keyMapN.deleteToEndOfLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)): 
         {
+            // Get the value for shouldWeCut
+            let shouldWeCut;
+            switch (true) {
+                case (keyMapN.deleteToEndOfLine[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine[1] === true || keyMapN.deleteToEndOfLine[2] === modifierInput)): 
+                { shouldWeCut = keyMapN.deleteToEndOfLine[4]; break; }
+                case (keyMapN.deleteToEndOfLine2[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine2[1] === true || keyMapN.deleteToEndOfLine2[2] === modifierInput)): 
+                { shouldWeCut = keyMapN.deleteToEndOfLine2[4]; break; }
+                case (keyMapN.deleteToEndOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)): 
+                { shouldWeCut = keyMapN.deleteToEndOfLineInsert[4]; break; }
+                case (keyMapN.deleteToEndOfLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)): 
+                { shouldWeCut = keyMapN.deleteToEndOfLine2Insert[4]; break; }
+            }
+
             // D, d$, C, c$ (delete to end of line)
             let [startXCoord, startYCoord] = docs.getCoords();
             docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -1059,7 +1086,7 @@ windowsVim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
                 docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                this.deleteOrCut(shouldWeCut);
             } else {
                 // We are on the end of a multiline or line
                 docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
@@ -1076,10 +1103,11 @@ windowsVim.normal_keydown = function (e) {
                     // Highlight
                     docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    this.deleteOrCut(shouldWeCut);
                 }
             }
 
+            // Insert case
             if ((keyMapN.deleteToEndOfLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput) || (
                 keyMapN.deleteToEndOfLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)
             ))) 
@@ -1090,6 +1118,7 @@ windowsVim.normal_keydown = function (e) {
                 return true;
             }
 
+            // Base case, stay in normal mode
             windowsVim.clearData();
             return true;
         }

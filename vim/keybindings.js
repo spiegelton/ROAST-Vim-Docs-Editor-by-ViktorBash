@@ -201,7 +201,7 @@ export function getDefaultKeyBindings() {
 		c: ["c", false, 0b0000, "Delete highlighted text and enter insert mode", false],
 		D: ["D", false, 0b0100, "Delete highlighted text", false],
 		C: ["C", false, 0b0100, "Delete highlighted text and enter insert mode", false],
-		y: ["y", false, 0b0000, "Copy highlighted text", false],
+		y: ["y", false, 0b0000, "Copy highlighted text", null],
 		arrowDownCtrl: ["ArrowDown", false, 0b1000, "Highlight down", null],
 		arrowUpCtrl: ["ArrowUp", false, 0b1000, "Highlight up", null],
 		ctrlDPageDown: ["d", false, 0b1000, "Highlight down several lines", null],
