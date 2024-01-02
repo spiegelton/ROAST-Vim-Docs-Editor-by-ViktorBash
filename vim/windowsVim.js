@@ -1011,11 +1011,18 @@ windowsVim.normal_keydown = function (e) {
                 }
 
                 // Only delete based whether or not text is selected
-                if (docs.isTextSelected()) {
+                if (docs.isTextSelected() && numRepeats > 1) {
                     this.deleteOrCutAndUndo(shouldWeCut);
                     // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
                     docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
                     docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+                else if (docs.isTextSelected() && numRepeats === 1) {
+                    if (shouldWeCut) {
+                        docs.contentDocument.execCommand("copy");
+                    }
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    docs.pressKey(docs.codeFromKey("Delete"));
                 }
             }
             else if (deleteWholeLine) {
@@ -1023,11 +1030,18 @@ windowsVim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true)
 
                 // Only delete based whether or not text is selected
-                if (docs.isTextSelected()) {
+                if (docs.isTextSelected() && numRepeats > 1) {
                     this.deleteOrCutAndUndo(shouldWeCut);
                     // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
                     docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
                     docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+                else if (docs.isTextSelected() && numRepeats === 1) {
+                    if (shouldWeCut) {
+                        docs.contentDocument.execCommand("copy");
+                    }
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    docs.pressKey(docs.codeFromKey("Delete"));
                 }
             }
             else {
@@ -1037,11 +1051,18 @@ windowsVim.normal_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                     ultimateCounter--;
                 }
-                if (docs.isTextSelected()) {
+                if (docs.isTextSelected() && numRepeats > 1) {
                     this.deleteOrCutAndUndo(shouldWeCut);
                     // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
                     docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
                     docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+                else if (docs.isTextSelected() && numRepeats === 1) {
+                    if (shouldWeCut) {
+                        docs.contentDocument.execCommand("copy");
+                    }
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    docs.pressKey(docs.codeFromKey("Delete"));
                 }
             }
 
@@ -1356,27 +1377,62 @@ windowsVim.normal_keydown = function (e) {
             windowsVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.deleteLine[0] === windowsVim.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)): 
+        case (keyMapN.deleteLine[0] === windowsVim.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)):
         {
-            // dd (delete whole line)
-            // We are going to select text down, move right one arrow, select text up, and delete
+            // !IMPORTANT: If we hit the bottom of the file for "dd", we effectively stop (we don't start deleting upwards)
+            // Strategy:
+            // 1. Move to the start of the line
+            // 2. Count how many lines down we can delete
+            // 3. Count how many lines up we can delete
+            // 4. Make sure we're in the right place
+            // 5. Highlight down and delete
+            // 6. Make sure we end at the right location
+            this.moveToStartOfLine();
+            let [initialXCoord, initialYCoord] = docs.getCoords();
             const numRepeats = parseInt(windowsVim.num) || 1;
-            for (let i = 0; i < numRepeats; i++) {
-                let cursorLocations = docs.getCursorLocations();
-                if (cursorLocations[3] && cursorLocations[0]) {
-                    // We are at the end of a file on an empty line
-                    docs.pressKey(docs.codeFromKey("Backspace"));
+            let counter = numRepeats;
+            let downCounter = 0;
+
+            let hitEnd = false; // todo, will be useful later seeing if we have to backspace again to delete
+            // the empty line at the very end
+
+            while (counter > 0) {
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                    // We are at the end of the file on an empty line, so we can't go down anymore
+                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder so line isn't empty anymore
+                    counter--;
+                    downCounter++;
+                    hitEnd = true;
                     break;
                 }
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                if (cursorLocations[3]) {
-                    // We are at the end of the file, so backspace again to remove the empty line we're on
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                    break; // With dd we finish if we reach the end of the
+                else if (startYCoord === endYCoord) {
+                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                    counter--;
+                    downCounter++;
+                    hitEnd = true;
+                    break;
                 }
+                else {
+                    counter--;
+                    downCounter++;
+                }
+            }
+
+            // Move back to the original place (start of line)
+            // this.moveToCoords(initialXCoord, initialYCoord);
+
+            // Now we highlight down and delete
+            while (downCounter > 0) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                downCounter--;
+            }
+
+            this.deleteOrCut(keyMapN.deleteLine[4]);
+            if (hitEnd) {
+                docs.pressKey(docs.codeFromKey("Backspace"));
             }
 
             windowsVim.clearData();
