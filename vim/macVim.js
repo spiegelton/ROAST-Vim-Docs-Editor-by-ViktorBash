@@ -1016,6 +1016,20 @@ macVim.normal_keydown = function (e) {
         case (keyMapN.deleteToEndOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)): 
         case (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)): 
         {
+            // Get the value for shouldWeCut
+            let shouldWeCut;
+            switch (true) {
+                case (keyMapN.deleteToEndOfLine[0] === this.currentSequence && (keyMapN.deleteToEndOfLine[1] === true || keyMapN.deleteToEndOfLine[2] === modifierInput)):
+                { shouldWeCut = keyMapN.deleteToEndOfLine[4]; break; }
+                case (keyMapN.deleteToEndOfLine2[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2[1] === true || keyMapN.deleteToEndOfLine2[2] === modifierInput)):
+                { shouldWeCut = keyMapN.deleteToEndOfLine2[4]; break; }
+                case (keyMapN.deleteToEndOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)):
+                { shouldWeCut = keyMapN.deleteToEndOfLineInsert[4]; break; }
+                case (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)):
+                { shouldWeCut = keyMapN.deleteToEndOfLine2Insert[4]; break; }
+            }
+            console.log(shouldWeCut);
+
 	        // D, d$, C, c$
             let [startXCoord, startYCoord] = docs.getCoords();
             docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -1026,7 +1040,7 @@ macVim.normal_keydown = function (e) {
                 // We're in the middle of a line
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                this.deleteOrCut(shouldWeCut);
             } else {
                 // We are on the end of a multiline or line
                 docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
@@ -1041,10 +1055,11 @@ macVim.normal_keydown = function (e) {
 
                     // Highlight
                     docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    this.deleteOrCut(shouldWeCut);
                 }
             }
 
+            // Insert case
             if (
             (keyMapN.deleteToEndOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)) || 
             (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)) 
@@ -1056,6 +1071,7 @@ macVim.normal_keydown = function (e) {
                     return true;
                 }
 
+            // Base case
             macVim.clearData();
             return true;
         }
