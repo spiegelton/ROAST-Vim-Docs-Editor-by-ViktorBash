@@ -1335,13 +1335,6 @@ macVim.normal_keydown = function (e) {
         case (keyMapN.deleteLine[0] === this.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)): 
         {
             let shouldWeCut = keyMapN.deleteLine[4];
-            // !IMPORTANT: If we hit the bottom of the file for "dd", we effectively stop (we don't start deleting upwards)
-            // Strategy:
-            // 1. Move to the start of the line
-            // 2. Count how many lines down we can delete
-            // 4. Make sure we're in the right place
-            // 5. Highlight up and delete
-            // 6. Make sure we end at the right location and do some repositioning if need be
             this.moveToEndOfLine();
             const numRepeats = parseInt(this.num) || 1;
             let counter = numRepeats - 1;

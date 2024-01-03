@@ -1414,25 +1414,65 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.deleteLineInsert[0] === windowsVim.currentSequence && (keyMapN.deleteLineInsert[1] === true || keyMapN.deleteLineInsert[2] === modifierInput)): 
         case (keyMapN.deleteLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)): 
         {
-            // cc (delete whole line and enter insert mode)
-            // If just executed one time/loop, we delete everything on the line but not actually the line itself
-            // We are going to select text down, move right one arrow, select text up, and delete
+            let shouldWeCut = keyMapN.deleteLineInsert[4];
+            if (keyMapN.deleteLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)) {
+                shouldWeCut = keyMapN.deleteLine2Insert[4];
+            }
+            // !IMPORTANT: If we hit the bottom of the file for "dd", we effectively stop (we don't start deleting upwards)
+            // Strategy:
+            // 1. Move to the start of the line
+            // 2. Count how many lines down we can delete
+            // 4. Make sure we're in the right place
+            // 5. Highlight up and delete
+            // 6. Make sure we end at the right location and do some repositioning if need be
+            this.moveToStartOfLine();
             const numRepeats = parseInt(windowsVim.num) || 1;
-            for (let i = 0; i < numRepeats; i++) {
-                let cursorLocations = docs.getCursorLocations();
-                if (cursorLocations[3] && cursorLocations[0]) {
-                    // We are at the end of a file on an empty line, do not delete
+            let counter = numRepeats;
+            let downCounter = 0;
+
+            let endOfFile = false;
+            while (counter > 0) {
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                counter--;
+                downCounter++;
+                if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                    // We are at the end of the file on an empty line, so we can't go down anymore
+                    endOfFile = true;
                     break;
                 }
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                if (cursorLocations[3]) {
-                    // We are at the end of the file, do not delete
-                    break; // With dd we finish if we reach the end of the
+                else if (startYCoord === endYCoord) {
+                    endOfFile = true;
+                    break;
                 }
-                if (i === numRepeats - 1) {
+            }
+
+            if (endOfFile) {
+                // We delete this enter with a backspace, but need it to properly cut the last line to the clipboard
+                // Otherwise the clipboard won't have the "\n" at the end
+                docs.pressKey(docs.codeFromKey("Enter"));
+            }
+
+            while (downCounter > 0) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                downCounter--;
+            }
+            this.deleteOrCut(shouldWeCut);
+
+            if (shouldWeCut) {
+                // Since we are doing commands immediately after a execCommand("cut") operation, we need the timeout
+                if (!endOfFile) {
+                    // We still have the style of the deleted line on our cursor, so we just move quick right/left to
+                    // get rid of it and have the style of the line we're on
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("Enter"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }, 1);
+                }
+            }
+            else {
+                if (!endOfFile) {
                     docs.pressKey(docs.codeFromKey("Enter"));
                     docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
