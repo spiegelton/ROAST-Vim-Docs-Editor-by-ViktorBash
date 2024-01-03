@@ -279,14 +279,15 @@ macVim.moveToStartOfLine = function () {
 	let newCoords = docs.userCursor.style.transform;
 	if (oldCoords === newCoords) {
 		// We are at the end of a file (which may be an empty line, so we have to test for that)
-		let initialYCoord = docs.getYCoord();
+        let [initialXCoord, initialYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		let finalYCoord = docs.getYCoord();
+        let [finalXCoord, finalYCoord] = docs.getCoords();
 
 		// We we are going to check Y-Values, if the y-value didn't change, hit arrow up
 		// If the y value did change, hit arrow right
 		if (initialYCoord === finalYCoord) {
 			// Y Coord didn't change, so we should get to the start of a line with arrow up
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
 		} else {
 			// Y Coord changed, so we were at the start of a line (so just go back)
@@ -1333,50 +1334,81 @@ macVim.normal_keydown = function (e) {
         }
         case (keyMapN.deleteLine[0] === this.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)): 
         {
-	// dd 
-		const numRepeats = parseInt(macVim.num) || 1;
-		for (let i = 0; i < numRepeats; i++) {
-			macVim.moveToEndOfLine();
-			let [startXCoord, startYCoord] = docs.getCoords();
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			let [endXCoord, endYCoord] = docs.getCoords();
-			let atEndOfFile = false;
-			if (startXCoord === endXCoord && startYCoord === endYCoord) {
-				atEndOfFile = true;
-			}
-			else {
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-			
-			// The magic sauce
-			docs.pressSpecialKey(" ");
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-			docs.pressKey(docs.codeFromKey("Backspace"));
+            let shouldWeCut = keyMapN.deleteLine[4];
+            // !IMPORTANT: If we hit the bottom of the file for "dd", we effectively stop (we don't start deleting upwards)
+            // Strategy:
+            // 1. Move to the start of the line
+            // 2. Count how many lines down we can delete
+            // 4. Make sure we're in the right place
+            // 5. Highlight up and delete
+            // 6. Make sure we end at the right location and do some repositioning if need be
+            this.moveToEndOfLine();
+            const numRepeats = parseInt(this.num) || 1;
+            let counter = numRepeats - 1;
+            let downCounter = 1;
 
-			if (atEndOfFile) {
-				docs.pressKey(docs.codeFromKey("Backspace"));
-				macVim.moveToStartOfLine();
-			}
-			else {
-				docs.pressKey(docs.codeFromKey("Delete"));
-			}
+            while (counter > 0) {
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                    // We are at the end of the file on an empty line, so we can't go down anymore
+                    break;
+                }
+                else {
+                    counter--;
+                    downCounter++;
+                }
+            }
 
-			if (i === numRepeats - 1 && e.repeat === false) {
-				// Get rid of the highlighting of the deleted line (only if we're sure this is the last 'dd' and we're not spamming it)
-				let [curXPos, curYPos] = docs.getCoords();
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-				let [endXPos, endYPos] = docs.getCoords();
-				if (curXPos === endXPos && curYPos === endYPos) {
-				}
-				else {
-					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				}
+            let endOfFile = false;
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [endXCoord, endYCoord] = docs.getCoords();
+            if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                // Didn't move, enter
+                docs.pressKey(docs.codeFromKey("Enter"));
+                endOfFile = true;
+            }
 
-			}
 
-		}
-		macVim.clearData();
-		return true;
+            while (downCounter > 0) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                downCounter--;
+            }
+            this.deleteOrCut(shouldWeCut);
+
+            if (shouldWeCut) {
+                // Since we are doing commands immediately after a execCommand("cut") operation, we need the timeout
+                if (endOfFile) {
+                    // Position ourselves properly
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        this.moveToStartOfLine();
+                    }, 1);
+                }
+                else {
+                    // We still have the style of the deleted line on our cursor, so we just move quick right/left to
+                    // get rid of it and have the style of the line we're on
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }, 1);
+                }
+            }
+            else {
+                if (endOfFile) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    this.moveToStartOfLine();
+                }
+                else {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+            }
+
+            macVim.clearData();
+            return true;
         }
         case (keyMapN.deleteLineInsert[0] === this.currentSequence && (keyMapN.deleteLineInsert[1] === true || keyMapN.deleteLineInsert[2] === modifierInput)): 
         case (keyMapN.deleteLine2Insert[0] === this.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)): 
