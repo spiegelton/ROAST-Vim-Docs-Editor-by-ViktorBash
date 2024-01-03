@@ -383,6 +383,10 @@ docs.getCoords = function () {
 }
 
 docs.isTextSelected = function () {
+	if (docs.isMac) { // Mac Version
+		return docs.contentDocument.getSelection(0).getRangeAt(0).startOffset === 0
+	}
+	// Windows version
 	return docs.contentDocument.getSelection(0).getRangeAt(0).endOffset !== 0;
 }
 
