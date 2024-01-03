@@ -1335,60 +1335,63 @@ windowsVim.normal_keydown = function (e) {
         }
         case (keyMapN.deleteLine[0] === windowsVim.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)):
         {
+            let shouldWeCut = keyMapN.deleteLine[4];
             // !IMPORTANT: If we hit the bottom of the file for "dd", we effectively stop (we don't start deleting upwards)
             // Strategy:
             // 1. Move to the start of the line
             // 2. Count how many lines down we can delete
-            // 3. Count how many lines up we can delete
             // 4. Make sure we're in the right place
-            // 5. Highlight down and delete
-            // 6. Make sure we end at the right location
+            // 5. Highlight up and delete
+            // 6. Make sure we end at the right location and do some repositioning if need be
             this.moveToStartOfLine();
-            let [initialXCoord, initialYCoord] = docs.getCoords();
             const numRepeats = parseInt(windowsVim.num) || 1;
             let counter = numRepeats;
             let downCounter = 0;
 
-            let hitEnd = false; // todo, will be useful later seeing if we have to backspace again to delete
-            // the empty line at the very end
-
+            let endOfFile = false;
             while (counter > 0) {
                 let [startXCoord, startYCoord] = docs.getCoords();
                 docs.pressKey(docs.codeFromKey("ArrowDown"), true);
                 let [endXCoord, endYCoord] = docs.getCoords();
+                counter--;
+                downCounter++;
                 if (startXCoord === endXCoord && startYCoord === endYCoord) {
                     // We are at the end of the file on an empty line, so we can't go down anymore
-                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder so line isn't empty anymore
-                    counter--;
-                    downCounter++;
-                    hitEnd = true;
+                    endOfFile = true;
                     break;
                 }
                 else if (startYCoord === endYCoord) {
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-                    counter--;
-                    downCounter++;
-                    hitEnd = true;
+                    endOfFile = true;
                     break;
-                }
-                else {
-                    counter--;
-                    downCounter++;
                 }
             }
 
-            // Move back to the original place (start of line)
-            // this.moveToCoords(initialXCoord, initialYCoord);
+            if (endOfFile) {
+                // We delete this enter with a backspace, but need it to properly cut the last line to the clipboard
+                // Otherwise the clipboard won't have the "\n" at the end
+                docs.pressKey(docs.codeFromKey("Enter"));
+            }
 
-            // Now we highlight down and delete
             while (downCounter > 0) {
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
                 downCounter--;
             }
+            this.deleteOrCut(shouldWeCut);
 
-            this.deleteOrCut(keyMapN.deleteLine[4]);
-            if (hitEnd) {
-                docs.pressKey(docs.codeFromKey("Backspace"));
+            if (shouldWeCut) {
+                // Since we are doing commands immediately after a execCommand("cut") operation, we need the timeout
+                setTimeout(() => {
+                    if (endOfFile) {
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                        this.moveToStartOfLine();
+                    }
+                }, 1);
+            }
+            else {
+                if (endOfFile) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                    this.moveToStartOfLine();
+                }
             }
 
             windowsVim.clearData();
