@@ -1380,17 +1380,31 @@ windowsVim.normal_keydown = function (e) {
 
             if (shouldWeCut) {
                 // Since we are doing commands immediately after a execCommand("cut") operation, we need the timeout
-                setTimeout(() => {
-                    if (endOfFile) {
+
+                if (endOfFile) {
+                    // Position ourselves properly
+                    setTimeout(() => {
                         docs.pressKey(docs.codeFromKey("Backspace"));
                         this.moveToStartOfLine();
-                    }
-                }, 1);
+                    }, 1);
+                }
+                else {
+                    // We still have the style of the deleted line on our cursor, so we just move quick right/left to
+                    // get rid of it and have the style of the line we're on
+                    setTimeout(() => {
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }, 1);
+                }
             }
             else {
                 if (endOfFile) {
                     docs.pressKey(docs.codeFromKey("Backspace"));
                     this.moveToStartOfLine();
+                }
+                else {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
             }
 
