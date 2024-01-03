@@ -924,7 +924,6 @@ windowsVim.normal_keydown = function (e) {
             
             let counter = numRepeats;
             let rightCounter = 0; // How many characters to move to the right
-            let leftCounter = 0; // How many characters to move to the left
 
             while (counter > 0) {
                 let [curXCoord, curYCoord] = docs.getCoords();
@@ -956,60 +955,13 @@ windowsVim.normal_keydown = function (e) {
                 }
             }
 
-            if (counter > 0) {
-                // Traverse to start coords
-                this.moveToCoords(startXCoord, startYCoord);
-            }
-
-            let deleteWholeLine = false;
-
-            while (counter > 0) {
-                // Traverse left counting as much as we can until we hit the start of the line
-                let [curXCoord, curYCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                let [newXCoord, newYCoord] = docs.getCoords();
-
-                if (curXCoord === newXCoord && curYCoord === newYCoord) {
-                    // We reached the start of the file, we are done
-                    deleteWholeLine = true;
-                    break;
-                }
-                else if (newYCoord !== curYCoord) {
-                    // We are on a new line (potentially), so we need to test and take appropriate action
-                    let [midXCoord, midYCoord] = docs.getCoords();
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-                    let [endXCoord, endYCoord] = docs.getCoords();
-                    if (midXCoord === endXCoord && midYCoord === endYCoord) {
-                        // We are on a new line, so we're done now and moving to the next stage
-                        deleteWholeLine = true;
-                        docs.pressKey(docs.codeFromKey("ArrowRight")); // Leaving the cursor at the start of the line
-                        break;
-                    }
-                    else {
-                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        counter--;
-                        leftCounter++;
-                    }
-                }
-                else {
-                    // Middle of a line, all is well
-                    counter--;
-                    leftCounter++;
-                }
-                
-            }
-
-            // Now time to highlight what we are going to delete
-            // The reason we have a separate scenario for deleting the whole line is an optimization (it's faster than just
-            // highlighting key by key)
-            if (leftCounter === 0 && rightCounter > 0) {
+            if (rightCounter > 0) {
+                // Characters to delete that we can
+                // We will highlight going to the left
                 while (rightCounter > 0) {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
                     rightCounter--;
                 }
-
                 // Only delete based whether or not text is selected
                 if (docs.isTextSelected() && numRepeats > 1) {
                     this.deleteOrCutAndUndo(shouldWeCut);
@@ -1025,45 +977,49 @@ windowsVim.normal_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("Delete"));
                 }
             }
-            else if (deleteWholeLine) {
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true)
+            else if (rightCounter === 0) {
+                // We're at the end of the line and need to cut/delete 1 character left (unless we're on an empty line)
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [newXCoord, newYCoord] = docs.getCoords();
+                if (startXCoord === newXCoord && startYCoord === newYCoord) {
+                    // We're on an empty line
+                    // We don't copy emptiness to the clipboard (if we're cutting)
+                }
+                else if (newYCoord !== startYCoord) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+                    let [finalXCoord, finalYCoord] = docs.getCoords();
+                    if (finalXCoord === newXCoord && finalYCoord === newYCoord) {
+                        // We're on a new line, so go back and do nothing
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        // We don't copy emptiness to the clipboard (if we're cutting)
+                    }
+                    else {
+                        // Multiline
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+                        if (shouldWeCut) {
+                            docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                            docs.contentDocument.execCommand("copy")
+                            docs.pressKey(docs.codeFromKey("Backspace"));
+                        }
+                        else {
+                            docs.pressKey(docs.codeFromKey("Backspace"))
+                        }
+                    }
+                }
+                else {
+                    if (shouldWeCut) {
+                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        docs.contentDocument.execCommand("copy");
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                        docs.pressKey(docs.codeFromKey("Delete"));
+                    }
+                    else {
+                        docs.pressKey(docs.codeFromKey("Delete"));
+                    }
+                }
 
-                // Only delete based whether or not text is selected
-                if (docs.isTextSelected() && numRepeats > 1) {
-                    this.deleteOrCutAndUndo(shouldWeCut);
-                    // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
-                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-                else if (docs.isTextSelected() && numRepeats === 1) {
-                    if (shouldWeCut) {
-                        docs.contentDocument.execCommand("copy");
-                    }
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    docs.pressKey(docs.codeFromKey("Delete"));
-                }
-            }
-            else {
-                // We are going to higlight
-                let ultimateCounter = rightCounter + leftCounter;
-                while (ultimateCounter > 0) {
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                    ultimateCounter--;
-                }
-                if (docs.isTextSelected() && numRepeats > 1) {
-                    this.deleteOrCutAndUndo(shouldWeCut);
-                    // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
-                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-                else if (docs.isTextSelected() && numRepeats === 1) {
-                    if (shouldWeCut) {
-                        docs.contentDocument.execCommand("copy");
-                    }
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    docs.pressKey(docs.codeFromKey("Delete"));
-                }
             }
 
             if (keyMapN.x[0] === windowsVim.currentSequence && (keyMapN.x[1] === true || keyMapN.x[2] === modifierInput)) {
