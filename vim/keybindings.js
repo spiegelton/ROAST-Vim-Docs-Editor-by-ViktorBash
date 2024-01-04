@@ -218,18 +218,18 @@ export function getDefaultKeyBindings() {
 
 	if (isMac) {
 		// A couple of the keybindings are different on Mac (primarily option (alt) for arrowCtrl keys)
-		keyMapN["arrowLeftCtrl"] = ["ArrowLeft", false, 0b0010];
-		keyMapN["arrowRightCtrl"] = ["ArrowRight", false, 0b0010];
-		keyMapN["arrowDownCtrl"] = ["ArrowDown", false, 0b0010];
-		keyMapN["arrowUpCtrl"] = ["ArrowUp", false, 0b0010];
+		keyMapN["arrowLeftCtrl"][2] = 0b0010;
+		keyMapN["arrowRightCtrl"][2] = 0b0010;
+		keyMapN["arrowDownCtrl"][2] = 0b0010;
+		keyMapN["arrowUpCtrl"][2] = 0b0010;
 
-		keyMapV["arrowLeftCtrl"] = ["ArrowLeft", false, 0b0010];
-		keyMapV["arrowRightCtrl"] = ["ArrowRight", false, 0b0010];
-		keyMapV["arrowDownCtrl"] = ["ArrowDown", false, 0b0010];
-		keyMapV["arrowUpCtrl"] = ["ArrowUp", false, 0b0010];
+		keyMapV["arrowLeftCtrl"][2] = 0b0010;
+		keyMapV["arrowRightCtrl"][2] = 0b0010;
+		keyMapV["arrowDownCtrl"][2] = 0b0010;
+		keyMapV["arrowUpCtrl"][2] = 0b0010;
 
-		keyMapVLine["arrowDownCtrl"] = ["ArrowDown", false, 0b0010];
-		keyMapVLine["arrowUpCtrl"] = ["ArrowUp", false, 0b0010];
+		keyMapVLine["arrowDownCtrl"][2] = 0b0010;
+		keyMapVLine["arrowUpCtrl"][2] = 0b0010;
 	}
 
 	return {
