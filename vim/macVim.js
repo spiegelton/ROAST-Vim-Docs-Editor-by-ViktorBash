@@ -2157,21 +2157,24 @@ macVim.visual_keydown = function (e) {
             }
         case (keyMapV.x[0] === this.currentSequence && (keyMapV.x[1] === true || keyMapV.x[2] === modifierInput)):
             {
-                docs.contentDocument.execCommand("cut");
+                let shouldWeCut = keyMapV.x[4];
+                this.deleteOrCut(shouldWeCut);
                 macVim.clearData();
                 macVim.switchToNormalMode();
                 return true;
             }
         case (keyMapV.d[0] === this.currentSequence && (keyMapV.d[1] === true || keyMapV.d[2] === modifierInput)):
             {
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                let shouldWeCut = keyMapV.d[4];
+                this.deleteOrCut(shouldWeCut);
                 macVim.clearData();
                 macVim.switchToNormalMode();
                 return true;
             }
         case (keyMapV.c[0] === this.currentSequence && (keyMapV.c[1] === true || keyMapV.c[2] === modifierInput)):
             {
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                let shouldWeCut = keyMapV.c[4];
+                this.deleteOrCut(shouldWeCut);
                 macVim.clearData();
                 macVim.switchToInsertMode();
                 return true;
