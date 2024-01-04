@@ -2513,7 +2513,8 @@ windowsVim.visual_line_keydown = function (e) {
             }
         case (keyMapVLine.x[0] === windowsVim.currentSequence && (keyMapVLine.x[1] === true || keyMapVLine.x[2] === modifierInput)):
             {
-                docs.contentDocument.execCommand("cut");
+                let shouldWeCut = keyMapVLine.x[4];
+                this.deleteOrCut(shouldWeCut);
                 windowsVim.clearData();
                 windowsVim.switchToNormalMode();
                 return true;
@@ -2521,7 +2522,11 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.d[0] === windowsVim.currentSequence && (keyMapVLine.d[1] === true || keyMapVLine.d[2] === modifierInput)):
         case (keyMapVLine.D[0] === windowsVim.currentSequence && (keyMapVLine.D[1] === true || keyMapVLine.D[2] === modifierInput)):
             {
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                let shouldWeCut = keyMapVLine.d[4];
+                if (keyMapVLine.D[0] === windowsVim.currentSequence && (keyMapVLine.D[1] === true || keyMapVLine.D[2] === modifierInput)) {
+                    shouldWeCut = keyMapVLine.D[4];
+                }
+                this.deleteOrCut(shouldWeCut);
                 windowsVim.clearData();
                 windowsVim.switchToNormalMode();
                 return true;
@@ -2529,7 +2534,11 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.c[0] === windowsVim.currentSequence && (keyMapVLine.c[1] === true || keyMapVLine.c[2] === modifierInput)):
         case (keyMapVLine.C[0] === windowsVim.currentSequence && (keyMapVLine.C[1] === true || keyMapVLine.C[2] === modifierInput)):
             {
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                let shouldWeCut = keyMapVLine.c[4];
+                if (keyMapVLine.C[0] === windowsVim.currentSequence && (keyMapVLine.C[1] === true || keyMapVLine.C[2] === modifierInput)) {
+                    shouldWeCut = keyMapVLine.C[4];
+                }
+                this.deleteOrCut(shouldWeCut);
                 windowsVim.clearData();
                 windowsVim.switchToInsertMode();
                 return true;
