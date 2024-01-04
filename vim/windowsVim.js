@@ -1418,72 +1418,44 @@ windowsVim.normal_keydown = function (e) {
             if (keyMapN.deleteLine2Insert[0] === windowsVim.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)) {
                 shouldWeCut = keyMapN.deleteLine2Insert[4];
             }
-            // !IMPORTANT: If we hit the bottom of the file for "dd", we effectively stop (we don't start deleting upwards)
             // Strategy:
-            // 1. Move to the start of the line
-            // 2. Count how many lines down we can delete
-            // 4. Make sure we're in the right place
-            // 5. Highlight up and delete
-            // 6. Make sure we end at the right location and do some repositioning if need be
+            // 1. Get to start of line
+            // 2. Highlight down as needed
+            // 3. Copy, if required
+            // 4. Shift + ArrowLeft once
+            // 5. Backspace
             this.moveToStartOfLine();
-            const numRepeats = parseInt(windowsVim.num) || 1;
+            let numRepeats = parseInt(windowsVim.num) || 1;
             let counter = numRepeats;
-            let downCounter = 0;
-
-            let endOfFile = false;
-            while (counter > 0) {
-                let [startXCoord, startYCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-                let [endXCoord, endYCoord] = docs.getCoords();
-                counter--;
-                downCounter++;
-                if (startXCoord === endXCoord && startYCoord === endYCoord) {
-                    // We are at the end of the file on an empty line, so we can't go down anymore
-                    endOfFile = true;
-                    break;
-                }
-                else if (startYCoord === endYCoord) {
-                    endOfFile = true;
-                    break;
-                }
+            while (numRepeats > 0) {
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                numRepeats--;
             }
-
-            if (endOfFile) {
-                // We delete this enter with a backspace, but need it to properly cut the last line to the clipboard
-                // Otherwise the clipboard won't have the "\n" at the end
-                docs.pressKey(docs.codeFromKey("Enter"));
-            }
-
-            while (downCounter > 0) {
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                downCounter--;
-            }
-            this.deleteOrCut(shouldWeCut);
-
             if (shouldWeCut) {
-                // Since we are doing commands immediately after a execCommand("cut") operation, we need the timeout
-                if (!endOfFile) {
-                    // We still have the style of the deleted line on our cursor, so we just move quick right/left to
-                    // get rid of it and have the style of the line we're on
-                    setTimeout(() => {
-                        docs.pressKey(docs.codeFromKey("Enter"));
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }, 1);
-                }
+                docs.contentDocument.execCommand("copy");
+                setTimeout(() => {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                    if (docs.isTextSelected()) {
+                        docs.pressKey(docs.codeFromKey("Backspace"));
+                    }
+                    // If we're trying to delete 1 empty line we're not really supposed to do anything actually then
+
+                }, 1)
             }
             else {
-                if (!endOfFile) {
-                    docs.pressKey(docs.codeFromKey("Enter"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
                 }
+                // If we're trying to delete 1 empty line we're not really supposed to do anything actually then
             }
 
             windowsVim.clearData();
             windowsVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.deleteInnerWord[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWord[1] === true || keyMapN.deleteInnerWord[2] === modifierInput)): 
-        case (keyMapN.deleteInnerWordInsert[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)): 
+        case (keyMapN.deleteInnerWord[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWord[1] === true || keyMapN.deleteInnerWord[2] === modifierInput)):
+        case (keyMapN.deleteInnerWordInsert[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)):
         {
             // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky tricky
             let numRepeats = parseInt(windowsVim.num) || 1;
