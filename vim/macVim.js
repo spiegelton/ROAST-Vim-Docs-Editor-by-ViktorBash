@@ -1406,43 +1406,83 @@ macVim.normal_keydown = function (e) {
         case (keyMapN.deleteLineInsert[0] === this.currentSequence && (keyMapN.deleteLineInsert[1] === true || keyMapN.deleteLineInsert[2] === modifierInput)): 
         case (keyMapN.deleteLine2Insert[0] === this.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)): 
         {
-	    // cc 
-		const numRepeats = parseInt(macVim.num) || 1;
-		for (let i = 0; i < numRepeats; i++) {
-			macVim.moveToEndOfLine();
-			let [startXCoord, startYCoord] = docs.getCoords();
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			let [endXCoord, endYCoord] = docs.getCoords();
-			let atEndOfFile = false;
-			if (startXCoord === endXCoord && startYCoord === endYCoord) {
-				atEndOfFile = true;
-			}
-			else {
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-			
-			// The magic sauce
-			docs.pressSpecialKey(" ");
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-			docs.pressKey(docs.codeFromKey("Backspace"));
+            // cc
+            let shouldWeCut = keyMapN.deleteLineInsert[4];
+            if (keyMapN.deleteLine2Insert[0] === this.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)) {
+                shouldWeCut = keyMapN.deleteLine2Insert[4];
+            }
 
-			if (i < numRepeats - 1) {
-				// Actually delete the empty line now if we're not on the last iteration
-				if (atEndOfFile) {
-					docs.pressKey(docs.codeFromKey("Backspace"));
-					macVim.moveToStartOfLine();
-				}
-				else {
-					docs.pressKey(docs.codeFromKey("Delete"));
-				}
-				}
+            this.moveToEndOfLine();
+            const numRepeats = parseInt(this.num) || 1;
+            let counter = numRepeats - 1;
+            let downCounter = 1;
 
-		}
+            while (counter > 0) {
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                    // We are at the end of the file on an empty line, so we can't go down anymore
+                    break;
+                }
+                else {
+                    counter--;
+                    downCounter++;
+                }
+            }
 
-		macVim.currentSequence = "";
-		macVim.num = "";
-		macVim.switchToInsertMode();
-		return true;
+            // Now let's test if we're on an empty line or not before we highlight back up
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            let [endXCoord, endYCoord] = docs.getCoords();
+            if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                // At start of file on an empty line
+                if (shouldWeCut) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                    docs.contentDocument.execCommand("copy");
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+                macVim.currentSequence = "";
+                macVim.num = "";
+                macVim.switchToInsertMode();
+                return true;
+
+            }
+            else if (endYCoord !== startYCoord) {
+                // We were on an empty line somewhere
+                // highlight 1 less line on the way up
+                if (downCounter === 1) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    if (shouldWeCut) {
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                        docs.contentDocument.execCommand("copy");
+                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    }
+                    macVim.currentSequence = "";
+                    macVim.num = "";
+                    macVim.switchToInsertMode();
+                    return true;
+                }
+                else {
+                    downCounter--;
+                    docs.pressKey(docs.codeFromKey("ArrowRight"))
+                }
+            }
+            else {
+                // Base case, reverse our ArrowLeft
+                docs.pressKey(docs.codeFromKey("ArrowRight"))
+            }
+
+            while (downCounter > 0) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                downCounter--;
+            }
+            this.deleteOrCut(shouldWeCut);
+
+            macVim.currentSequence = "";
+            macVim.num = "";
+            macVim.switchToInsertMode();
+            return true;
         }
         case (keyMapN.deleteInnerWord[0] === this.currentSequence && (keyMapN.deleteInnerWord[1] === true || keyMapN.deleteInnerWord[2] === modifierInput)): 
         case (keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)): 
