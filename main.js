@@ -2,13 +2,43 @@ let extpay = ExtPay("vim-for-docs");
 import { macVim } from "./vim/macVim.js";
 import { windowsVim } from "./vim/windowsVim.js";
 import { docs } from "./docs.js";
-import { updateUIModeText } from "./vim/UI.js";
+import { UI } from "./vim/UI.js";
 import { getUltimateKeyMapInCallback } from "./vim/keybindings.js";
+
+// Helper function to sleep
+function sleep(ms = 0)  {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Try to execute a function, on failure wait and then retry
+async function retry(fn, { retries, retryIntervalMs }) {
+	try {
+		return await fn()
+	} catch (error) {
+		if (retries <= 0) {
+			throw error
+		}
+		await sleep(retryIntervalMs)
+		return retry(fn, { retries: retries - 1, retryIntervalMs })
+	}
+}
 
 // Get the user and only run Vim if they have paid (being on the free trial counts as paying)
 let user = await extpay.getUser().catch((err) => {
 	console.error("Vim for Google Docs Error: Network error, no connection");
 });
+
+// Set up the UI
+await retry(() => {
+	UI.setUp();
+}, { retries: 100, retryIntervalMs: 200});
+
+// docs.setUp() should be successful the first time, however it sometimes fails (maybe like 0.5-1% of the time)
+// If it fails, we retry it a few times.
+// Also, we need to run this because this loads in the DOM manipulation stuff that we need
+await retry(() => {
+	docs.setUp();
+}, { retries: 100, retryIntervalMs: 200});
 
 if (user.paid) {
 	runVim();
@@ -17,9 +47,9 @@ if (user.paid) {
 	// (This grace period is defined in the Stripe settings)
 	runVim();
 } else if (user.subscriptionStatus === "unpaid") {
-	updateUIModeText("-- UNPAID --");
+	UI.updateUIModeText("-- UNPAID --");
 } else if (user.subscriptionStatus === "canceled") {
-	updateUIModeText("-- CANCELLED --");
+	UI.updateUIModeText("-- CANCELLED --");
 } else {
 	// Check if user started or went past their free trial
 	const now = new Date();
@@ -27,13 +57,13 @@ if (user.paid) {
 	if (user.trialStartedAt === null) {
 		// User has not yet started their free trial, so prompt them to do so
 		extpay.openTrialPage();
-		updateUIModeText("-- ACTIVATE TRIAL --");
+		UI.updateUIModeText("-- ACTIVATE TRIAL --");
 	} else if (user.trialStartedAt && now - user.trialStartedAt < sevenDays) {
 		// User is still in their free trial
 		runVim();
 	} else {
 		// User's free trial ran out and they still haven't paid
-		updateUIModeText("-- TRIAL EXPIRED --");
+		UI.updateUIModeText("-- TRIAL EXPIRED --");
 	}
 }
 
@@ -41,7 +71,6 @@ if (user.paid) {
 * Called when we verify that the user has access to the extension
 */
 function runVim() {
-
 	// Create a copy of the vimVariant we want to run
 	let vimVariant;
 	if (docs.isMac) {
@@ -50,6 +79,8 @@ function runVim() {
 	else {
 		vimVariant = windowsVim;
 	}
+
+	vimVariant.setUp(docs, UI);
 
 	// Now, we will populate the vimVariant with the user's keybindings
 	getUltimateKeyMapInCallback(function (ultimateKeyMap) {
@@ -71,16 +102,16 @@ function runVim() {
 function continueRunVim(vimVariant) {
 	// Hook up Vim to the keydown presses in the document
 	docs.keydown = function (e) {
-		if (vimVariant.mode == "insert") {
+		if (vimVariant.mode === "insert") {
 			return vimVariant.insert_keydown(e);
 		}
-		if (vimVariant.mode == "normal") {
+		if (vimVariant.mode === "normal") {
 			return vimVariant.normal_keydown(e);
 		}
-		if (vimVariant.mode == "visual") {
+		if (vimVariant.mode === "visual") {
 			return vimVariant.visual_keydown(e);
 		}
-		if (vimVariant.mode == "visual_line") {
+		if (vimVariant.mode === "visual_line") {
 			return vimVariant.visual_line_keydown(e);
 		}
 	};
@@ -89,7 +120,7 @@ function continueRunVim(vimVariant) {
 	let mouseDown = false;
 	let mouseDownCoords = [-1, -1];
 
-	// For double click
+	// For double-click
 	let lastMouseUp = 0; // ms
 
 	// validMouseArea: 

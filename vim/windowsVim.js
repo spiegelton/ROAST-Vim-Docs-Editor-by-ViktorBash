@@ -1,20 +1,27 @@
-import { docs } from "../docs.js";
-import { updateUIModeText, updateUISequenceText, getCleanedSequence } from "./UI.js";
+import { getCleanedSequence } from "./UI.js";
 import { KEY_SEPARATOR } from "./keybindings.js";
 
+let docs;
+let UI;
+
 let windowsVim = {
-	// Main variables here
-	mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual", "visual_line"]
-	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
-	currentSequence: "", // Keep track of key sequences (ex: "gg")
+    // Main variables here
+    mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual", "visual_line"]
+    num: "", // Keep track of number keys pressed by the user if they want to repeat a command
+    currentSequence: "", // Keep track of key sequences (ex: "gg")
 };
+
+windowsVim.setUp = function (docsInstance, UIInstance) {
+    docs = docsInstance;
+    UI = UIInstance;
+}
 
 windowsVim.switchToNormalMode = function () {
 	windowsVim.currentSequence = "";
 	windowsVim.mode = "normal";
 	windowsVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- NORMAL --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- NORMAL --");
 	docs.setCursorWidth();
 };
 
@@ -22,8 +29,8 @@ windowsVim.switchToVisualMode = function () {
 	windowsVim.currentSequence = "";
 	windowsVim.mode = "visual";
 	windowsVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- VISUAL --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- VISUAL --");
 	docs.setCursorWidth(true);
 	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 };
@@ -32,8 +39,8 @@ windowsVim.switchToVisualLineMode = function () {
 	windowsVim.currentSequence = "";
 	windowsVim.mode = "visual_line";
 	windowsVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- VISUAL LINE --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- VISUAL LINE --");
 	docs.setCursorWidth(true);
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 	docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
@@ -43,8 +50,8 @@ windowsVim.switchToInsertMode = function () {
 	windowsVim.currentSequence = "";
 	windowsVim.mode = "insert";
 	windowsVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- INSERT --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- INSERT --");
 	docs.setCursorWidth(true);
 };
 
@@ -103,7 +110,7 @@ windowsVim.copyWholeLine = async function () {
 	}
 	windowsVim.num = "";
 	windowsVim.currentSequence = "";
-	updateUISequenceText("");
+	UI.updateUISequenceText("");
 	// Not updating cursor because we're at the same place
 };
 
@@ -292,7 +299,7 @@ windowsVim.normalShortcuts = [
 windowsVim.clearData = function () {
     windowsVim.num = "";
     windowsVim.currentSequence = "";
-    updateUISequenceText("");
+    UI.updateUISequenceText("");
     docs.setCursorWidth();
     return;
 };
@@ -1825,7 +1832,7 @@ windowsVim.normal_keydown = function (e) {
         return true;
     }
 
-    updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
+    UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
     docs.setCursorWidth();
     return true;
 };
@@ -1894,7 +1901,7 @@ windowsVim.visual_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
                 this.clearData();
-                updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
+                UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
                 docs.setCursorWidth();
                 return true;
 
@@ -2267,7 +2274,7 @@ windowsVim.visual_keydown = function (e) {
         windowsVim.currentSequence = "";
     }
 
-    updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
+    UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
     return true;
 
 }
@@ -2325,7 +2332,7 @@ windowsVim.visual_line_keydown = function (e) {
         } else {
             // Do nothing (We are in visual LINE mode, so 0 shouldn't actually do anything)
         }
-        updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
+        UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
         docs.setCursorWidth();
         return true;
     }
@@ -2563,7 +2570,7 @@ windowsVim.visual_line_keydown = function (e) {
         windowsVim.currentSequence = "";
     }
 
-    updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
+    UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
     return true;
 
 

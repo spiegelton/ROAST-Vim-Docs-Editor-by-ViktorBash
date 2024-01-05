@@ -1,6 +1,8 @@
-import { docs } from "../docs.js";
-import { updateUIModeText, updateUISequenceText, getCleanedSequence } from "./UI.js";
+import { getCleanedSequence } from "./UI.js";
 import { KEY_SEPARATOR } from "./keybindings.js";
+
+let docs;
+let UI;
 
 let macVim = {
 	// Main variables here
@@ -10,12 +12,17 @@ let macVim = {
     // Note: There is no "incompleteKeyMapsI" because commands can be a max of 1 character in insert mode
 };
 
+macVim.setUp = function (docsInstance, UIInstance) {
+    docs = docsInstance;
+    UI = UIInstance;
+}
+
 macVim.switchToNormalMode = function () {
 	macVim.currentSequence = "";
 	macVim.mode = "normal";
 	macVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- NORMAL --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- NORMAL --");
 	docs.setCursorWidth();
 };
 
@@ -23,8 +30,8 @@ macVim.switchToVisualMode = function () {
 	macVim.currentSequence = "";
 	macVim.mode = "visual";
 	macVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- VISUAL --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- VISUAL --");
 	docs.setCursorWidth(true);
 	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 };
@@ -33,8 +40,8 @@ macVim.switchToVisualLineMode = function () {
 	macVim.currentSequence = "";
 	macVim.mode = "visual_line";
 	macVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- VISUAL LINE --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- VISUAL LINE --");
 	docs.setCursorWidth(true);
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 }
@@ -43,8 +50,8 @@ macVim.switchToInsertMode = function () {
 	macVim.currentSequence = "";
 	macVim.mode = "insert";
 	macVim.num = "";
-	updateUISequenceText("");
-	updateUIModeText("-- INSERT --");
+	UI.updateUISequenceText("");
+	UI.updateUIModeText("-- INSERT --");
 	docs.setCursorWidth(true);
 };
 
@@ -103,7 +110,7 @@ macVim.copyWholeLine = async function () {
 	}
 	macVim.num = "";
 	macVim.currentSequence = "";
-	updateUISequenceText("");
+	UI.updateUISequenceText("");
 	// Not updating cursor because we're at the same place
 };
 
@@ -242,7 +249,7 @@ macVim.normalShortcuts = [
 macVim.clearData = function () {
 	macVim.num = "";
 	macVim.currentSequence = "";
-	updateUISequenceText("");
+	UI.updateUISequenceText("");
 	docs.setCursorWidth();
 	return;
 }
@@ -1883,7 +1890,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
     }
 
 	// Basically catch here anything that is a valid keymap but is not fully finished typing yet (ex: "g", but not "gg" yet)
-    updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
+    UI.updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
     docs.setCursorWidth();
     return true;
 };
@@ -1947,7 +1954,7 @@ macVim.visual_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
                 this.clearData();
-                updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
+                UI.updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
                 docs.setCursorWidth();
                 return true;
 
@@ -2331,7 +2338,7 @@ macVim.visual_keydown = function (e) {
         this.currentSequence = "";
     }
 
-    updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
+    UI.updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
     return true;
 
 
@@ -2386,7 +2393,7 @@ macVim.visual_line_keydown = function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
 		}
-		updateUISequenceText(macVim.num + getCleanedSequence(macVim.currentSequence));
+		UI.updateUISequenceText(macVim.num + getCleanedSequence(macVim.currentSequence));
 		docs.setCursorWidth();
 		return true;
 	}
@@ -2624,7 +2631,7 @@ macVim.visual_line_keydown = function (e) {
         this.currentSequence = "";
     }
 
-    updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
+    UI.updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
     return true;
 };
 
