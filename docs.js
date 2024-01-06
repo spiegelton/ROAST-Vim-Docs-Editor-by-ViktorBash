@@ -466,9 +466,65 @@ docs._clickEditButton = function (ariaLabel) {
     let buttonElem = document.querySelector(
         `.goog-menuitem-label[aria-label="${ariaLabel}"]`
     ).parentElement.parentElement;
-    console.log(buttonElem);
     docs._simulateClick(buttonElem);
 }
+
+docs.__clickButtonFromAriaLabel = function (ariaLabel) {
+    let buttonElem = document.querySelector(
+        `.goog-menuitem-label[aria-label="${ariaLabel}"]`
+    ).parentElement.parentElement;
+    docs._simulateClick(buttonElem);
+}
+
+docs._clickFileButton = function (ariaLabel) {
+    docs.__clickButtonFromAriaLabel(ariaLabel);
+}
+
+docs._clickVersionHistoryButton = async function (ariaLabel) {
+    let fileButtonElem = document.getElementById("docs-file-menu");
+    docs._simulateClick(fileButtonElem);
+
+    let versionHistoryElem = document.querySelector(`.goog-menuitem-label[aria-label="Version history h"]`).parentElement.parentElement;
+    docs._simulateClick(versionHistoryElem);
+
+    let buttonElem;
+    await retry(() => {
+        buttonElem = document.querySelector(
+            `.goog-menuitem-label[aria-label="${ariaLabel}"]`
+        ).parentElement.parentElement;
+    }, {retries: 200, retryIntervalMs: 10});
+    docs._simulateClick(buttonElem);
+}
+
+docs._clickInsertButton = function (ariaLabel) {
+    docs.__clickButtonFromAriaLabel(ariaLabel);
+}
+
+docs._clickPageBreakButton = async function (ariaLabel) {
+    let insertButtonElem = document.getElementById("docs-insert-menu");
+    docs._simulateClick(insertButtonElem);
+
+    let pageBreakMenuButton = document.querySelector(`.goog-menuitem-label[aria-label="Break k"]`).parentElement.parentElement;
+    docs._simulateClick(pageBreakMenuButton);
+
+    let buttonElem;
+    await retry(() => {
+        buttonElem = document.querySelector(
+            `.goog-menuitem-label[aria-label="${ariaLabel}"]`
+        ).parentElement.parentElement;
+    }, {retries: 200, retryIntervalMs: 10});
+
+    docs._simulateClick(buttonElem);
+}
+
+docs._clickToolsButton = function (ariaLabel) {
+    docs.__clickButtonFromAriaLabel(ariaLabel);
+}
+
+docs._clickHelpButton = function (ariaLabel) {
+    docs.__clickButtonFromAriaLabel(ariaLabel);
+}
+
 
 docs._simulateClick = function (el, x, y) {
     if (x == null) x = 0;
@@ -518,7 +574,9 @@ docs.toolbarMenuButtonOptions = {
     justifyText: ["alignJustifyButton", docs._clickMainToolBarButton],
     increaseFontSize: ["fontSizeIncrement", docs._clickMainToolBarButton],
     decreaseFontSize: ["fontSizeDecrement", docs._clickMainToolBarButton],
-    strikethrough: ["Strikethrough k", docs._clickTextFormatButton],
+    print: ["printButton", docs._clickMainToolBarButton],
+    spellingAndGrammarCheck: ["spellGrammarCheckButton", docs._clickMainToolBarButton],
+    clearFormatting: ["clearFormattingButton", docs._clickMainToolBarButton],
     normalText: [0, docs._clickParagraphStylesButton],
     title: [1, docs._clickParagraphStylesButton],
     subtitle: [2, docs._clickParagraphStylesButton],
@@ -528,11 +586,22 @@ docs.toolbarMenuButtonOptions = {
     heading4: [6, docs._clickParagraphStylesButton],
     heading5: [7, docs._clickParagraphStylesButton],
     heading6: [8, docs._clickParagraphStylesButton],
+    strikethrough: ["Strikethrough k", docs._clickTextFormatButton],
     superscript: ["Superscript s", docs._clickTextFormatButton],
     subscript: ["Subscript r", docs._clickTextFormatButton],
     uppercase: ["UPPERCASE u", docs._clickCapitalizationButton],
     lowercase: ["lowercase l", docs._clickCapitalizationButton],
     selectAll: ["Select all a", docs._clickEditButton],
+    open: ["Open o", docs._clickFileButton],
+    seeVersionHistory: ["See version history s", docs._clickVersionHistoryButton],
+    findAndReplace: ["Find and replace f", docs._clickEditButton],
+    footNote: ["Footnote n", docs._clickInsertButton],
+    pageBreak: ["Page break p", docs._clickPageBreakButton],
+    wordCount: ["Word count w", docs._clickToolsButton],
+    explore: ["Explore r", docs._clickToolsButton],
+    dictionary: ["Dictionary d", docs._clickToolsButton],
+    voiceTyping: ["Voice typing v", docs._clickToolsButton],
+    searchTheMenus: ["Search the menus m", docs._clickHelpButton], // Clicking via main toolbar doesn't work
 };
 
 export {docs};
