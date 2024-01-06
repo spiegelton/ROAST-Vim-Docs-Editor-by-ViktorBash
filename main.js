@@ -11,7 +11,7 @@ function sleep(ms = 0)  {
 }
 
 // Try to execute a function, on failure wait and then retry
-async function retry(fn, { retries, retryIntervalMs }) {
+export async function retry(fn, { retries, retryIntervalMs }) {
 	try {
 		return await fn()
 	} catch (error) {

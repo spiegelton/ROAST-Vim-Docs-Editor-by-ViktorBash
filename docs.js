@@ -1,5 +1,6 @@
 // docs is the class for interacting with Google Docs. It contains functions that abstract stuff away for us in other
 // parts of the code. For example, checking if we have text highlighted, pressing a button, pressing a key, etc.
+import {retry} from "./main.js";
 let docs = {};
 
 const MAC_PLATFORMS = ["MacIntel", "MacPPC", "Mac68K", "iPhone", "iPad"]; // Really only just "MacIntel"
@@ -27,6 +28,11 @@ docs.setUp = function () {
     docs.fontSizeInput = document.querySelector(
         '.jfk-textinput.goog-toolbar-combo-button-input[aria-label="Font size"]'
     );
+
+    docs.formatTextMenuLoaded = false;
+    docs.capitalizationMenuLoaded = false;
+    docs.paragraphStylesMenuLoaded = false;
+
 }
 
 // Helper method to translate keys (including a few special/command keys) to
@@ -100,9 +106,6 @@ docs.keydown_ = function (e) {
 // Simulate a key press.
 // keyCode, ctrlKey (or altKey on Mac), shiftKey, commandKey(Mac only)
 docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
-    var el = document.getElementsByClassName("docs-texteventtarget-iframe")[0];
-    el = el.contentDocument;
-
     let is_command = keyCode <= 46 || ctrlKey;
 
     let data;
@@ -147,7 +150,7 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
         }
     }
 
-    var key_event;
+    let key_event;
     if (is_command) {
         key_event = new KeyboardEvent("keydown", data);
     } else {
@@ -155,7 +158,7 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
     }
     key_event.docs_plus_ = true;
 
-    el.dispatchEvent(key_event);
+    docs.contentDocument.dispatchEvent(key_event);
 };
 
 
@@ -299,11 +302,7 @@ docs.atStartOfLine = function () {
     let finalYCoord = coords.slice(xIndex + 4, coords.length - 3);
     docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our key action
 
-    if (initialYCoord !== finalYCoord) {
-        // Y Coords different --> At start of line
-        return true;
-    }
-    return false; // Not at start of line
+    return initialYCoord !== finalYCoord;
 };
 
 // Returns an array of booleans representing the cursor's location [atStartOfLine, atEndOfLine, atStartOfFile, atEndOfFile]
@@ -383,65 +382,157 @@ docs.isTextSelected = function () {
     return docs.contentDocument.getSelection(0).getRangeAt(0).endOffset !== 0;
 }
 
-// docs.clickMenuButton = function () {
-//     let ariaLabel = "Bold (Ctrl+B)";
-//     // let menuElem = document.querySelector(`[aria-label="${ariaLabel}"]`);
-//     let menuElem = document.querySelector("#boldButton");
-//     console.log(menuElem);
-//     docs.simulateClick(menuElem);
-// }
 
-// docs.toolbarMenuButtonOptions = {
-//     bold: "boldButton",
-//     italic: "italicButton",
-//     underline: "underlineButton",
-//     link: "insertLinkButton",
-//     comment: "insertCommentButton",
-//     checkList: "addChecklistButton",
-//     bulletedList: "addBulletButton",
-//     numberedList: "addNumberedBulletButton",
-//     outdent: "outdentButton",
-//     indent: "indentButton",
-//     alignLeft: "alignLeftButton",
-//     alignCenter: "alignCenterButton",
-//     alignRight: "alignRightButton",
-//     increaseFontSize: "fontSizeIncrement",
-//     decreaseFontSize: "fontSizeDecrement",
-// }
-//
-// // TODO:
-// // Strikethrough
-// // Super script /sub script
-// // Upper case
-// // Lower case
-// // Text styles (heading 1, heading 2, etc etc)
-//
-//
-// docs.simulateClick = function (el, x, y) {
-//     if (x == null) x = 0;
-//     if (y == null) y = 0;
-//     const eventSequence = ["mouseover", "mousedown", "mouseup", "click"];
-//     for (const eventName of eventSequence) {
-//         const event = document.createEvent("MouseEvents");
-//         event.initMouseEvent(
-//             eventName,
-//             true, // bubbles
-//             true, // cancelable
-//             window, //view
-//             1, // event-detail
-//             x, // screenX
-//             y, // screenY
-//             x, // clientX
-//             y, // clientY
-//             false, // ctrl
-//             false, // alt
-//             false, // shift
-//             false, // meta
-//             0, // button
-//             null, // relatedTarget
-//         );
-//         el.dispatchEvent(event);
-//     }
-// }
+docs._clickMainToolBarButton = function (buttonID) {
+    let buttonElem = document.getElementById(buttonID);
+    docs._simulateClick(buttonElem);
+};
+
+docs._clickTextFormatButton = function (spanAriaLabel) {
+    if (!docs.formatTextMenuLoaded) {
+        let formatButton = document.getElementById("docs-format-menu");
+        docs._simulateClick(formatButton);
+        let textButton = document.querySelector(".goog-menuitem-label[aria-label='Text s']").parentElement.parentElement;
+        docs._simulateClick(textButton);
+
+        docs.formatTextMenuLoaded = true;
+    }
+
+    let buttonElem;
+
+    retry(() => {
+        console.log("An attempt");
+        buttonElem = document.querySelector(
+            `.goog-menuitem-label[aria-label="${spanAriaLabel}"]`
+        );
+        if (buttonElem === null) {
+            throw Error(`Could not find button with aria-label ${spanAriaLabel}`);
+        }
+    }, {retries: 200, retryIntervalMs: 10}).then(() => {
+        docs._simulateClick(buttonElem);
+    });
+
+}
+
+docs._clickCapitalizationButton = async function (spanAriaLabel) {
+    if (!docs.capitalizationMenuLoaded) {
+        let formatButton = document.getElementById("docs-format-menu");
+        docs._simulateClick(formatButton);
+        let textButton = document.querySelector(".goog-menuitem-label[aria-label='Text s']").parentElement.parentElement;
+        docs._simulateClick(textButton);
+
+        docs.capitalizationMenuLoaded = true;
+
+        let capitalizationButton;
+        await retry(() => {
+            capitalizationButton = document.querySelector(".goog-menuitem-label[aria-label='Capitalization 1']").parentElement.parentElement;
+            if (capitalizationButton === null) {
+                throw Error(`Could not find button with aria-label ${spanAriaLabel}`);
+            }
+        }, {retries: 200, retryIntervalMs: 10});
+
+        docs._simulateClick(capitalizationButton);
+    }
+
+    let buttonElem;
+    await retry(() => {
+        buttonElem = document.querySelector(`.goog-menuitem-label[aria-label='${spanAriaLabel}']`).parentElement.parentElement;
+        if (buttonElem === null) {
+            throw Error(`Could not find button with aria-label ${spanAriaLabel}`);
+        }
+    }, {retries: 200, retryIntervalMs: 10});
+
+    docs._simulateClick(buttonElem);
+}
+
+docs._clickParagraphStylesButton = async function (elementIndex) {
+    // Open the menu
+    let headingStyleSelectButton = document.getElementById("headingStyleSelect")
+    docs._simulateClick(headingStyleSelectButton);
+
+    // Click the specific style we want in the menu, note: elems is of length 9 (0-8)
+    let elems = document.querySelectorAll('div.goog-menuitem.goog-option.goog-submenu.docs-submenuitem.apps-menuitem[role="menuitemradio"]');
+    for (let i = 0; i < elems.length; i++) {
+        if (i === elementIndex) {
+            let elem = elems[i];
+            docs._simulateClick(elem);
+            break;
+        }
+    }
+
+}
+
+docs._clickEditButton = function (ariaLabel) {
+    let buttonElem = document.querySelector(
+        `.goog-menuitem-label[aria-label="${ariaLabel}"]`
+    ).parentElement.parentElement;
+    console.log(buttonElem);
+    docs._simulateClick(buttonElem);
+}
+
+docs._simulateClick = function (el, x, y) {
+    if (x == null) x = 0;
+    if (y == null) y = 0;
+    const eventSequence = ["mouseover", "mousedown", "mouseup", "click"];
+    for (const eventName of eventSequence) {
+        const event = document.createEvent("MouseEvents");
+        event.initMouseEvent(
+            eventName,
+            true, // bubbles
+            true, // cancelable
+            window, //view
+            1, // event-detail
+            x, // screenX
+            y, // screenY
+            x, // clientX
+            y, // clientY
+            false, // ctrl
+            false, // alt
+            false, // shift
+            false, // meta
+            0, // button
+            null, // relatedTarget
+        );
+        el.dispatchEvent(event);
+    }
+}
+
+docs.clickButton = function (buttonOption) {
+    buttonOption[1](buttonOption[0]);
+}
+
+docs.toolbarMenuButtonOptions = {
+    bold: ["boldButton", docs._clickMainToolBarButton],
+    italic: ["italicButton", docs._clickMainToolBarButton],
+    underline: ["underlineButton", docs._clickMainToolBarButton],
+    link: ["insertLinkButton", docs._clickMainToolBarButton],
+    comment: ["insertCommentButton", docs._clickMainToolBarButton],
+    checkList: ["addChecklistButton", docs._clickMainToolBarButton],
+    bulletedList: ["addBulletButton", docs._clickMainToolBarButton],
+    numberedList: ["addNumberedBulletButton", docs._clickMainToolBarButton],
+    outdent: ["outdentButton", docs._clickMainToolBarButton],
+    indent: ["indentButton", docs._clickMainToolBarButton],
+    alignLeft: ["alignLeftButton", docs._clickMainToolBarButton],
+    alignCenter: ["alignCenterButton", docs._clickMainToolBarButton],
+    alignRight: ["alignRightButton", docs._clickMainToolBarButton],
+    justifyText: ["alignJustifyButton", docs._clickMainToolBarButton],
+    increaseFontSize: ["fontSizeIncrement", docs._clickMainToolBarButton],
+    decreaseFontSize: ["fontSizeDecrement", docs._clickMainToolBarButton],
+    strikethrough: ["Strikethrough k", docs._clickTextFormatButton],
+    normalText: [0, docs._clickParagraphStylesButton],
+    title: [1, docs._clickParagraphStylesButton],
+    subtitle: [2, docs._clickParagraphStylesButton],
+    heading1: [3, docs._clickParagraphStylesButton],
+    heading2: [4, docs._clickParagraphStylesButton],
+    heading3: [5, docs._clickParagraphStylesButton],
+    heading4: [6, docs._clickParagraphStylesButton],
+    heading5: [7, docs._clickParagraphStylesButton],
+    heading6: [8, docs._clickParagraphStylesButton],
+    superscript: ["Superscript s", docs._clickTextFormatButton],
+    subscript: ["Subscript r", docs._clickTextFormatButton],
+    uppercase: ["UPPERCASE u", docs._clickCapitalizationButton],
+    lowercase: ["lowercase l", docs._clickCapitalizationButton],
+    selectAll: ["Select all a", docs._clickEditButton],
+};
 
 export {docs};
