@@ -571,7 +571,7 @@ docs.toolbarMenuButtonOptions = {
     alignLeft: ["alignLeftButton", docs._clickMainToolBarButton],
     alignCenter: ["alignCenterButton", docs._clickMainToolBarButton],
     alignRight: ["alignRightButton", docs._clickMainToolBarButton],
-    justifyText: ["alignJustifyButton", docs._clickMainToolBarButton],
+    alignJustify: ["alignJustifyButton", docs._clickMainToolBarButton],
     increaseFontSize: ["fontSizeIncrement", docs._clickMainToolBarButton],
     decreaseFontSize: ["fontSizeDecrement", docs._clickMainToolBarButton],
     print: ["printButton", docs._clickMainToolBarButton],

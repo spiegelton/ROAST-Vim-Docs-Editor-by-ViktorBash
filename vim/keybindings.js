@@ -208,13 +208,71 @@ export function getDefaultKeyBindings() {
 		ctrlUPageUp: ["u", false, 0b1000, "Highlight up several lines", null],
 	}
 
-
 	// Determine if the user is on a Mac or not
 	let macPlatforms = ["MacIntel", "MacPPC", "Mac68K", "iPhone", "iPad"];
 	let isMac = false;
 	if (macPlatforms.includes(navigator.platform)) {
 		isMac = true;
 	}
+
+	// Native shortcuts
+	// bitmask: (ctrl, shift, alt, meta)
+	let keyMapNative;
+	if (!isMac) {
+		// Windows
+		keyMapNative = {
+			bold: ["b", false, 0b1000, "Bold text", null],
+			italic: ["i", false, 0b1000, "Italicize text", null],
+			underline: ["u", false, 0b1000, "Underline text", null],
+			link: ["k", false, 0b1000, "Add a link", null],
+			comment: ["c", false, 0b1010, "Add a comment", null],
+			checkList: ["9", false, 0b1100, "Checklist", null],
+			bulletedList: ["8", false, 0b1100, "Bulleted list", null],
+			numberedList: ["7", false, 0b1100, "Checklist", null],
+			indent: [">" + KEY_SEPARATOR + ">", true, 0b0000, "Indent", null],
+			outdent: ["<" + KEY_SEPARATOR + "<", true, 0b0000, "Outdent", null],
+			alignLeft: ["L", false, 0b1100, "Align left", null],
+			alignCenter: ["E", false, 0b1100, "Align center", null],
+			alignRight: ["R", false, 0b1100, "Align right", null],
+			alignJustify: ["J", false, 0b1100, "Align justify", null],
+			increaseFontSize: [".", false, 0b1100, "Increase font size", null],
+			decreaseFontSize: [",", false, 0b1100, "Decrease font size", null],
+			print: ["p" + KEY_SEPARATOR + "p", true, 0b0000, "Print", null],
+			spellingAndGrammarCheck: ["X", false, 0b1010, "Spelling and grammar check", null],
+			clearFormatting: ["\\", false, 0b1000, "Clear formatting", null], // Literal backspace
+			normalText: ["0", false, 0b1010, "Apply 'Normal text' styling", null],
+			heading1: ["1", false, 0b1010, "Apply 'Heading 1' styling", null],
+			heading2: ["2", false, 0b1010, "Apply 'Heading 2' styling", null],
+			heading3: ["3", false, 0b1010, "Apply 'Heading 3' styling", null],
+			heading4: ["4", false, 0b1010, "Apply 'Heading 4' styling", null],
+			heading5: ["5", false, 0b1010, "Apply 'Heading 5' styling", null],
+			heading6: ["6", false, 0b1010, "Apply 'Heading 6' styling", null],
+			strikethrough: ["5", false, 0b0110, "Strikethrough text", null],
+			superscript: [".", false, 0b1000, "Superscript", null],
+			subscript: [",", false, 0b1000, "Subscript", null],
+			selectAll: ["a", false, 0b1000, "Select All", null],
+			open: ["o", false, 0b1000, "Open a file", null],
+			seeVersionHistory: ["H", false, 0b1110, "See version history", null],
+			findAndReplace: ["h", false, 0b1000, "Find and replace", null],
+			footNote: ["f", false, 0b1010, "Add a footnote", null],
+			pageBreak: ["Enter", false, 0b1000, "Add a page break", null],
+			wordCount: ["c", false, 0b1100, "See word count", null],
+			explore: ["I", false, 0b1110, "Explore tab", null],
+			dictionary: ["Y", false, 0b1100, "Open dictionary", null],
+			voiceTyping: ["S", false, 0b1100, "Use voice typing", null],
+			searchTheMenus: ["/", false, 0b0010, "Search docs menus", null],
+		}
+
+	}
+	else {
+		keyMapNative = {
+
+		}
+
+	}
+
+
+
 
 	if (isMac) {
 		// A couple of the keybindings are different on Mac (primarily option (alt) for arrowCtrl keys)
@@ -237,6 +295,7 @@ export function getDefaultKeyBindings() {
 		keyMapI: keyMapI,
 		keyMapV: keyMapV,
 		keyMapVLine: keyMapVLine,
+		keyMapNative: keyMapNative,
 	}
 }
 
