@@ -354,7 +354,7 @@ export function getUltimateKeyMapInCallback(callback) {
 
 		// Now, let's go through keyMapN, keyMapI, keyMapV, and keyMapVLine and set any keybindings that aren't present
 		// Also, if one of these isn't present (ex: keyMapVLine), we would set that as well
-		let keyMapNames = ["keyMapN", "keyMapI", "keyMapV", "keyMapVLine"];
+		let keyMapNames = ["keyMapN", "keyMapI", "keyMapV", "keyMapVLine", "keyMapNative"];
 
 		// Set the keymaps as properties of savedKeyMap if they don't exist
 		for (let i = 0; i < keyMapNames.length; i++) {
@@ -372,10 +372,12 @@ export function getUltimateKeyMapInCallback(callback) {
 			keyMapI: {},
 			keyMapV: {},
 			keyMapVLine: {},
+			keyMapNative: {},
 			incompleteKeyMapN: [],
 			// Note: no incompleteKeyMapI because keybindings in insert mode are limited to 1 key
 			incompleteKeyMapV: [],
 			incompleteKeyMapVLine: [],
+			incompleteKeyMapNative: [],
 		}
 
 		// We are going to loop through each keyMap (keyMapN, keyMapI, keyMapV, keyMapVLine)
@@ -471,9 +473,32 @@ export function getUltimateKeyMapInCallback(callback) {
 			}
 		});
 
+		// keymapNative
+		const keyMapNativeKeys = Object.keys(defaultKeyMap.keyMapNative);
+		keyMapNativeKeys.forEach((key) => {
+			if (key in savedKeyMap.keyMapNative) {
+				// Set the keybinding to the one in the storage keymap
+				outputKeyMap.keyMapNative[key] = savedKeyMap.keyMapNative[key];
+				outputKeyMap.keyMapNative[key][3] = defaultKeyMap.keyMapNative[key][3]; // Set the description to the default (in case it was updated)
+			}
+			else {
+				// Set the keybinding to the default
+				outputKeyMap.keyMapNative[key] = defaultKeyMap.keyMapNative[key];
+			}
+
+			// Add to incompleteKeyMapNative if it's a multi-key keybinding
+			let keyVal = outputKeyMap.keyMapNative[key][0];
+			for (let i = 0; i < keyVal.length; i++) {
+				if (keyVal[i] === KEY_SEPARATOR) {
+					outputKeyMap.incompleteKeyMapNative.push(keyVal.slice(0, i));
+				}
+			}
+
+		});
+
 		// Now, outputKeyMap is fully populated with the keybindings
 		// Call the callback function with outputKeyMap as an argument
-        callback(outputKeyMap);
+		callback(outputKeyMap);
 
     });
 

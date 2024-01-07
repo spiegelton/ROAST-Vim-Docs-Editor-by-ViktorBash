@@ -1,3 +1,4 @@
+let nativeElem = document.getElementById("native");
 let normalElem = document.getElementById("normal");
 let insertElem = document.getElementById("insert");
 let visualElem = document.getElementById("visual");
@@ -383,6 +384,17 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
     // We increment it as we add more keymaps
     let id = 1;
 
+    // Add native keymaps
+    let keyMapNative = ultimateKeyMap["keyMapNative"];
+    let nativeKeys = Object.keys(keyMapNative);
+
+    for (let i = 0; i < nativeKeys.length; i++) {
+        // Loop through each keymap in the normal mode keymaps
+        let key = keyMapNative[nativeKeys[i]]; // We now have the array holding the specific keybinding's data
+        addHTML(nativeElem, key, id, "keyMapNative", nativeKeys[i]);
+        id += 1;
+    }
+
     // Add normal mode keymaps
     let keyMapN = ultimateKeyMap["keyMapN"];
     let normalKeys = Object.keys(keyMapN);
@@ -429,6 +441,7 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 
     // Wire up collapsible buttons to their respective tables
     let collapseAndTables = [
+        [document.getElementById("dropdown-native"), document.getElementById("native-table")],
         [document.getElementById("dropdown-normal"), document.getElementById("normal-table")],
         [document.getElementById("dropdown-insert"), document.getElementById("insert-table")],
         [document.getElementById("dropdown-visual"), document.getElementById("visual-table")],
