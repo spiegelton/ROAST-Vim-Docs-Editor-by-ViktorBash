@@ -327,16 +327,6 @@ windowsVim.nativeKeyCheck = function (modifierInput) {
             docs.clickButton(docs.toolbarMenuButtonOptions.numberedList);
             return true;
         }
-        case (keyMapNative.indent[0] === this.currentSequence && (keyMapNative.indent[1] === true || keyMapNative.indent[2] === modifierInput)):
-        {
-            docs.clickButton(docs.toolbarMenuButtonOptions.indent);
-            return true;
-        }
-        case (keyMapNative.outdent[0] === this.currentSequence && (keyMapNative.outdent[1] === true || keyMapNative.outdent[2] === modifierInput)):
-        {
-            docs.clickButton(docs.toolbarMenuButtonOptions.outdent);
-            return true;
-        }
         case (keyMapNative.alignLeft[0] === this.currentSequence && (keyMapNative.alignLeft[1] === true || keyMapNative.alignLeft[2] === modifierInput)):
         {
             docs.clickButton(docs.toolbarMenuButtonOptions.alignLeft);
@@ -1955,7 +1945,7 @@ windowsVim.normal_keydown = function (e) {
 
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapN.includes(windowsVim.currentSequence) && !keyMap.incompleteKeyMapNative.includes(windowsVim.currentSequence)
+        !keyMap.incompleteKeyMapN.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.clearData();
@@ -2384,7 +2374,7 @@ windowsVim.visual_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapV.includes(windowsVim.currentSequence) && !keyMap.incompleteKeyMapNative.includes(windowsVim.currentSequence)
+        !keyMap.incompleteKeyMapV.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.num = "";

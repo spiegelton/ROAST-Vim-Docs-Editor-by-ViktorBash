@@ -176,78 +176,6 @@ macVim.paste = async function (e) {
 	}
 };
 
-// TODO: Check } and { in visual mode on mac
-
-// List of shortcuts for visual mode that we will let pass through (ex: Command + B to bold)
-// NOTE: The letters have to be lowercase, even if shift=True is part of the combination for some reason
-macVim.visualShortcuts = [
-	// e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
-	["b", false, false, true, false], // Bold (Command + B)
-	["i", false, false, true, false], // Italic (Command + I)
-	["X", false, false, true, true], // Strikethrough (Command + Shift + X)
-    ["f", false, false, true, false], // Search (Command + F)
-    ["l", false, false, true, true], //  Left-align text (Command + Shift + L)
-    ["r", false, false, true, true], // Right-align text (Command + Shift + R)
-    ["e", false, false, true, true], // Center-align text (Command + Shift + E)
-    ["j", false, false, true, true], // Justify text (Command + Shift + J)
-	["a", false, false, true, false], // Select all (Command + A),
-	// Chrome shortcut for switching tabs
-	["1", false, false, true, false], // Command + 1
-	["2", false, false, true, false], // Command + 2
-	["3", false, false, true, false], // Command + 3
-	["4", false, false, true, false], // Command + 4
-	["5", false, false, true, false], // Command + 5
-	["6", false, false, true, false], // Command + 6
-	["7", false, false, true, false], // Command + 7
-	["8", false, false, true, false], // Command + 8
-	["9", false, false, true, false], // Command + 9
-    // Bullet points
-    ["7", false, false, true, true], // Control + Shift + 7 (Numbered List)
-    ["8", false, false, true, true], // Control + Shift + 8 (Bulleted List)
-    ["9", false, false, true, true], // Control + Shift + 9 (Checklist List)
-    // Apply styling (title, heading 1, heading 2, etc)
-    ["º", true, false, true, false], // Command + Option + 0 (Normal text)
-    ["¡", true, false, true, false], // Command + Option + 1 (Heading 1)
-    ["™", true, false, true, false], // Command + Option + 2 (Heading 2)
-    ["£", true, false, true, false], // Command + Option + 3 (Heading 3)
-    ["¢", true, false, true, false], // Command + Option + 4 (Heading 4)
-    ["∞", true, false, true, false], // Command + Option + 5 (Heading 5)
-    ["§", true, false, true, false], // Command + Option + 6 (Heading 6)
-]
-
-macVim.normalShortcuts = [
-    // e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey
-    ["f", false, false, true, false], // Search (Command + F)
-    ["l", false, false, true, true], //  Left-align text (Command + Shift + L)
-    ["r", false, false, true, true], // Right-align text (Command + Shift + R)
-    ["e", false, false, true, true], // Center-align text (Command + Shift + E)
-    ["j", false, false, true, true], // Justify text (Command + Shift + J)
-    ["a", false, false, true, false], // Select all (Command + A)
-    // Chrome shortcut for switching tabs
-    ["1", false, false, true, false], // Command + 1
-    ["2", false, false, true, false], // Command + 2
-    ["3", false, false, true, false], // Command + 3
-    ["4", false, false, true, false], // Command + 4
-    ["5", false, false, true, false], // Command + 5
-    ["6", false, false, true, false], // Command + 6
-    ["7", false, false, true, false], // Command + 7
-    ["8", false, false, true, false], // Command + 8
-    ["9", false, false, true, false], // Command + 9
-    // Bullet points
-    ["7", false, false, true, true], // Control + Shift + 7 (Numbered List)
-    ["8", false, false, true, true], // Control + Shift + 8 (Bulleted List)
-    ["9", false, false, true, true], // Control + Shift + 9 (Checklist List)
-    // Apply styling (title, heading 1, heading 2, etc)
-    ["º", true, false, true, false], // Command + Option + 0 (Normal text)
-    ["¡", true, false, true, false], // Command + Option + 1 (Heading 1)
-    ["™", true, false, true, false], // Command + Option + 2 (Heading 2)
-    ["£", true, false, true, false], // Command + Option + 3 (Heading 3)
-    ["¢", true, false, true, false], // Command + Option + 4 (Heading 4)
-    ["∞", true, false, true, false], // Command + Option + 5 (Heading 5)
-    ["§", true, false, true, false], // Command + Option + 6 (Heading 6)
-];
-
-
 macVim.clearData = function () {
 	macVim.num = "";
 	macVim.currentSequence = "";
@@ -360,6 +288,208 @@ macVim.deleteOrCutAndUndo = function(shouldWeCut) {
     }
 }
 
+macVim.nativeKeyCheck = function (modifierInput) {
+    const keyMapNative = keyMap.keyMapNative;
+    switch (true) {
+        case (keyMapNative.bold[0] === this.currentSequence && (keyMapNative.bold[1] === true || keyMapNative.bold[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.bold);
+            return true;
+        }
+        case (keyMapNative.italic[0] === this.currentSequence && (keyMapNative.italic[1] === true || keyMapNative.italic[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.italic);
+            return true;
+        }
+        case (keyMapNative.underline[0] === this.currentSequence && (keyMapNative.underline[1] === true || keyMapNative.underline[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.underline);
+            return true;
+        }
+        case (keyMapNative.link[0] === this.currentSequence && (keyMapNative.link[1] === true || keyMapNative.link[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.link);
+            return true;
+        }
+        case (keyMapNative.comment[0] === this.currentSequence && (keyMapNative.comment[1] === true || keyMapNative.comment[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.comment);
+            return true;
+        }
+        case (keyMapNative.checkList[0] === this.currentSequence && (keyMapNative.checkList[1] === true || keyMapNative.checkList[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.checkList);
+            return true;
+        }
+        case (keyMapNative.bulletedList[0] === this.currentSequence && (keyMapNative.bulletedList[1] === true || keyMapNative.bulletedList[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.bulletedList);
+            return true;
+        }
+        case (keyMapNative.numberedList[0] === this.currentSequence && (keyMapNative.numberedList[1] === true || keyMapNative.numberedList[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.numberedList);
+            return true;
+        }
+        case (keyMapNative.alignLeft[0] === this.currentSequence && (keyMapNative.alignLeft[1] === true || keyMapNative.alignLeft[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.alignLeft);
+            return true;
+        }
+        case (keyMapNative.alignCenter[0] === this.currentSequence && (keyMapNative.alignCenter[1] === true || keyMapNative.alignCenter[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.alignCenter);
+            return true;
+        }
+        case (keyMapNative.alignRight[0] === this.currentSequence && (keyMapNative.alignRight[1] === true || keyMapNative.alignRight[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.alignRight);
+            return true;
+        }
+        case (keyMapNative.alignJustify[0] === this.currentSequence && (keyMapNative.alignJustify[1] === true || keyMapNative.alignJustify[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.alignJustify);
+            return true;
+        }
+        case (keyMapNative.increaseFontSize[0] === this.currentSequence && (keyMapNative.increaseFontSize[1] === true || keyMapNative.increaseFontSize[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.increaseFontSize);
+            return true;
+        }
+        case (keyMapNative.decreaseFontSize[0] === this.currentSequence && (keyMapNative.decreaseFontSize[1] === true || keyMapNative.decreaseFontSize[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.decreaseFontSize);
+            return true;
+        }
+        case (keyMapNative.print[0] === this.currentSequence && (keyMapNative.print[1] === true || keyMapNative.print[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.print);
+            return true;
+        }
+        case (keyMapNative.spellingAndGrammarCheck[0] === this.currentSequence && (keyMapNative.spellingAndGrammarCheck[1] === true || keyMapNative.spellingAndGrammarCheck[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.spellingAndGrammarCheck);
+            return true;
+        }
+        case (keyMapNative.clearFormatting[0] === this.currentSequence && (keyMapNative.clearFormatting[1] === true || keyMapNative.clearFormatting[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.clearFormatting);
+            return true;
+        }
+        case (keyMapNative.normalText[0] === this.currentSequence && (keyMapNative.normalText[1] === true || keyMapNative.normalText[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.normalText);
+            return true;
+        }
+        case (keyMapNative.heading1[0] === this.currentSequence && (keyMapNative.heading1[1] === true || keyMapNative.heading1[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.heading1);
+            return true;
+        }
+        case (keyMapNative.heading2[0] === this.currentSequence && (keyMapNative.heading2[1] === true || keyMapNative.heading2[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.heading2);
+            return true;
+        }
+        case (keyMapNative.heading3[0] === this.currentSequence && (keyMapNative.heading3[1] === true || keyMapNative.heading3[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.heading3);
+            return true;
+        }
+        case (keyMapNative.heading4[0] === this.currentSequence && (keyMapNative.heading4[1] === true || keyMapNative.heading4[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.heading4);
+            return true;
+        }
+        case (keyMapNative.heading5[0] === this.currentSequence && (keyMapNative.heading5[1] === true || keyMapNative.heading5[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.heading5);
+            return true;
+        }
+        case (keyMapNative.heading6[0] === this.currentSequence && (keyMapNative.heading6[1] === true || keyMapNative.heading6[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.heading6);
+            return true;
+        }
+        case (keyMapNative.strikethrough[0] === this.currentSequence && (keyMapNative.strikethrough[1] === true || keyMapNative.strikethrough[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.strikethrough);
+            return true;
+        }
+        case (keyMapNative.superscript[0] === this.currentSequence && (keyMapNative.superscript[1] === true || keyMapNative.superscript[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.superscript);
+            return true;
+        }
+        case (keyMapNative.subscript[0] === this.currentSequence && (keyMapNative.subscript[1] === true || keyMapNative.subscript[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.subscript);
+            return true;
+        }
+        case (keyMapNative.selectAll[0] === this.currentSequence && (keyMapNative.selectAll[1] === true || keyMapNative.selectAll[2] === modifierInput)):
+        {
+            if (this.mode !== "visual" && this.mode !== "visual_line") {
+                this.switchToVisualMode();
+            }
+            docs.clickButton(docs.toolbarMenuButtonOptions.selectAll);
+            return true;
+        }
+        case (keyMapNative.open[0] === this.currentSequence && (keyMapNative.open[1] === true || keyMapNative.open[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.open);
+            return true;
+        }
+        case (keyMapNative.seeVersionHistory[0] === this.currentSequence && (keyMapNative.seeVersionHistory[1] === true || keyMapNative.seeVersionHistory[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.seeVersionHistory);
+            return true;
+        }
+        case (keyMapNative.findAndReplace[0] === this.currentSequence && (keyMapNative.findAndReplace[1] === true || keyMapNative.findAndReplace[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.findAndReplace);
+            return true;
+        }
+        case (keyMapNative.footNote[0] === this.currentSequence && (keyMapNative.footNote[1] === true || keyMapNative.footNote[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.footNote);
+            return true;
+        }
+        case (keyMapNative.pageBreak[0] === this.currentSequence && (keyMapNative.pageBreak[1] === true || keyMapNative.pageBreak[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.pageBreak);
+            return true;
+        }
+        case (keyMapNative.wordCount[0] === this.currentSequence && (keyMapNative.wordCount[1] === true || keyMapNative.wordCount[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.wordCount);
+            return true;
+        }
+        case (keyMapNative.explore[0] === this.currentSequence && (keyMapNative.explore[1] === true || keyMapNative.explore[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.explore);
+            return true;
+        }
+        case (keyMapNative.dictionary[0] === this.currentSequence && (keyMapNative.dictionary[1] === true || keyMapNative.dictionary[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.dictionary);
+            return true;
+        }
+        case (keyMapNative.voiceTyping[0] === this.currentSequence && (keyMapNative.voiceTyping[1] === true || keyMapNative.voiceTyping[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.voiceTyping);
+            return true;
+        }
+        case (keyMapNative.searchTheMenus[0] === this.currentSequence && (keyMapNative.searchTheMenus[1] === true || keyMapNative.searchTheMenus[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.searchTheMenus);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 // Called in normal mode.
 macVim.normal_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
@@ -367,29 +497,7 @@ macVim.normal_keydown = function (e) {
         return true;
     }
 
-	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
-
-	// Check if the native shortcut is in the normalShortcuts
-	for (let i = 0; i < macVim.normalShortcuts.length; i++) {
-		let equal = true;
-		for (let j = 0; j < macVim.normalShortcuts[i].length; j++) {
-			if (macVim.normalShortcuts[i][j] !== checkIfNativeShortcut[j]) {
-				equal = false;
-				break;
-			}
-		}
-		if (equal) {
-			if (e.key === "a" && e.metaKey === true) {
-				// Select all text --> Switch to visual mode
-				macVim.visualModeIsLinedBased = false;
-				macVim.switchToVisualMode();
-			}
-			macVim.clearData();
-			return true;
-		}
-	}
-
-    // Past this point we are controlling what happens 
+    // Past this point we are controlling what happens
     e.preventDefault();
     e.stopPropagation();
 
@@ -406,6 +514,11 @@ macVim.normal_keydown = function (e) {
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapN = keyMap.keyMapN;
+
+    if (this.nativeKeyCheck(modifierInput)) {
+        this.clearData();
+        return true;
+    }
 
     switch (true) {
         case(keyMapN.replaceCharacter[0] === this.currentSequence && (keyMapN.replaceCharacter[1] === true || keyMapN.replaceCharacter[2] === modifierInput)):
@@ -1904,24 +2017,6 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
-	// Check if the key is a Google Docs native shortcut
-	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
-
-	// Check if the native shortcut is in the macVim.visualShortcuts
-	for (let i = 0; i < macVim.visualShortcuts.length; i++) {
-		let equal = true;
-		for (let j = 0; j < macVim.visualShortcuts[i].length; j++) {
-			if (macVim.visualShortcuts[i][j] !== checkIfNativeShortcut[j]) {
-				equal = false;
-				break;
-			}
-		}
-		if (equal) {
-			macVim.clearData();
-			return true;
-		}
-	}
-
 	e.preventDefault();
 	e.stopPropagation();
 
@@ -1943,6 +2038,11 @@ macVim.visual_keydown = function (e) {
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapV = keyMap.keyMapV;
+
+    if (this.nativeKeyCheck(modifierInput)) {
+        this.clearData();
+        return true;
+    }
 
 	switch (true) {
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
@@ -2352,51 +2452,11 @@ macVim.visual_line_keydown = function (e) {
 		return true;
 	}
 
-	// Check if the key is a Google Docs native shortcut
-	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
-
-	// Check if the native shortcut is in the macVim.visualShortcuts
-	for (let i = 0; i < macVim.visualShortcuts.length; i++) {
-		let equal = true;
-		for (let j = 0; j < macVim.visualShortcuts[i].length; j++) {
-			if (macVim.visualShortcuts[i][j] !== checkIfNativeShortcut[j]) {
-				equal = false;
-				break;
-			}
-		}
-		if (equal) {
-			macVim.clearData();
-			return true;
-		}
-	}
-
 	e.preventDefault();
 	e.stopPropagation();
 
 	if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
 		// Shift by itself does nothing
-		return true;
-	}
-
-	if (e.key.match(/\d+/) && macVim.currentSequence.length === 0) {
-		if (e.key === "0" && macVim.num.length !== 0) {
-			// 0 is part of the number being typed (ex: "100")
-			if (macVim.num.length < 3) {
-				// We don't want to crash, so max you can type in is a 3 digit number (999)
-				macVim.num += e.key;
-			}
-		} else if (e.key !== "0") {
-			// We have any digit besides 0 being typed (ex: "1" or "11")
-			if (macVim.num.length < 3) {
-				macVim.num += e.key;
-			}
-		} else {
-			docs.pressKey(docs.codeFromKey("Home"), false, true);
-			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-		}
-		UI.updateUISequenceText(macVim.num + getCleanedSequence(macVim.currentSequence));
-		docs.setCursorWidth();
 		return true;
 	}
 
@@ -2413,6 +2473,11 @@ macVim.visual_line_keydown = function (e) {
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapVLine = keyMap.keyMapVLine;
+
+    if (this.nativeKeyCheck(modifierInput)) {
+        this.clearData();
+        return true;
+    }
 
 	switch (true) {
         case (keyMapVLine.arrowUp[0] === this.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
@@ -2623,6 +2688,14 @@ macVim.visual_line_keydown = function (e) {
 			}
 	}
 
+    if (e.key.match(/\d+/) && macVim.currentSequence.length === 1) {
+        // We have a number
+        this.currentSequence = "";
+        if (this.num.length < 3) {
+            this.num += e.key
+        }
+    }
+
     // Check if we are building up to a command or if the sequence is invalid
     if (
         this.currentSequence.length !== 0 &&
@@ -2633,6 +2706,7 @@ macVim.visual_line_keydown = function (e) {
         this.currentSequence = "";
     }
 
+
     UI.updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
     return true;
 };
@@ -2641,6 +2715,12 @@ macVim.insert_keydown = function (e) {
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapI = keyMap.keyMapI;
 	// Check if current key is part of a key map
+    if (this.nativeKeyCheck(modifierInput)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return true;
+    }
+
 	switch (true) {
         case (keyMapI.escape[0] === e.key && (keyMapI.escape[1] === true || keyMapI.escape[2] === modifierInput)):
         case (keyMapI.ctrlC[0] === e.key && (keyMapI.ctrlC[1] === true || keyMapI.ctrlC[2] === modifierInput)):

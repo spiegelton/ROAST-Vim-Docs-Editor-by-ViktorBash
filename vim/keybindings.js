@@ -229,8 +229,6 @@ export function getDefaultKeyBindings() {
 			checkList: ["9", false, 0b1100, "Checklist", null],
 			bulletedList: ["8", false, 0b1100, "Bulleted list", null],
 			numberedList: ["7", false, 0b1100, "Checklist", null],
-			indent: [">" + KEY_SEPARATOR + ">", true, 0b0000, "Indent", null],
-			outdent: ["<" + KEY_SEPARATOR + "<", true, 0b0000, "Outdent", null],
 			alignLeft: ["L", false, 0b1100, "Align left", null],
 			alignCenter: ["E", false, 0b1100, "Align center", null],
 			alignRight: ["R", false, 0b1100, "Align right", null],
@@ -274,8 +272,6 @@ export function getDefaultKeyBindings() {
 			checkList: ["9", false, 0b0101, "Checklist", null],
 			bulletedList: ["8", false, 0b0101, "Bulleted list", null],
 			numberedList: ["7", false, 0b0101, "Checklist", null],
-			indent: [">" + KEY_SEPARATOR + ">", true, 0b0000, "Indent", null],
-			outdent: ["<" + KEY_SEPARATOR + "<", true, 0b0000, "Outdent", null],
 			alignLeft: ["L", false, 0b0101, "Align left", null],
 			alignCenter: ["E", false, 0b0101, "Align center", null],
 			alignRight: ["R", false, 0b0101, "Align right", null],
@@ -375,9 +371,9 @@ export function getUltimateKeyMapInCallback(callback) {
 			keyMapNative: {},
 			incompleteKeyMapN: [],
 			// Note: no incompleteKeyMapI because keybindings in insert mode are limited to 1 key
+			// Note: no incompleteKeyMapNative for same reasons
 			incompleteKeyMapV: [],
 			incompleteKeyMapVLine: [],
-			incompleteKeyMapNative: [],
 		}
 
 		// We are going to loop through each keyMap (keyMapN, keyMapI, keyMapV, keyMapVLine)
@@ -484,14 +480,6 @@ export function getUltimateKeyMapInCallback(callback) {
 			else {
 				// Set the keybinding to the default
 				outputKeyMap.keyMapNative[key] = defaultKeyMap.keyMapNative[key];
-			}
-
-			// Add to incompleteKeyMapNative if it's a multi-key keybinding
-			let keyVal = outputKeyMap.keyMapNative[key][0];
-			for (let i = 0; i < keyVal.length; i++) {
-				if (keyVal[i] === KEY_SEPARATOR) {
-					outputKeyMap.incompleteKeyMapNative.push(keyVal.slice(0, i));
-				}
 			}
 
 		});
