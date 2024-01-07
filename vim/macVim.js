@@ -3,6 +3,7 @@ import { KEY_SEPARATOR } from "./keybindings.js";
 
 let docs;
 let UI;
+let keyMap;
 
 let macVim = {
 	// Main variables here
@@ -12,9 +13,10 @@ let macVim = {
     // Note: There is no "incompleteKeyMapsI" because commands can be a max of 1 character in insert mode
 };
 
-macVim.setUp = function (docsInstance, UIInstance) {
+macVim.setUp = function (docsInstance, UIInstance, keyMapInstance) {
     docs = docsInstance;
     UI = UIInstance;
+    keyMap = keyMapInstance;
 }
 
 macVim.switchToNormalMode = function () {
@@ -403,7 +405,7 @@ macVim.normal_keydown = function (e) {
 
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
-    const keyMapN = this.keyMapN;
+    const keyMapN = keyMap.keyMapN;
 
     switch (true) {
         case(keyMapN.replaceCharacter[0] === this.currentSequence && (keyMapN.replaceCharacter[1] === true || keyMapN.replaceCharacter[2] === modifierInput)):
@@ -1882,7 +1884,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
     if (
         this.currentSequence.length !== 0 &&
-        !this.incompleteKeyMapN.includes(this.currentSequence)
+        !keyMap.incompleteKeyMapN.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.clearData();
@@ -1940,7 +1942,7 @@ macVim.visual_keydown = function (e) {
 
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
-    const keyMapV = this.keyMapV;
+    const keyMapV = keyMap.keyMapV;
 
 	switch (true) {
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
@@ -2331,7 +2333,7 @@ macVim.visual_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         this.currentSequence.length !== 0 &&
-        !this.incompleteKeyMapV.includes(this.currentSequence)
+        !keyMap.incompleteKeyMapV.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.num = "";
@@ -2410,7 +2412,7 @@ macVim.visual_line_keydown = function (e) {
 
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
-    const keyMapVLine = this.keyMapVLine;
+    const keyMapVLine = keyMap.keyMapVLine;
 
 	switch (true) {
         case (keyMapVLine.arrowUp[0] === this.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
@@ -2624,7 +2626,7 @@ macVim.visual_line_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         this.currentSequence.length !== 0 &&
-        !this.incompleteKeyMapVLine.includes(this.currentSequence)
+        !keyMap.incompleteKeyMapVLine.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.num = "";
@@ -2637,7 +2639,7 @@ macVim.visual_line_keydown = function (e) {
 
 macVim.insert_keydown = function (e) {
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
-    const keyMapI = this.keyMapI;
+    const keyMapI = keyMap.keyMapI;
 	// Check if current key is part of a key map
 	switch (true) {
         case (keyMapI.escape[0] === e.key && (keyMapI.escape[1] === true || keyMapI.escape[2] === modifierInput)):

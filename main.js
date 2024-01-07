@@ -62,7 +62,7 @@ if (user.paid) {
 		// User is still in their free trial
 		runVim();
 	} else {
-		// User's free trial ran out and they still haven't paid
+		// User's free trial ran out, and they still haven't paid
 		UI.updateUIModeText("-- TRIAL EXPIRED --");
 	}
 }
@@ -80,22 +80,10 @@ function runVim() {
 		vimVariant = windowsVim;
 	}
 
-	vimVariant.setUp(docs, UI);
-
 	// Now, we will populate the vimVariant with the user's keybindings
 	getUltimateKeyMapInCallback(function (ultimateKeyMap) {
-		vimVariant.keyMapN = ultimateKeyMap.keyMapN;
-		vimVariant.keyMapI = ultimateKeyMap.keyMapI;
-		vimVariant.keyMapV = ultimateKeyMap.keyMapV;
-		vimVariant.keyMapVLine = ultimateKeyMap.keyMapVLine;
-		vimVariant.keyMapNative = ultimateKeyMap.keyMapNative;
-		
-		// Set the incomplete keymap bindings now
-		vimVariant.incompleteKeyMapN = ultimateKeyMap.incompleteKeyMapN;
-		vimVariant.incompleteKeyMapV = ultimateKeyMap.incompleteKeyMapV;
-		vimVariant.incompleteKeyMapVLine = ultimateKeyMap.incompleteKeyMapVLine;
-		vimVariant.incompleteKeyMapNative = ultimateKeyMap.incompleteKeyMapNative;
 
+		vimVariant.setUp(docs, UI, ultimateKeyMap);
 		// After fetching the keybindings, we can start running Vim
 		continueRunVim(vimVariant);
 	})
