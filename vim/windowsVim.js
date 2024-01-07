@@ -1955,7 +1955,7 @@ windowsVim.normal_keydown = function (e) {
 
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapN.includes(windowsVim.currentSequence)
+        !keyMap.incompleteKeyMapN.includes(windowsVim.currentSequence) && !keyMap.incompleteKeyMapNative.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.clearData();
@@ -1972,24 +1972,6 @@ windowsVim.visual_keydown = function (e) {
         // Pass through any function keys.
         return true;
     }
-
-	// Check if the key is a Google Docs native shortcut
-	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
-
-	// Check if the native shortcut is in the windowsVim.visualShortcuts
-	for (let i = 0; i < windowsVim.visualShortcuts.length; i++) {
-		let equal = true;
-		for (let j = 0; j < windowsVim.visualShortcuts[i].length; j++) {
-			if (windowsVim.visualShortcuts[i][j] !== checkIfNativeShortcut[j]) {
-				equal = false;
-				break;
-			}
-		}
-		if (equal) {
-			windowsVim.clearData();
-			return true;
-		}
-	}
 
     e.preventDefault();
     e.stopPropagation();
@@ -2017,6 +1999,11 @@ windowsVim.visual_keydown = function (e) {
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapV = keyMap.keyMapV;
+
+    if (this.nativeKeyCheck(modifierInput)) {
+        windowsVim.clearData();
+        return true;
+    }
 
     switch (true) {
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
@@ -2397,7 +2384,7 @@ windowsVim.visual_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapV.includes(windowsVim.currentSequence)
+        !keyMap.incompleteKeyMapV.includes(windowsVim.currentSequence) && !keyMap.incompleteKeyMapNative.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.num = "";
@@ -2415,24 +2402,6 @@ windowsVim.visual_line_keydown = function (e) {
         return true;
     }
 
-	// Check if the key is a Google Docs native shortcut
-	let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
-
-	// Check if the native shortcut is in the windowsVim.visualShortcuts
-	for (let i = 0; i < windowsVim.visualShortcuts.length; i++) {
-		let equal = true;
-		for (let j = 0; j < windowsVim.visualShortcuts[i].length; j++) {
-			if (windowsVim.visualShortcuts[i][j] !== checkIfNativeShortcut[j]) {
-				equal = false;
-				break;
-			}
-		}
-		if (equal) {
-			windowsVim.clearData();
-			return true;
-		}
-	}
-
     e.preventDefault();
     e.stopPropagation();
 
@@ -2443,27 +2412,6 @@ windowsVim.visual_line_keydown = function (e) {
         e.key === "Meta"
     ) {
         // Shift by itself does nothing
-        return true;
-    }
-
-    // Check if it's a number
-    if (e.key.match(/\d+/) && windowsVim.currentSequence.length === 0) {
-        if (e.key === "0" && windowsVim.num.length !== 0) {
-            // 0 is part of the number being typed (ex: "100")
-            if (windowsVim.num.length < 3) {
-                // We don't want to crash, so max you can type in is a 3 digit number (999)
-                windowsVim.num += e.key;
-            }
-        } else if (e.key !== "0") {
-            // We have any digit besides 0 being typed (ex: "1" or "11")
-            if (windowsVim.num.length < 3) {
-                windowsVim.num += e.key;
-            }
-        } else {
-            // Do nothing (We are in visual LINE mode, so 0 shouldn't actually do anything)
-        }
-        UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
-        docs.setCursorWidth();
         return true;
     }
 
@@ -2480,6 +2428,11 @@ windowsVim.visual_line_keydown = function (e) {
     // Bit mask of what modifier keys are pressed
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapVLine = keyMap.keyMapVLine;
+
+    if (this.nativeKeyCheck(modifierInput)) {
+        windowsVim.clearData();
+        return true;
+    }
 
     switch (true) {
         case (keyMapVLine.arrowUp[0] === windowsVim.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
@@ -2688,6 +2641,15 @@ windowsVim.visual_line_keydown = function (e) {
                 windowsVim.switchToNormalMode();
                 return true;
             }
+    }
+
+    // Check if it's a number
+    if (e.key.match(/\d+/) && this.currentSequence.length === 1) {
+        // We have a number
+        this.currentSequence = "";
+        if (this.num.length < 3) {
+            this.num += e.key
+        }
     }
 
     // Check if we are building up to a command or if the sequence is invalid
