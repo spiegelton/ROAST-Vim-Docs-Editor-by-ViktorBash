@@ -1320,7 +1320,7 @@ macVim.normal_keydown = function (e) {
 
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                    let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+                    let textNotSelected = !docs.isTextSelected()
                     if (textNotSelected) {
                         // Proceed normally, no chance it's a space
                         docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
@@ -1424,7 +1424,7 @@ macVim.normal_keydown = function (e) {
 
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
-                    let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+                    let textNotSelected = !docs.isTextSelected();
                     if (textNotSelected) {
                         // Proceed normally, no chance it's a space
                         docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
@@ -1672,7 +1672,7 @@ macVim.normal_keydown = function (e) {
                         // Delete stuff at the end of the line
                         docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
                         docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                        let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+                        let textNotSelected = !docs.isTextSelected();
                         if (textNotSelected) {
                             // No trailing spaces to worry about or anything
                             docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
@@ -1770,8 +1770,10 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 					// Delete stuff at the end of the line
 					docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-					let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
+                    let textNotSelected = !docs.isTextSelected();
+					// let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
 					if (textNotSelected) {
+                        console.log("No trailing spaces");
 						// No trailing spaces to worry about or anything
 						docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
 						docs.pressKey(docs.codeFromKey("Backspace"));
