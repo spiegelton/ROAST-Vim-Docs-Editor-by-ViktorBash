@@ -235,7 +235,6 @@ export function getDefaultKeyBindings() {
 			alignJustify: ["J", false, 0b1100, "Align justify", null],
 			increaseFontSize: [".", false, 0b1100, "Increase font size", null],
 			decreaseFontSize: [",", false, 0b1100, "Decrease font size", null],
-			print: ["p" + KEY_SEPARATOR + "p", true, 0b0000, "Print", null],
 			spellingAndGrammarCheck: ["X", false, 0b1010, "Spelling and grammar check", null],
 			clearFormatting: ["\\", false, 0b1000, "Clear formatting", null], // Literal backspace
 			normalText: ["0", false, 0b1010, "Apply 'Normal text' styling", null],
@@ -278,7 +277,6 @@ export function getDefaultKeyBindings() {
 			alignJustify: ["J", false, 0b0101, "Align justify", null],
 			increaseFontSize: [".", false, 0b0101, "Increase font size", null],
 			decreaseFontSize: [",", false, 0b0101, "Decrease font size", null],
-			print: ["p" + KEY_SEPARATOR + "p", true, 0b0000, "Print", null],
 			spellingAndGrammarCheck: ["x", false, 0b0011, "Spelling and grammar check", null],
 			clearFormatting: ["\\", false, 0b0001, "Clear formatting", null], // Literal backspace
 			normalText: ["º", false, 0b1010, "Apply 'Normal text' styling", null],

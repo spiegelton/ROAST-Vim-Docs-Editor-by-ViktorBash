@@ -357,11 +357,6 @@ windowsVim.nativeKeyCheck = function (modifierInput) {
             docs.clickButton(docs.toolbarMenuButtonOptions.decreaseFontSize);
             return true;
         }
-        case (keyMapNative.print[0] === this.currentSequence && (keyMapNative.print[1] === true || keyMapNative.print[2] === modifierInput)):
-        {
-            docs.clickButton(docs.toolbarMenuButtonOptions.print);
-            return true;
-        }
         case (keyMapNative.spellingAndGrammarCheck[0] === this.currentSequence && (keyMapNative.spellingAndGrammarCheck[1] === true || keyMapNative.spellingAndGrammarCheck[2] === modifierInput)):
         {
             docs.clickButton(docs.toolbarMenuButtonOptions.spellingAndGrammarCheck);
