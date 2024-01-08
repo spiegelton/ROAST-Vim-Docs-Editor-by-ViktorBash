@@ -375,11 +375,11 @@ docs.getCoords = function () {
 }
 
 docs.isTextSelected = function () {
-    if (docs.isMac) { // Mac Version
-        return docs.contentDocument.getSelection(0).getRangeAt(0).startOffset === 0
+    let cursorDisplay = docs.userCursor.style.display;
+    if (cursorDisplay === "none") {
+        return true;
     }
-    // Windows version
-    return docs.contentDocument.getSelection(0).getRangeAt(0).endOffset !== 0;
+    return false;
 }
 
 

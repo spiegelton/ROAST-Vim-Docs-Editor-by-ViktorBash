@@ -1666,8 +1666,7 @@ windowsVim.normal_keydown = function (e) {
                         docs.pressKey(docs.codeFromKey("x"));
                         docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
                         docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                        let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
-                        if (textSelected) {
+                        if (docs.isTextSelected()) {
                             // No trailing space or period or anything to worry about
                             docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
                             docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
@@ -1782,8 +1781,7 @@ windowsVim.normal_keydown = function (e) {
                         docs.pressKey(docs.codeFromKey("x"));
                         docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
                         docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                        let textSelected = docs.contentDocument.getSelection(0).getRangeAt(0).endOffset;
-                        if (textSelected) {
+                        if (docs.isTextSelected()) {
                             // No trailing space or period or anything to worry about
                             docs.pressKey(docs.codeFromKey("Z"), true); // Undo the "x" that we placed
                             docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
