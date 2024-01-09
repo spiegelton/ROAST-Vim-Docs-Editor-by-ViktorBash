@@ -1,6 +1,7 @@
 // docs is the class for interacting with Google Docs. It contains functions that abstract stuff away for us in other
 // parts of the code. For example, checking if we have text highlighted, pressing a button, pressing a key, etc.
 import {retry} from "./main.js";
+
 let docs = {};
 
 const MAC_PLATFORMS = ["MacIntel", "MacPPC", "Mac68K", "iPhone", "iPad"]; // Really only just "MacIntel"
@@ -65,8 +66,7 @@ if (!docs.isMac) {
         }
         return key.charCodeAt(key);
     };
-}
-else {
+} else {
     docs.codeFromKey = function (key) {
         const specialKeys = {
             Backspace: 8,
@@ -254,20 +254,6 @@ docs.pressSpecialKey = function (key) {
     docs.contentDocument.dispatchEvent(key_event);
 }
 
-// Pastes plain text into the document
-docs.pasteClipboardPlainText = async function () {
-    let data = new DataTransfer();
-    data.setData("text/plain", await navigator.clipboard.readText());
-    let paste = new ClipboardEvent("paste", {
-        clipboardData: data,
-        dataType: "text",
-    });
-    paste.docs_plus_ = true;
-
-    docs.texttarget.dispatchEvent(paste);
-};
-
-
 // Sets the width of the user's insertion point marker. @width should be a
 // width value compatible with CSS border-width: @width;
 docs.setCursorWidth = function (isRegular) {
@@ -381,6 +367,32 @@ docs.isTextSelected = function () {
     }
     return false;
 }
+
+/*
+    Attempt to paste HTML into the document if possible (called if execCommand fa
+ */
+docs.pasteRegular = function () {
+    let success = docs.contentDocument.execCommand("paste");
+    if (success) {
+        return;
+    }
+    console.error("execCommand(paste) failed, trying to paste plain text...");
+    // execCommand failed, let's try to paste any plain text at least
+    docs.pastePlainText();
+}
+
+// Pastes plain text into the document using the navigator.clipboard API
+docs.pastePlainText = async function () {
+    let data = new DataTransfer();
+    data.setData("text/plain", await navigator.clipboard.readText());
+    let paste = new ClipboardEvent("paste", {
+        clipboardData: data,
+        dataType: "text",
+    });
+    paste.docs_plus_ = true;
+
+    docs.texttarget.dispatchEvent(paste);
+};
 
 
 docs._clickMainToolBarButton = function (buttonID) {
@@ -574,12 +586,12 @@ docs.toolbarMenuButtonOptions = {
     alignJustify: ["alignJustifyButton", docs._clickMainToolBarButton],
     increaseFontSize: ["fontSizeIncrement", docs._clickMainToolBarButton],
     decreaseFontSize: ["fontSizeDecrement", docs._clickMainToolBarButton],
-    print: ["printButton", docs._clickMainToolBarButton],
+    // print: ["printButton", docs._clickMainToolBarButton],
     spellingAndGrammarCheck: ["spellGrammarCheckButton", docs._clickMainToolBarButton],
     clearFormatting: ["clearFormattingButton", docs._clickMainToolBarButton],
     normalText: [0, docs._clickParagraphStylesButton],
-    title: [1, docs._clickParagraphStylesButton],
-    subtitle: [2, docs._clickParagraphStylesButton],
+    // title: [1, docs._clickParagraphStylesButton],
+    // subtitle: [2, docs._clickParagraphStylesButton],
     heading1: [3, docs._clickParagraphStylesButton],
     heading2: [4, docs._clickParagraphStylesButton],
     heading3: [5, docs._clickParagraphStylesButton],

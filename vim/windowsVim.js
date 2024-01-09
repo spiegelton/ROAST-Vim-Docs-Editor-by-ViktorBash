@@ -168,67 +168,6 @@ windowsVim.deleteOrCutAndUndo = function(shouldWeCut) {
     }
 }
 
-
-/*
-* Paste whatever is in the clipboard at the appropriate place (lot of logic to move the cursor around)
-* You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
-* with stuff like being at the end of a line or multiline
-*/
-windowsVim.paste = async function (e) {
-	// The main thing is to check that if we're at the end, are we at the end of a multiline or real line
-	let [xCoord, yCoord] = docs.getCoords();
-	docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
-	let [leftXCoord, leftYCoord] = docs.getCoords();
-	if (leftXCoord === xCoord && leftYCoord === yCoord) {
-		// We are the start of a file
-		let startYCoord = docs.getYCoord();
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		let endYCoord = docs.getYCoord();
-		if (startYCoord !== endYCoord) {
-			// We are at the start of an empty line, so don't move right actually
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		}
-	} else {
-		docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our ArrowLeft because we're not at the start of the file
-		let yCoord = docs.getYCoord();
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		let newYCoord = docs.getYCoord();
-		if (yCoord === newYCoord) {
-			// Either we are in the middle of a line or at the end of a file, good to go
-		} else {
-			// We are at the end of a multiline (fake line) or a real line,
-			// Even though we do the same thing for both scenarios, the below key movements are still necessary
-			// to either put us at the right position for either scenario
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-		}
-	}
-
-	// Now that we're in the right position, we can paste
-	let startCursorPosition = docs.userCursor.style.transform;
-	if (e.ctrlKey === false) {
-		await docs.contentDocument.execCommand("paste");
-		setTimeout(() => {
-			let endCursorPosition = docs.userCursor.style.transform;
-			// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
-			if (startCursorPosition !== endCursorPosition) {
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-		}, 1);
-	} else {
-		await docs.pasteClipboardPlainText().then(() => {
-			setTimeout(() => {
-				let endCursorPosition = docs.userCursor.style.transform;
-				// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
-				if (startCursorPosition !== endCursorPosition) {
-					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				}
-			}, 1);
-		});
-	}
-};
-
 windowsVim.clearData = function () {
     windowsVim.num = "";
     windowsVim.currentSequence = "";
@@ -236,7 +175,6 @@ windowsVim.clearData = function () {
     docs.setCursorWidth();
     return;
 };
-
 /*
  * Move to the end of a line
  */
@@ -279,6 +217,39 @@ windowsVim.moveToStartOfLine = function () {
         docs.pressKey(docs.codeFromKey("ArrowRight"));
         docs.pressKey(docs.codeFromKey("ArrowUp"), true);
     }
+}
+
+windowsVim.moveRightToPasteAfterCursor = function () {
+    // The main thing is to check that if we're at the end, are we at the end of a multiline or real line
+    let [xCoord, yCoord] = docs.getCoords();
+    docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
+    let [leftXCoord, leftYCoord] = docs.getCoords();
+    if (leftXCoord === xCoord && leftYCoord === yCoord) {
+        // We are the start of a file
+        let startYCoord = docs.getYCoord();
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        let endYCoord = docs.getYCoord();
+        if (startYCoord !== endYCoord) {
+            // We are at the start of an empty line, so don't move right actually
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+    } else {
+        docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our ArrowLeft because we're not at the start of the file
+        let yCoord = docs.getYCoord();
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        let newYCoord = docs.getYCoord();
+        if (yCoord === newYCoord) {
+            // Either we are in the middle of a line or at the end of a file, good to go
+        } else {
+            // We are at the end of a multiline (fake line) or a real line,
+            // Even though we do the same thing for both scenarios, the below key movements are still necessary
+            // to either put us at the right position for either scenario
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+        }
+    }
+
 }
 
 // Check if the key is a native shortcut and handle it if so
@@ -805,56 +776,37 @@ windowsVim.normal_keydown = function (e) {
             }
         case (keyMapN.paste[0] === windowsVim.currentSequence && (keyMapN.paste[1] === true || keyMapN.paste[2] === modifierInput)):
             {
-                // TODO: Fix
-                windowsVim.paste(e); // All the cursor logic is in here
-                windowsVim.clearData();
+                this.moveRightToPasteAfterCursor();
+                // Now we're in the right position to paste
+
+                // We set a timeout because otherwise the paste may not work (from testing)
+                setTimeout(() => {
+                    docs.pasteRegular();
+                }, 1)
+                this.clearData();
                 return true;
             }
         case (keyMapN.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteNoFormatting[1] === true || keyMapN.pasteNoFormatting[2] === modifierInput)):
             {
-                // TODO: Fix
-                windowsVim.paste(e); // All the cursor logic is in here
-                windowsVim.clearData();
+                this.moveRightToPasteAfterCursor();
+                // Now we're in the right position to paste
+
+                docs.pastePlainText()
+                this.clearData();
                 return true;
             }
         case (keyMapN.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursor[1] === true || keyMapN.pasteBeforeCursor[2] === modifierInput)):
             {
-                // TODO: Fix
-                if (e.ctrlKey === false) {
-                    // Paste with formatting
-                    docs.contentDocument.execCommand("paste");
-                    setTimeout(() => {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }, 1);
-                } else {
-                    // Paste without formatting
-                    docs.pasteClipboardPlainText().then(() => {
-                        setTimeout(() => {
-                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        }, 1);
-                    });
-                }
-                windowsVim.clearData();
+                setTimeout(() => {
+                    docs.pasteRegular();
+                }, 1)
+                this.clearData();
                 return true;
             }
         case (keyMapN.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursorNoFormatting[1] === true || keyMapN.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
-                // TODO: Fix
-                if (e.ctrlKey === false) {
-                    // Paste with formatting
-                    docs.contentDocument.execCommand("paste");
-                    setTimeout(() => {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }, 1);
-                } else {
-                    // Paste without formatting
-                    docs.pasteClipboardPlainText().then(() => {
-                        setTimeout(() => {
-                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        }, 1);
-                    });
-                }
-                windowsVim.clearData();
+                docs.pastePlainText()
+                this.clearData();
                 return true;
             }
         case (keyMapN.insert[0] === windowsVim.currentSequence && (keyMapN.insert[1] === true || keyMapN.insert[2] === modifierInput)):
