@@ -121,7 +121,7 @@ macVim.copyWholeLine = async function () {
 * You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
 * with stuff like being at the end of a line or multiline
 */
-macVim.paste = async function (e) {
+macVim.moveRightToPasteAfterCursor = function (e) {
 	// The main thing is to check that if we're at the end, are we at the end of a multiline or real line
 	let [xCoord, yCoord] = docs.getCoords();
 	docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
@@ -150,29 +150,6 @@ macVim.paste = async function (e) {
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 		}
-	}
-
-	// Now that we're in the right position, we can paste
-	let startCursorPosition = docs.userCursor.style.transform;
-	if (e.ctrlKey === false) {
-		await docs.contentDocument.execCommand("paste");
-		setTimeout(() => {
-			let endCursorPosition = docs.userCursor.style.transform;
-			// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
-			if (startCursorPosition !== endCursorPosition) {
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-		}, 1);
-	} else {
-		await docs.pasteClipboardPlainText().then(() => {
-			setTimeout(() => {
-				let endCursorPosition = docs.userCursor.style.transform;
-				// Only move back one arrow if we actually did paste something that wasn't just a blank string ""
-				if (startCursorPosition !== endCursorPosition) {
-					docs.pressKey(docs.codeFromKey("ArrowLeft"));
-				}
-			}, 1);
-		});
 	}
 };
 
@@ -813,55 +790,37 @@ macVim.normal_keydown = function (e) {
             }
         case (keyMapN.paste[0] === this.currentSequence && (keyMapN.paste[1] === true || keyMapN.paste[2] === modifierInput)):
             {
-                // Paste (no support for numbers/pasting multiple times yet)
-                macVim.paste(e);
-                macVim.clearData();
+                this.moveRightToPasteAfterCursor();
+                // Now we're in the right position to paste
+
+                // We set a timeout because otherwise the paste may not work (from testing)
+                setTimeout(() => {
+                    docs.pasteRegular();
+                }, 1)
+                this.clearData();
                 return true;
             }
         case (keyMapN.pasteNoFormatting[0] === this.currentSequence && (keyMapN.pasteNoFormatting[1] === true || keyMapN.pasteNoFormatting[2] === modifierInput)):
             {
-                macVim.paste(e);
-                macVim.clearData();
+                this.moveRightToPasteAfterCursor();
+                // Now we're in the right position to paste
+
+                docs.pastePlainText()
+                this.clearData();
                 return true;
             }
         case (keyMapN.pasteBeforeCursor[0] === this.currentSequence && (keyMapN.pasteBeforeCursor[1] === true || keyMapN.pasteBeforeCursor[2] === modifierInput)):
             {
-	            // Paste (no support for numbers/pasting multiple times yet)
-                if (e.ctrlKey === false) {
-                    // Paste with formatting
-                    docs.contentDocument.execCommand("paste");
-                    setTimeout(() => {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }, 1);
-                } else {
-                    // Paste without formatting
-                    docs.pasteClipboardPlainText().then(() => {
-                        setTimeout(() => {
-                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        }, 1);
-                    });
-                }
-                macVim.clearData();
+                setTimeout(() => {
+                    docs.pasteRegular();
+                }, 1)
+                this.clearData();
                 return true;
             }
         case (keyMapN.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapN.pasteBeforeCursorNoFormatting[1] === true || keyMapN.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
-	            // Paste (no support for numbers/pasting multiple times yet)
-                if (e.ctrlKey === false) {
-                    // Paste with formatting
-                    docs.contentDocument.execCommand("paste");
-                    setTimeout(() => {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }, 1);
-                } else {
-                    // Paste without formatting
-                    docs.pasteClipboardPlainText().then(() => {
-                        setTimeout(() => {
-                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        }, 1);
-                    });
-                }
-                macVim.clearData();
+                docs.pastePlainText()
+                this.clearData();
                 return true;
             }
         case (keyMapN.insert[0] === this.currentSequence && (keyMapN.insert[1] === true || keyMapN.insert[2] === modifierInput)):
