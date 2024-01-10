@@ -2471,7 +2471,6 @@ windowsVim.visual_line_keydown = function (e) {
             {
                 // Paste
                 docs.pressKey(docs.codeFromKey("Backspace"));
-                this.moveRightToPasteAfterCursor();
 
                 setTimeout(() => {
                     docs.pasteRegular();
@@ -2485,7 +2484,6 @@ windowsVim.visual_line_keydown = function (e) {
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
                 docs.pressKey(docs.codeFromKey("Backspace"));
-                this.moveRightToPasteAfterCursor();
                 docs.pastePlainText();
 
                 windowsVim.clearData();
