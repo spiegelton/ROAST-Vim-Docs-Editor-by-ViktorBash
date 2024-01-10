@@ -397,7 +397,7 @@ docs.pastePlainText = async function () {
 
 docs._clickMainToolBarButton = function (buttonID) {
     let buttonElem = document.getElementById(buttonID);
-    docs._simulateClick(buttonElem);
+    docs._simulateClick(buttonElem, true);
 };
 
 docs._clickTextFormatButton = function (spanAriaLabel) {
@@ -538,10 +538,18 @@ docs._clickHelpButton = function (ariaLabel) {
 }
 
 
-docs._simulateClick = function (el, x, y) {
-    if (x == null) x = 0;
-    if (y == null) y = 0;
-    const eventSequence = ["mouseover", "mousedown", "mouseup", "click"];
+docs._simulateClick = function (el, mouseout= false) {
+    let x = 0;
+    let y = 0;
+    let eventSequence;
+
+    if (mouseout) {
+        eventSequence = ["mouseover", "mousedown", "mouseup", "click", "mouseout"];
+    }
+    else {
+        eventSequence = ["mouseover", "mousedown", "mouseup", "click"];
+    }
+
     for (const eventName of eventSequence) {
         const event = document.createEvent("MouseEvents");
         event.initMouseEvent(
