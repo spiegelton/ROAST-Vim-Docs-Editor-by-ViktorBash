@@ -2146,35 +2146,28 @@ macVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.paste[0] === this.currentSequence && (keyMapV.paste[1] === true || keyMapV.paste[2] === modifierInput)):
+        case (keyMapV.pasteBeforeCursor[0] === this.currentSequence && (keyMapV.pasteBeforeCursor[1] === true || keyMapV.pasteBeforeCursor[2] === modifierInput)):
+            {
+                // Paste
+                docs.pressKey(docs.codeFromKey("Backspace"));
+
+                setTimeout(() => {
+                    docs.pasteRegular();
+                }, 1)
+                this.clearData();
+                this.switchToNormalMode();
+                return true;
+
+            }
         case (keyMapV.pasteNoFormatting[0] === this.currentSequence && (keyMapV.pasteNoFormatting[1] === true || keyMapV.pasteNoFormatting[2] === modifierInput)):
+        case (keyMapV.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
                 docs.pressKey(docs.codeFromKey("Backspace"));
-                macVim.paste(e);
-                macVim.clearData();
-                macVim.switchToNormalMode();
-                return true;
-            }
-        case (keyMapV.pasteBeforeCursor[0] === this.currentSequence && (keyMapV.pasteBeforeCursor[1] === true || keyMapV.pasteBeforeCursor[2] === modifierInput)):
-        case (keyMapV.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                if (e.ctrlKey === false) {
-                    // Paste with formatting
-                    docs.contentDocument.execCommand("paste");
-                    setTimeout(() => {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }, 1);
-                } else {
-                    // Paste without formatting
-                    docs.pasteClipboardPlainText().then(() => {
-                        setTimeout(() => {
-                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        }, 1);
-                    });
-                }
-                macVim.clearData();
-                macVim.switchToNormalMode();
+                docs.pastePlainText();
+
+                this.clearData();
+                this.switchToNormalMode();
                 return true;
             }
         case (keyMapV.insertStartOfHighlight[0] === this.currentSequence && (keyMapV.insertStartOfHighlight[1] === true || keyMapV.insertStartOfHighlight[2] === modifierInput)):
@@ -2543,33 +2536,25 @@ macVim.visual_line_keydown = function (e) {
                 return true;
             }
         case (keyMapVLine.paste[0] === this.currentSequence && (keyMapVLine.paste[1] === true || keyMapVLine.paste[2] === modifierInput)):
-        case (keyMapVLine.pasteNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
+        case (keyMapVLine.pasteBeforeCursor[0] === this.currentSequence && (keyMapVLine.pasteBeforeCursor[1] === true || keyMapVLine.pasteBeforeCursor[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
                 docs.pressKey(docs.codeFromKey("Backspace"));
-                macVim.paste(e);
+
+                setTimeout(() => {
+                    docs.pasteRegular();
+                }, 1)
+
                 macVim.clearData();
                 macVim.switchToNormalMode();
                 return true;
             }
-        case (keyMapVLine.pasteBeforeCursor[0] === this.currentSequence && (keyMapVLine.pasteBeforeCursor[1] === true || keyMapVLine.pasteBeforeCursor[2] === modifierInput)):
+        case (keyMapVLine.pasteNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
         case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("Backspace"));
-                if (e.ctrlKey === false) {
-                    // Paste with formatting
-                    docs.contentDocument.execCommand("paste");
-                    setTimeout(() => {
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }, 1);
-                } else {
-                    // Paste without formatting
-                    docs.pasteClipboardPlainText().then(() => {
-                        setTimeout(() => {
-                            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                        }, 1);
-                    });
-                }
+                docs.pastePlainText();
+
                 macVim.clearData();
                 macVim.switchToNormalMode();
                 return true;
