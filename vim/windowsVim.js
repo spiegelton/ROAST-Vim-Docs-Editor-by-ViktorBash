@@ -12,6 +12,38 @@ let windowsVim = {
     currentSequence: "", // Keep track of key sequences (ex: "gg")
 };
 
+// List of shortcuts for normal, visual and visual line mode that we will let pass through, primarily Chrome shortcuts
+windowsVim.chromeShortcuts = [
+    // Chrome shortcut for switching tabs
+    ["1", false, true, false, false], // Control + 1
+    ["2", false, true, false, false], // Control + 2
+    ["3", false, true, false, false], // Control + 3
+    ["4", false, true, false, false], // Control + 4
+    ["5", false, true, false, false], // Control + 5
+    ["6", false, true, false, false], // Control + 6
+    ["7", false, true, false, false], // Control + 7
+    ["8", false, true, false, false], // Control + 8
+    ["9", false, true, false, false], // Control + 9
+]
+
+windowsVim.isChromeShortcut = function (e) {
+    let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
+
+	for (let i = 0; i < windowsVim.chromeShortcuts.length; i++) {
+		let equal = true;
+		for (let j = 0; j < windowsVim.chromeShortcuts[i].length; j++) {
+			if (windowsVim.chromeShortcuts[i][j] !== checkIfNativeShortcut[j]) {
+				equal = false;
+				break;
+			}
+		}
+        if (equal) {
+            return true;
+        }
+	}
+    return false;
+}
+
 windowsVim.setUp = function (docsInstance, UIInstance, keyMapInstance) {
     docs = docsInstance;
     UI = UIInstance;
@@ -455,6 +487,10 @@ windowsVim.nativeKeyCheck = function (modifierInput) {
 windowsVim.normal_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
         // Let function keys (F1 to F12), go through normally
+        return true;
+    }
+
+    if (windowsVim.isChromeShortcut(e)) {
         return true;
     }
 
@@ -1908,6 +1944,10 @@ windowsVim.visual_keydown = function (e) {
         return true;
     }
 
+    if (windowsVim.isChromeShortcut(e)) {
+        return true;
+    }
+
     e.preventDefault();
     e.stopPropagation();
 
@@ -2326,6 +2366,10 @@ windowsVim.visual_keydown = function (e) {
 windowsVim.visual_line_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
         // Pass through any function keys.
+        return true;
+    }
+
+    if (windowsVim.isChromeShortcut(e)) {
         return true;
     }
 

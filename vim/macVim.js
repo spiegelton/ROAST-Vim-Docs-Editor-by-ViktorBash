@@ -13,6 +13,38 @@ let macVim = {
     // Note: There is no "incompleteKeyMapsI" because commands can be a max of 1 character in insert mode
 };
 
+// List of shortcuts for normal, visual and visual line mode that we will let pass through, primarily Chrome shortcuts
+macVim.chromeShortcuts = [
+    // Chrome shortcut for switching tabs
+    ["1", false, false, true, false], // Command + 1
+    ["2", false, false, true, false], // Command + 2
+    ["3", false, false, true, false], // Command + 3
+    ["4", false, false, true, false], // Command + 4
+    ["5", false, false, true, false], // Command + 5
+    ["6", false, false, true, false], // Command + 6
+    ["7", false, false, true, false], // Command + 7
+    ["8", false, false, true, false], // Command + 8
+    ["9", false, false, true, false], // Command + 9
+]
+
+macVim.isChromeShortcut = function (e) {
+    let checkIfNativeShortcut = [e.key, e.altKey, e.ctrlKey, e.metaKey, e.shiftKey];
+
+    for (let i = 0; i < this.chromeShortcuts.length; i++) {
+        let equal = true;
+        for (let j = 0; j < this.chromeShortcuts[i].length; j++) {
+            if (this.chromeShortcuts[i][j] !== checkIfNativeShortcut[j]) {
+                equal = false;
+                break;
+            }
+        }
+        if (equal) {
+            return true;
+        }
+    }
+    return false;
+}
+
 macVim.setUp = function (docsInstance, UIInstance, keyMapInstance) {
     docs = docsInstance;
     UI = UIInstance;
@@ -466,6 +498,10 @@ macVim.nativeKeyCheck = function (modifierInput) {
 macVim.normal_keydown = function (e) {
     if (e.key.match(/F\d+/)) {
         // Let function keys (F1 to F12), go through normally
+        return true;
+    }
+
+    if (this.isChromeShortcut(e)) {
         return true;
     }
 
@@ -1973,6 +2009,10 @@ macVim.visual_keydown = function (e) {
 		return true;
 	}
 
+    if (this.isChromeShortcut(e)) {
+        return true;
+    }
+
 	e.preventDefault();
 	e.stopPropagation();
 
@@ -2400,6 +2440,10 @@ macVim.visual_line_keydown = function (e) {
 		// Pass through any function keys.
 		return true;
 	}
+
+    if (this.isChromeShortcut(e)) {
+        return true;
+    }
 
 	e.preventDefault();
 	e.stopPropagation();
