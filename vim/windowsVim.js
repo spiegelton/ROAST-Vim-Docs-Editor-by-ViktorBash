@@ -2085,10 +2085,10 @@ windowsVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.paste[0] === windowsVim.currentSequence && (keyMapV.paste[1] === true || keyMapV.paste[2] === modifierInput)):
+        case (keyMapV.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursor[1] === true || keyMapV.pasteBeforeCursor[2] === modifierInput)):
             {
                 // Paste
                 docs.pressKey(docs.codeFromKey("Backspace"));
-                this.moveRightToPasteAfterCursor();
 
                 setTimeout(() => {
                     docs.pasteRegular();
@@ -2098,32 +2098,13 @@ windowsVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteNoFormatting[1] === true || keyMapV.pasteNoFormatting[2] === modifierInput)):
+        case (keyMapV.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
                 docs.pressKey(docs.codeFromKey("Backspace"));
                 this.moveRightToPasteAfterCursor();
                 docs.pastePlainText();
 
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
-                return true;
-            }
-        case (keyMapV.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursor[1] === true || keyMapV.pasteBeforeCursor[2] === modifierInput)):
-            {
-                // Paste before cursor
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                setTimeout(() => {
-                    docs.pasteRegular();
-                }, 1)
-                this.clearData();
-                this.switchToNormalMode();
-                return true;
-
-            }
-        case (keyMapV.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                docs.pastePlainText();
                 windowsVim.clearData();
                 windowsVim.switchToNormalMode();
                 return true;
@@ -2486,6 +2467,7 @@ windowsVim.visual_line_keydown = function (e) {
                 return true;
             }
         case (keyMapVLine.paste[0] === windowsVim.currentSequence && (keyMapVLine.paste[1] === true || keyMapVLine.paste[2] === modifierInput)):
+        case (keyMapVLine.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursor[1] === true || keyMapVLine.pasteBeforeCursor[2] === modifierInput)):
             {
                 // Paste
                 docs.pressKey(docs.codeFromKey("Backspace"));
@@ -2499,31 +2481,13 @@ windowsVim.visual_line_keydown = function (e) {
                 return true;
             }
         case (keyMapVLine.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
+        case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
                 docs.pressKey(docs.codeFromKey("Backspace"));
                 this.moveRightToPasteAfterCursor();
                 docs.pastePlainText();
 
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
-                return true;
-            }
-        case (keyMapVLine.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursor[1] === true || keyMapVLine.pasteBeforeCursor[2] === modifierInput)):
-            {
-                // Paste before cursor
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                setTimeout(() => {
-                    docs.pasteRegular();
-                }, 1)
-                this.clearData();
-                this.switchToNormalMode();
-                return true;
-            }
-        case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                docs.pressKey(docs.codeFromKey("Backspace"));
-                docs.pastePlainText();
                 windowsVim.clearData();
                 windowsVim.switchToNormalMode();
                 return true;
