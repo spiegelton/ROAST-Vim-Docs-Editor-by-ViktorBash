@@ -147,10 +147,10 @@ export function getDefaultKeyBindings() {
 		U: ["U", false, 0b0100, "Exit to normal to undo", null],
 		redo: ["r", false, 0b1000, "Exit to normal to redo", null],
 		slashSearch: ["/", false, 0b0000, "Search for text", null],
-		paste: ["p", false, 0b0000, "Paste after cursor", null], // TODO: Change into 2 functions on the other side
-		pasteNoFormatting: ["p", false, 0b1000, "Paste after cursor with no formatting", null],
-		pasteBeforeCursor: ["P", false, 0b0100, "Paste before cursor", null],
-		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste before cursor with no formatting", null],
+		paste: ["p", false, 0b0000, "Paste", null], // TODO: Change into 2 functions on the other side
+		pasteNoFormatting: ["p", false, 0b1000, "Paste with no formatting", null],
+		pasteBeforeCursor: ["P", false, 0b0100, "Paste", null],
+		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste with no formatting", null],
 		insertStartOfHighlight: ["I", false, 0b0100, "Insert at start of highlight", null],
 		exitVisualMode: ["v", false, 0b0000, "Exit to normal mode", null],
 		exitToVisualLineMode: ["V", false, 0b0100, "Exit to visual line mode", null],
@@ -188,10 +188,10 @@ export function getDefaultKeyBindings() {
 		U: ["U", false, 0b0100, "Exit to normal to undo", null],
 		redo: ["r", false, 0b1000, "Exit to normal to redo", null],
 		slashSearch: ["/", false, 0b0000, "Search for text", null],
-		paste: ["p", false, 0b0000, "Paste after cursor", null], // TODO: Change into 2 functions on the other side
-		pasteNoFormatting: ["p", false, 0b1000, "Paste after cursor no formatting", null],
-		pasteBeforeCursor: ["P", false, 0b0100, "Paste before cursor", null],
-		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste before cursor no formatting", null],
+		paste: ["p", false, 0b0000, "Paste", null], // TODO: Change into 2 functions on the other side
+		pasteNoFormatting: ["p", false, 0b1000, "Paste with no formatting", null],
+		pasteBeforeCursor: ["P", false, 0b0100, "Paste", null],
+		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste with no formatting", null],
 		insertStartOfHighlight: ["I", false, 0b0100, "Insert at start of highlight", null],
 		exitToVisualMode: ["v", false, 0b0000, "Exit to visual mode", null],
 		exitVisualLineMode: ["V", false, 0b0100, "Exit to normal mode", null],
