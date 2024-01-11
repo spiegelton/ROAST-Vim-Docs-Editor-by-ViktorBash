@@ -226,16 +226,16 @@ export function getDefaultKeyBindings() {
 			underline: ["u", false, 0b1000, "Underline text", null],
 			link: ["k", false, 0b1000, "Add a link", null],
 			comment: ["c", false, 0b1010, "Add a comment", null],
-			checkList: ["9", false, 0b1100, "Checklist", null],
-			bulletedList: ["8", false, 0b1100, "Bulleted list", null],
-			numberedList: ["7", false, 0b1100, "Checklist", null],
+			checkList: ["(", false, 0b1100, "Checklist", null],
+			bulletedList: ["*", false, 0b1100, "Bulleted list", null],
+			numberedList: ["&", false, 0b1100, "Checklist", null],
 			alignLeft: ["L", false, 0b1100, "Align left", null],
 			alignCenter: ["E", false, 0b1100, "Align center", null],
 			alignRight: ["R", false, 0b1100, "Align right", null],
 			alignJustify: ["J", false, 0b1100, "Align justify", null],
-			increaseFontSize: [".", false, 0b1100, "Increase font size", null],
-			decreaseFontSize: [",", false, 0b1100, "Decrease font size", null],
-			spellingAndGrammarCheck: ["X", false, 0b1010, "Spelling and grammar check", null],
+			increaseFontSize: [">", false, 0b1100, "Increase font size", null],
+			decreaseFontSize: ["<", false, 0b1100, "Decrease font size", null],
+			spellingAndGrammarCheck: ["x", false, 0b1010, "Spelling and grammar check", null],
 			clearFormatting: ["\\", false, 0b1000, "Clear formatting", null], // Literal backspace
 			normalText: ["0", false, 0b1010, "Apply 'Normal text' styling", null],
 			heading1: ["1", false, 0b1010, "Apply 'Heading 1' styling", null],
@@ -253,7 +253,7 @@ export function getDefaultKeyBindings() {
 			findAndReplace: ["h", false, 0b1000, "Find and replace", null],
 			footNote: ["f", false, 0b1010, "Add a footnote", null],
 			pageBreak: ["Enter", false, 0b1000, "Add a page break", null],
-			wordCount: ["C", false, 0b1100, "See word count", null],
+			wordCount: ["C", false, 0b1100, "See word count", null], // TODO: Breaks
 			explore: ["I", false, 0b1110, "Explore tab", null],
 			dictionary: ["Y", false, 0b1100, "Open dictionary", null],
 			voiceTyping: ["S", false, 0b1100, "Use voice typing", null],
@@ -372,6 +372,7 @@ export function getUltimateKeyMapInCallback(callback) {
 			// Note: no incompleteKeyMapNative for same reasons
 			incompleteKeyMapV: [],
 			incompleteKeyMapVLine: [],
+			incompleteKeyMapNative: [],
 		}
 
 		// We are going to loop through each keyMap (keyMapN, keyMapI, keyMapV, keyMapVLine)
@@ -478,6 +479,14 @@ export function getUltimateKeyMapInCallback(callback) {
 			else {
 				// Set the keybinding to the default
 				outputKeyMap.keyMapNative[key] = defaultKeyMap.keyMapNative[key];
+			}
+
+			// Add to incompleteKeyMapNative if it's a multi-key keybinding
+			let keyVal = outputKeyMap.keyMapNative[key][0];
+			for (let i = 0; i < keyVal.length; i++) {
+				if (keyVal[i] === KEY_SEPARATOR) {
+					outputKeyMap.incompleteKeyMapNative.push(keyVal.slice(0, i));
+				}
 			}
 
 		});

@@ -1926,7 +1926,7 @@ windowsVim.normal_keydown = function (e) {
 
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapN.includes(windowsVim.currentSequence)
+        !keyMap.incompleteKeyMapN.includes(windowsVim.currentSequence) && !keyMap.incompleteKeyMapNative.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.clearData();
@@ -2351,7 +2351,7 @@ windowsVim.visual_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapV.includes(windowsVim.currentSequence)
+        !keyMap.incompleteKeyMapV.includes(windowsVim.currentSequence) && !keyMap.incompleteKeyMapNative.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.num = "";
@@ -2617,7 +2617,7 @@ windowsVim.visual_line_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         windowsVim.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapVLine.includes(windowsVim.currentSequence)
+        !keyMap.incompleteKeyMapVLine.includes(windowsVim.currentSequence) && !keyMap.incompleteKeyMapNative.includes(windowsVim.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         windowsVim.num = "";

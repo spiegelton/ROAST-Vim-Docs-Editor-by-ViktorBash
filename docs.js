@@ -413,7 +413,6 @@ docs._clickTextFormatButton = function (spanAriaLabel) {
     let buttonElem;
 
     retry(() => {
-        console.log("An attempt");
         buttonElem = document.querySelector(
             `.goog-menuitem-label[aria-label="${spanAriaLabel}"]`
         );
@@ -460,7 +459,7 @@ docs._clickCapitalizationButton = async function (spanAriaLabel) {
 docs._clickParagraphStylesButton = async function (elementIndex) {
     // Open the menu
     let headingStyleSelectButton = document.getElementById("headingStyleSelect")
-    docs._simulateClick(headingStyleSelectButton);
+    docs._simulateClick(headingStyleSelectButton, true);
 
     // Click the specific style we want in the menu, note: elems is of length 9 (0-8)
     let elems = document.querySelectorAll('div.goog-menuitem.goog-option.goog-submenu.docs-submenuitem.apps-menuitem[role="menuitemradio"]');
