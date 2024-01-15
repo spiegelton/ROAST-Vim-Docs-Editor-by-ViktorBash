@@ -262,22 +262,23 @@ export function getDefaultKeyBindings() {
 
 	}
 	else {
+		// For mac platform
 		keyMapNative = {
 			bold: ["b", false, 0b0001, "Bold text", null],
 			italic: ["i", false, 0b0001, "Italicize text", null],
 			underline: ["u", false, 0b0001, "Underline text", null],
 			link: ["k", false, 0b0001, "Add a link", null],
-			comment: ["m", false, 0b0011, "Add a comment", null],
+			comment: ["µ", false, 0b0011, "Add a comment", null],
 			checkList: ["9", false, 0b0101, "Checklist", null],
 			bulletedList: ["8", false, 0b0101, "Bulleted list", null],
 			numberedList: ["7", false, 0b0101, "Checklist", null],
-			alignLeft: ["L", false, 0b0101, "Align left", null],
-			alignCenter: ["E", false, 0b0101, "Align center", null],
-			alignRight: ["R", false, 0b0101, "Align right", null],
-			alignJustify: ["J", false, 0b0101, "Align justify", null],
+			alignLeft: ["l", false, 0b0101, "Align left", null],
+			alignCenter: ["e", false, 0b0101, "Align center", null],
+			alignRight: ["r", false, 0b0101, "Align right", null],
+			alignJustify: ["j", false, 0b0101, "Align justify", null],
 			increaseFontSize: [".", false, 0b0101, "Increase font size", null],
 			decreaseFontSize: [",", false, 0b0101, "Decrease font size", null],
-			spellingAndGrammarCheck: ["x", false, 0b0011, "Spelling and grammar check", null],
+			spellingAndGrammarCheck: ["≈", false, 0b0011, "Spelling and grammar check", null],
 			clearFormatting: ["\\", false, 0b0001, "Clear formatting", null], // Literal backspace
 			normalText: ["º", false, 0b1010, "Apply 'Normal text' styling", null],
 			heading1: ["¡", false, 0b0011, "Apply 'Heading 1' styling", null],
@@ -286,20 +287,20 @@ export function getDefaultKeyBindings() {
 			heading4: ["¢", false, 0b0011, "Apply 'Heading 4' styling", null],
 			heading5: ["∞", false, 0b0011, "Apply 'Heading 5' styling", null],
 			heading6: ["§", false, 0b0011, "Apply 'Heading 6' styling", null],
-			strikethrough: ["X", false, 0b0101, "Strikethrough text", null],
+			strikethrough: ["x", false, 0b0101, "Strikethrough text", null],
 			superscript: [".", false, 0b0001, "Superscript", null],
 			subscript: [",", false, 0b0001, "Subscript", null],
 			selectAll: ["a", false, 0b0001, "Select All", null],
 			open: ["o", false, 0b0001, "Open a file", null],
-			seeVersionHistory: ["H", false, 0b0111, "See version history", null],
-			findAndReplace: ["H", false, 0b0101, "Find and replace", null],
-			footNote: ["f", false, 0b0011, "Add a footnote", null],
+			seeVersionHistory: ["Ó", false, 0b0111, "See version history", null],
+			findAndReplace: ["h", false, 0b0101, "Find and replace", null],
+			footNote: ["ƒ", false, 0b0011, "Add a footnote", null], // Not regular "f" key, is another one
 			pageBreak: ["Enter", false, 0b0001, "Add a page break", null],
-			wordCount: ["C", false, 0b0101, "See word count", null],
-			explore: ["I", false, 0b0111, "Explore tab", null],
-			dictionary: ["Y", false, 0b0101, "Open dictionary", null],
-			voiceTyping: ["S", false, 0b0101, "Use voice typing", null],
-			searchTheMenus: ["/", false, 0b0010, "Search docs menus", null],
+			wordCount: ["c", false, 0b0101, "See word count", null],
+			explore: ["ˆ", false, 0b0111, "Explore tab", null],
+			dictionary: ["y", false, 0b0101, "Open dictionary", null],
+			voiceTyping: ["s", false, 0b0101, "Use voice typing", null],
+			searchTheMenus: ["÷", false, 0b0010, "Search docs menus", null],
 		}
 
 	}
