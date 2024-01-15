@@ -528,6 +528,33 @@ docs._clickPageBreakButton = async function (ariaLabel) {
     docs._simulateClick(buttonElem);
 }
 
+docs._clickWordCountButton = function (ariaLabel) {
+    // Click the word count menu button
+    docs.__clickButtonFromAriaLabel(ariaLabel, true);
+
+    // We must detect when the word count menu is exited out of, and then click the "Paint format" button twice
+    // This is hacky, but it works. Otherwise, our event handlers for keydown events are not active for some reason.
+    // We're basically refocusing the document so the event handlers are live again (Even though .hasfocus() returns true for some reason)
+    let waitingForMenuClose = setInterval(() => {
+        // This element is hidden when the word count menu is open, so we'll detect when we close the word count menu
+        // By seeing when this element is not hidden anymore
+        let element = document.querySelector('meta[itemprop="name"]');
+        let elementHidden = element.getAttribute("aria-hidden");
+
+        if (elementHidden === null) {
+            // Element is not hidden anymore
+            clearInterval(waitingForMenuClose); // Clear the interval we're in right now
+
+            // We click on the bold button twice to "refocus/reactivate" the document. We click this button
+            // because clicking it twice has no impact. Also no bolding is actually visible to the end user :)
+            let boldButton = document.getElementById("boldButton");
+            docs._simulateClick(boldButton, true);
+            docs._simulateClick(boldButton, true);
+        }
+
+    }, 10)
+}
+
 docs._clickToolsButton = function (ariaLabel) {
     docs.__clickButtonFromAriaLabel(ariaLabel);
 }
@@ -616,7 +643,7 @@ docs.toolbarMenuButtonOptions = {
     findAndReplace: ["Find and replace f", docs._clickEditButton],
     footNote: ["Footnote n", docs._clickInsertButton],
     pageBreak: ["Page break p", docs._clickPageBreakButton],
-    wordCount: ["Word count w", docs._clickToolsButton],
+    wordCount: ["Word count w", docs._clickWordCountButton],
     explore: ["Explore r", docs._clickToolsButton],
     dictionary: ["Dictionary d", docs._clickToolsButton],
     voiceTyping: ["Voice typing v", docs._clickToolsButton],
