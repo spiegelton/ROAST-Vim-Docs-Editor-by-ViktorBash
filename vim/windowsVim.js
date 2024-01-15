@@ -607,7 +607,7 @@ windowsVim.normal_keydown = function (e) {
     }
 
     switch (true) {
-        case (keyMapN["0"][0] === this.currentSequence && (keyMapN.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
+        case (keyMapN["0"][0] === this.currentSequence && (keyMapN["0"][1] === true || keyMapN["0"][2] === modifierInput)):
             {
                 let regexNumMatch = /\d/;
                 if (regexNumMatch.test(this.currentSequence) && windowsVim.num !== "") {

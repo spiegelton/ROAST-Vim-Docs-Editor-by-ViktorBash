@@ -626,7 +626,7 @@ macVim.normal_keydown = function (e) {
     }
 
 	switch (true) {
-        case (keyMapN["0"][0] === this.currentSequence && (keyMapN.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
+        case (keyMapN["0"][0] === this.currentSequence && (keyMapN["0"][1] === true || keyMapN["0"][2] === modifierInput)):
             {
                 let regexNumMatch = /\d/;
                 if (regexNumMatch.test(this.currentSequence) && this.num !== "") {
@@ -638,7 +638,7 @@ macVim.normal_keydown = function (e) {
                 this.clearData();
                 return true;
             }
-        case (keyMapN.backspace[0] === this.currentSequence && (keyMapV.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
+        case (keyMapN.backspace[0] === this.currentSequence && (keyMapN.backspace[1] === true || keyMapN.backspace[2] === modifierInput)):
         case (keyMapN.arrowLeft[0] === this.currentSequence && (keyMapN.arrowLeft[1] === true || keyMapN.arrowLeft[2] === modifierInput)):
             {
                 const numRepeats = parseInt(this.num) || 1;
