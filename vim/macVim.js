@@ -523,11 +523,6 @@ macVim.normal_keydown = function (e) {
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapN = keyMap.keyMapN;
 
-    if (this.nativeKeyCheck(modifierInput)) {
-        this.clearData();
-        return true;
-    }
-
     switch (true) {
         case(keyMapN.replaceCharacter[0] === this.currentSequence && (keyMapN.replaceCharacter[1] === true || keyMapN.replaceCharacter[2] === modifierInput)):
         {
@@ -623,6 +618,11 @@ macVim.normal_keydown = function (e) {
     }
     else {
         this.currentSequence += KEY_SEPARATOR + e.key;
+    }
+
+    if (this.nativeKeyCheck(modifierInput)) {
+        this.clearData();
+        return true;
     }
 
 	switch (true) {
@@ -2699,12 +2699,6 @@ macVim.visual_line_keydown = function (e) {
 macVim.insert_keydown = function (e) {
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
     const keyMapI = keyMap.keyMapI;
-	// Check if current key is part of a key map
-    if (this.nativeKeyCheck(modifierInput)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return true;
-    }
 
 	switch (true) {
         case (keyMapI.escape[0] === e.key && (keyMapI.escape[1] === true || keyMapI.escape[2] === modifierInput)):
