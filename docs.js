@@ -474,10 +474,7 @@ docs._clickParagraphStylesButton = async function (elementIndex) {
 }
 
 docs._clickEditButton = function (ariaLabel) {
-    let buttonElem = document.querySelector(
-        `.goog-menuitem-label[aria-label="${ariaLabel}"]`
-    ).parentElement.parentElement;
-    docs._simulateClick(buttonElem);
+    docs.__clickButtonFromAriaLabel(ariaLabel);
 }
 
 docs.__clickButtonFromAriaLabel = function (ariaLabel) {
@@ -528,11 +525,13 @@ docs._clickPageBreakButton = async function (ariaLabel) {
     docs._simulateClick(buttonElem);
 }
 
-docs._clickWordCountButton = function (ariaLabel) {
-    // Click the word count menu button
+// Execute a command that opens a popup menu, which requires us to "reactivate" our event listeners afterwards (for
+// some reason)
+docs._clickPopupButton = function (ariaLabel) {
+    // Click whichever button we are trying to click
     docs.__clickButtonFromAriaLabel(ariaLabel, true);
 
-    // We must detect when the word count menu is exited out of, and then click the "Paint format" button twice
+    // We must detect when the menu is exited out of, and then click the "Bold" button twice
     // This is hacky, but it works. Otherwise, our event handlers for keydown events are not active for some reason.
     // We're basically refocusing the document so the event handlers are live again (Even though .hasfocus() returns true for some reason)
     let waitingForMenuClose = setInterval(() => {
@@ -546,7 +545,7 @@ docs._clickWordCountButton = function (ariaLabel) {
             clearInterval(waitingForMenuClose); // Clear the interval we're in right now
 
             // We click on the bold button twice to "refocus/reactivate" the document. We click this button
-            // because clicking it twice has no impact. Also no bolding is actually visible to the end user :)
+            // because clicking it twice has no impact. Also, no bolding is actually visible to the end user :)
             let boldButton = document.getElementById("boldButton");
             docs._simulateClick(boldButton, true);
             docs._simulateClick(boldButton, true);
@@ -640,10 +639,10 @@ docs.toolbarMenuButtonOptions = {
     selectAll: ["Select all a", docs._clickEditButton],
     open: ["Open o", docs._clickFileButton],
     seeVersionHistory: ["See version history s", docs._clickVersionHistoryButton],
-    findAndReplace: ["Find and replace f", docs._clickEditButton],
+    findAndReplace: ["Find and replace f", docs._clickPopupButton],
     footNote: ["Footnote n", docs._clickInsertButton],
     pageBreak: ["Page break p", docs._clickPageBreakButton],
-    wordCount: ["Word count w", docs._clickWordCountButton],
+    wordCount: ["Word count w", docs._clickPopupButton],
     explore: ["Explore r", docs._clickToolsButton],
     dictionary: ["Dictionary d", docs._clickToolsButton],
     voiceTyping: ["Voice typing v", docs._clickToolsButton],
