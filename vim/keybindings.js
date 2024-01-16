@@ -111,13 +111,15 @@ export function getDefaultKeyBindings() {
 		copyWholeLine2: ["Y", false, 0b0100, "Yank/copy the whole line", null],
 		u: ["u", false, 0b0000, "Undo", null],
 		U: ["U", false, 0b0100, "Undo", null],
-		replaceCharacter: ["r", true, 0b000, "Replace a character", null],
-		"0": ["0", false, 0b000, "Go to start of the line", null],
+		replaceCharacter: ["r", false, 0b000, "Replace a character", null],
+		"0": ["0", false, 0b0000, "Go to start of the line", null],
+		indent: [">" + KEY_SEPARATOR + ">", true, 0b0000, "Indent", null],
+		outdent: ["<" + KEY_SEPARATOR + "<", true, 0b0000, "Outdent", null],
 	}
 
 	let keyMapI = {
 		// TODO: Tell user only single character mappings work in insert mode
-		// TODO: if user wants to disable a keymapping (ex: ctrl - c), we will store two key separators 
+		// TODO: if user wants to disable a keymapping (ex: ctrl - c), we will store two key separators
 		//together in the keymap so that it won't ever run
 		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
 		ctrlC: ["c", false, 0b1000, "Exit to normal mode", null],
@@ -171,6 +173,8 @@ export function getDefaultKeyBindings() {
 		w: ["w", false, 0b0000, "Highlight forwards to the start of a word", null],
 		W: ["W", false, 0b0100, "Highlight forwards to the start of a word", null],
 		"0": ["0", false, 0b000, "Highlight to start of the line", null],
+		indent: [">", false, 0b0100, "Indent", null],
+		outdent: ["<", false, 0b0100, "Outdent", null],
 	}
 
 	let keyMapVLine = {
@@ -206,6 +210,8 @@ export function getDefaultKeyBindings() {
 		arrowUpCtrl: ["ArrowUp", false, 0b1000, "Highlight up", null],
 		ctrlDPageDown: ["d", false, 0b1000, "Highlight down several lines", null],
 		ctrlUPageUp: ["u", false, 0b1000, "Highlight up several lines", null],
+		indent: [">", false, 0b0100, "Indent", null],
+		outdent: ["<", false, 0b0100, "Outdent", null],
 	}
 
 	// Determine if the user is on a Mac or not
