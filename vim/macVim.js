@@ -1987,7 +1987,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
     if (
         this.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapN.includes(this.currentSequence)
+        !keyMap.incompleteKeyMapN.includes(this.currentSequence) && !keyMap.incompleteKeyMapNative.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.clearData();
@@ -2424,7 +2424,7 @@ macVim.visual_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         this.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapV.includes(this.currentSequence)
+        !keyMap.incompleteKeyMapV.includes(this.currentSequence) && !keyMap.incompleteKeyMapNative.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.num = "";
@@ -2686,7 +2686,7 @@ macVim.visual_line_keydown = function (e) {
     // Check if we are building up to a command or if the sequence is invalid
     if (
         this.currentSequence.length !== 0 &&
-        !keyMap.incompleteKeyMapVLine.includes(this.currentSequence)
+        !keyMap.incompleteKeyMapVLine.includes(this.currentSequence) && !keyMap.incompleteKeyMapNative.includes(this.currentSequence)
     ) {
         // This means that the current sequence is invalid, so we have to reset it
         this.num = "";
