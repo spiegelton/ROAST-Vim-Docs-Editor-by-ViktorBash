@@ -145,8 +145,8 @@ export function getDefaultKeyBindings() {
 		E: ["E", false, 0b0100, "Highlight to end of word", null],
 		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
 		ctrlC: ["c", false, 0b1000, "Exit to normal mode", null],
-		u: ["u", false, 0b0000, "Exit to normal to undo", null],
-		U: ["U", false, 0b0100, "Exit to normal to undo", null],
+		u: ["u", false, 0b0000, "Convert text to lowercase", null],
+		U: ["U", false, 0b0100, "Convert text to uppercase", null],
 		redo: ["r", false, 0b1000, "Exit to normal to redo", null],
 		slashSearch: ["/", false, 0b0000, "Search for text", null],
 		paste: ["p", false, 0b0000, "Paste", null], // TODO: Change into 2 functions on the other side
@@ -188,8 +188,8 @@ export function getDefaultKeyBindings() {
 		"}": ["}", false, 0b0100, "Highlight to next paragraph", null],
 		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
 		ctrlC: ["c", false, 0b1000, "Exit to normal mode", null],
-		u: ["u", false, 0b0000, "Exit to normal to undo", null],
-		U: ["U", false, 0b0100, "Exit to normal to undo", null],
+		u: ["u", false, 0b0000, "Convert text to lowercase", null],
+		U: ["U", false, 0b0100, "Convert text to uppercase", null],
 		redo: ["r", false, 0b1000, "Exit to normal to redo", null],
 		slashSearch: ["/", false, 0b0000, "Search for text", null],
 		paste: ["p", false, 0b0000, "Paste", null], // TODO: Change into 2 functions on the other side
