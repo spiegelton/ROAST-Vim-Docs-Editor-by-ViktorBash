@@ -223,7 +223,7 @@ export function getDefaultKeyBindings() {
 		keyMapNative = {
 			bold: ["b", false, 0b1000, "Bold text", null],
 			italic: ["i", false, 0b1000, "Italicize text", null],
-			underline: ["u", false, 0b1000, "Underline text", null],
+			underline: ["", false, 0b0000, "Underline text", null], // Default is this is not an active keybinding
 			link: ["k", false, 0b1000, "Add a link", null],
 			comment: ["c", false, 0b1010, "Add a comment", null],
 			checkList: ["(", false, 0b1100, "Checklist", null],
@@ -262,7 +262,7 @@ export function getDefaultKeyBindings() {
 
 	}
 	else {
-		// For mac platform
+		// Mac
 		keyMapNative = {
 			bold: ["b", false, 0b0001, "Bold text", null],
 			italic: ["i", false, 0b0001, "Italicize text", null],
