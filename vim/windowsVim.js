@@ -666,7 +666,7 @@ windowsVim.normal_keydown = function (e) {
                 windowsVim.clearData();
                 return true;
             }
-        case (keyMapN.h[0] === windowsVim.currentSequence && (keyMapN.j[1] === true || keyMapN.j[2] === modifierInput)):
+        case (keyMapN.h[0] === windowsVim.currentSequence && (keyMapN.h[1] === true || keyMapN.h[2] === modifierInput)):
             {
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
@@ -1221,7 +1221,7 @@ windowsVim.normal_keydown = function (e) {
             let [startXCoord, startYCoord] = docs.getCoords();
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
             let [middleXCoord, middleYCoord] = docs.getCoords();
-            if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+            if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
                 // At start of file, do nothing
             } else if (startYCoord === middleYCoord) {
                 // In the middle of a line
@@ -1567,7 +1567,7 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.deleteInnerWord[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWord[1] === true || keyMapN.deleteInnerWord[2] === modifierInput)):
         case (keyMapN.deleteInnerWordInsert[0] === windowsVim.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)):
         {
-            // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky tricky
+            // diw: delete a word, but don't delete any whitespace (and don't delete empty lines), tricky-tricky
             let numRepeats = parseInt(windowsVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
                 let atEndOfLine = false;
