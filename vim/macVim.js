@@ -229,7 +229,7 @@ macVim.moveToStartOfLine = function () {
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
         let [finalXCoord, finalYCoord] = docs.getCoords();
 
-		// We we are going to check Y-Values, if the y-value didn't change, hit arrow up
+		// We are going to check Y-Values, if the y-value didn't change, hit arrow up
 		// If the y value did change, hit arrow right
 		if (initialYCoord === finalYCoord) {
 			// Y Coord didn't change, so we should get to the start of a line with arrow up
@@ -685,7 +685,7 @@ macVim.normal_keydown = function (e) {
                 this.clearData();
                 return true;
             }
-        case (keyMapN.h[0] === this.currentSequence && (keyMapN.j[1] === true || keyMapN.j[2] === modifierInput)):
+        case (keyMapN.h[0] === this.currentSequence && (keyMapN.h[1] === true || keyMapN.h[2] === modifierInput)):
             {
                 const numRepeats = parseInt(this.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
@@ -1194,7 +1194,7 @@ macVim.normal_keydown = function (e) {
 		let [startXCoord, startYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		let [middleXCoord, middleYCoord] = docs.getCoords();
-		if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
 			// At start of file, do nothing
 		}
 		else if (startYCoord === middleYCoord) {
