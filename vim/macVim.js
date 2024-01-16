@@ -1141,7 +1141,6 @@ macVim.normal_keydown = function (e) {
                 case (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)):
                 { shouldWeCut = keyMapN.deleteToEndOfLine2Insert[4]; break; }
             }
-            console.log(shouldWeCut);
 
 	        // D, d$, C, c$
             let [startXCoord, startYCoord] = docs.getCoords();
@@ -1763,7 +1762,6 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
                     let textNotSelected = !docs.isTextSelected();
 					// let textNotSelected = docs.contentDocument.getSelection(0).getRangeAt(0).startOffset;
 					if (textNotSelected) {
-                        console.log("No trailing spaces");
 						// No trailing spaces to worry about or anything
 						docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
 						docs.pressKey(docs.codeFromKey("Backspace"));
@@ -2390,11 +2388,15 @@ macVim.visual_keydown = function (e) {
 	            // Page up/down if we are not line based visual mode
                 // Page down
                 docs.pressKey(docs.codeFromKey("PageDown"), false, true);
+                macVim.clearData();
+                return true;
             }
         case (keyMapV.ctrlUPageUp[0] === this.currentSequence && (keyMapV.ctrlUPageUp[1] === true || keyMapV.ctrlUPageUp[2] === modifierInput)):
             {
                 // Page up
                 docs.pressKey(docs.codeFromKey("PageUp"), false, true);
+                macVim.clearData();
+                return true;
             }
         case (keyMapV.w[0] === this.currentSequence && (keyMapV.w[1] === true || keyMapV.w[2] === modifierInput)):
         case (keyMapV.W[0] === this.currentSequence && (keyMapV.W[1] === true || keyMapV.W[2] === modifierInput)):
