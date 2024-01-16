@@ -2132,13 +2132,15 @@ windowsVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.u[0] === windowsVim.currentSequence && (keyMapV.u[1] === true || keyMapV.u[2] === modifierInput)):
+            {
+                docs.clickButton(docs.toolbarMenuButtonOptions.lowercase);
+                this.clearData();
+                return true;
+            }
         case (keyMapV.U[0] === windowsVim.currentSequence && (keyMapV.U[1] === true || keyMapV.U[2] === modifierInput)):
             {
-                // Escape visual mode
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                // go to the right side when the left side could be a solution as well
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
+                docs.clickButton(docs.toolbarMenuButtonOptions.uppercase);
+                this.clearData();
                 return true;
             }
         case (keyMapV.redo[0] === windowsVim.currentSequence && (keyMapV.redo[1] === true || keyMapV.redo[2] === modifierInput)):
@@ -2550,13 +2552,15 @@ windowsVim.visual_line_keydown = function (e) {
                 return true;
             }
         case (keyMapVLine.u[0] === windowsVim.currentSequence && (keyMapVLine.u[1] === true || keyMapVLine.u[2] === modifierInput)):
+            {
+                docs.clickButton(docs.toolbarMenuButtonOptions.lowercase);
+                this.clearData();
+                return true;
+            }
         case (keyMapVLine.U[0] === windowsVim.currentSequence && (keyMapVLine.U[1] === true || keyMapVLine.U[2] === modifierInput)):
             {
-                // Escape visual mode
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                // go to the right side when the left side could be a solution as well
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
+                docs.clickButton(docs.toolbarMenuButtonOptions.uppercase);
+                this.clearData();
                 return true;
             }
         case (keyMapVLine.redo[0] === windowsVim.currentSequence && (keyMapVLine.redo[1] === true || keyMapVLine.redo[2] === modifierInput)):
