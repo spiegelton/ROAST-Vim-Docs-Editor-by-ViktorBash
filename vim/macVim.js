@@ -1975,7 +1975,13 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 		}
         case (keyMapN.indent[0] === this.currentSequence && (keyMapN.indent[1] === true || keyMapN.indent[2] === modifierInput)):
         {
-            const numRepeats = parseInt(this.num) || 1;
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
             for (let i = 0; i < numRepeats; i++) {
                 // Indent
                 docs.clickButton(docs.toolbarMenuButtonOptions.indent);
@@ -1985,7 +1991,13 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
         }
         case (keyMapN.outdent[0] === this.currentSequence && (keyMapN.outdent[1] === true || keyMapN.outdent[2] === modifierInput)):
         {
-            const numRepeats = parseInt(this.num) || 1;
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
             for (let i = 0; i < numRepeats; i++) {
                 // Indent
                 docs.clickButton(docs.toolbarMenuButtonOptions.outdent);
@@ -2432,7 +2444,13 @@ macVim.visual_keydown = function (e) {
 			}
         case (keyMapV.indent[0] === this.currentSequence && (keyMapV.indent[1] === true || keyMapV.indent[2] === modifierInput)):
         {
-            const numRepeats = parseInt(this.num) || 1;
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
             for (let i = 0; i < numRepeats; i++) {
                 // Indent
                 docs.clickButton(docs.toolbarMenuButtonOptions.indent);
@@ -2442,7 +2460,13 @@ macVim.visual_keydown = function (e) {
         }
         case (keyMapV.outdent[0] === this.currentSequence && (keyMapV.outdent[1] === true || keyMapV.outdent[2] === modifierInput)):
         {
-            const numRepeats = parseInt(this.num) || 1;
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
             for (let i = 0; i < numRepeats; i++) {
                 // Indent
                 docs.clickButton(docs.toolbarMenuButtonOptions.outdent);
@@ -2717,7 +2741,13 @@ macVim.visual_line_keydown = function (e) {
 			}
         case (keyMapVLine.indent[0] === this.currentSequence && (keyMapVLine.indent[1] === true || keyMapVLine.indent[2] === modifierInput)):
         {
-            const numRepeats = parseInt(this.num) || 1;
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
             for (let i = 0; i < numRepeats; i++) {
                 // Indent
                 docs.clickButton(docs.toolbarMenuButtonOptions.indent);
@@ -2727,7 +2757,13 @@ macVim.visual_line_keydown = function (e) {
         }
         case (keyMapVLine.outdent[0] === this.currentSequence && (keyMapVLine.outdent[1] === true || keyMapVLine.outdent[2] === modifierInput)):
         {
-            const numRepeats = parseInt(this.num) || 1;
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
             for (let i = 0; i < numRepeats; i++) {
                 // Indent
                 docs.clickButton(docs.toolbarMenuButtonOptions.outdent);

@@ -1912,6 +1912,38 @@ windowsVim.normal_keydown = function (e) {
             windowsVim.clearData();
             return true;
         }
+        case (keyMapN.indent[0] === this.currentSequence && (keyMapN.indent[1] === true || keyMapN.indent[2] === modifierInput)):
+        {
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
+            for (let i = 0; i < numRepeats; i++) {
+                // Indent
+                docs.clickButton(docs.toolbarMenuButtonOptions.indent);
+            }
+            this.clearData();
+            return true;
+        }
+        case (keyMapN.outdent[0] === this.currentSequence && (keyMapN.outdent[1] === true || keyMapN.outdent[2] === modifierInput)):
+        {
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
+            for (let i = 0; i < numRepeats; i++) {
+                // Indent
+                docs.clickButton(docs.toolbarMenuButtonOptions.outdent);
+            }
+            this.clearData();
+            return true;
+        }
 
     }
 
@@ -2337,6 +2369,38 @@ windowsVim.visual_keydown = function (e) {
                 windowsVim.clearData();
                 return true;
             }
+        case (keyMapV.indent[0] === this.currentSequence && (keyMapV.indent[1] === true || keyMapV.indent[2] === modifierInput)):
+        {
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
+            for (let i = 0; i < numRepeats; i++) {
+                // Indent
+                docs.clickButton(docs.toolbarMenuButtonOptions.indent);
+            }
+            this.clearData();
+            return true;
+        }
+        case (keyMapV.outdent[0] === this.currentSequence && (keyMapV.outdent[1] === true || keyMapV.outdent[2] === modifierInput)):
+        {
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
+            for (let i = 0; i < numRepeats; i++) {
+                // Indent
+                docs.clickButton(docs.toolbarMenuButtonOptions.outdent);
+            }
+            this.clearData();
+            return true;
+        }
     }
 
     // Check for numbers
@@ -2603,6 +2667,38 @@ windowsVim.visual_line_keydown = function (e) {
                 windowsVim.switchToNormalMode();
                 return true;
             }
+        case (keyMapVLine.indent[0] === this.currentSequence && (keyMapVLine.indent[1] === true || keyMapVLine.indent[2] === modifierInput)):
+        {
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
+            for (let i = 0; i < numRepeats; i++) {
+                // Indent
+                docs.clickButton(docs.toolbarMenuButtonOptions.indent);
+            }
+            this.clearData();
+            return true;
+        }
+        case (keyMapVLine.outdent[0] === this.currentSequence && (keyMapVLine.outdent[1] === true || keyMapVLine.outdent[2] === modifierInput)):
+        {
+            let numRepeats = parseInt(this.num) || 1;
+
+            // 13 indentations is the max possible
+            if (numRepeats > 13) {
+                numRepeats = 13;
+            }
+
+            for (let i = 0; i < numRepeats; i++) {
+                // Indent
+                docs.clickButton(docs.toolbarMenuButtonOptions.outdent);
+            }
+            this.clearData();
+            return true;
+        }
     }
 
     // Check if it's a number
