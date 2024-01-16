@@ -7,10 +7,30 @@ A Chrome extension that allows you to use Vim keybindings in Google Docs.
 - Make sure `Developer mode` is turned on in Chrome and then use the `Load unpacked` button to load in the project
 
 ### Chrome Web Store Update Procedure:
-- Copy and paste everything except `.git/` into the other repo, titled `Vim-Docs-Editor-RELEASE`
-- Delete `.gitignore`, `.vscode/`, `icons/base_logo.svg`, `README.md`, `webpack.config.js`, `docs.js`, and `main.js`
-- Clone this into another repo, delete `.git/`, test that it works, zip it, and upload it to the Chrome Web Store
-- In `Vim-Docs-Editor-RELEASE`, add the changes to git and commit them
+- Copy and paste everything into a new folder
+- Delete:
+  - `.git/`
+  - `.vscode/`
+  - `.idea/`
+  - `.gitignore`
+  - `icons/base_logo.svg`
+  - `README.md`
+  - `docs.js`
+  - `main.js`,
+  - `webpack.config.js`
+  - `package-lock.json`
+  - `package.json`
+  - `vim/macVim.js`
+  - `vim/windowsVim.js`
+  - `vim/UI.js`
+  - `node_modules/`
+- Test that it works on both Windows and Mac extensively. You can zip this new folder and upload it to Google Drive
+to get it to the other device.
+- Zip the folder and upload the zipped folder to the Chrome Web Store, submit the update
+- After updating, copy everything in the folder to `Vim-Docs-Editor-RELEASE`
+  - Add everything to git
+  - Commit and push the changes with the commit message mentioning the release version
+
 
 ### Technical Inspiration
 Project based off both repos below (which are both open source MIT license):
