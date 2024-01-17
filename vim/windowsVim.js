@@ -513,8 +513,9 @@ windowsVim.normal_keydown = function (e) {
     const keyMapN = keyMap.keyMapN;
 
     switch (true) {
-        case (keyMapN.replaceCharacter[0] === windowsVim.currentSequence && (keyMapN.replaceCharacter[1] === true || keyMapN.replaceCharacter[2] === modifierInput)):
+        case (keyMapN.replaceCharacter[0] === windowsVim.currentSequence):
             {
+                // We don't check the .replaceCharacter modifierInput because we want to be able to replace a character
                 // r for replace command
                 let keyCharacter = e.key;
 
