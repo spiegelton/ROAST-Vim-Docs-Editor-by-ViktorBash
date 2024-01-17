@@ -83,7 +83,6 @@ if (!docs.isMac) {
             ArrowDown: 40,
             Delete: 46,
             Z: 90,
-            V: 86, // Critical
             PageUp: 33,
             PageDown: 34,
             f: 70,
@@ -143,10 +142,6 @@ docs.pressKey = function (keyCode, ctrlKey, shiftKey) {
                 keyCode: keyCode,
                 metaKey: true
             }
-        } else if (keyCode === docs.codeFromKey("V")) {
-            // Paste
-            // TODO: Remove this (appears unused in reality)
-            data = {keyCode: keyCode, metaKey: true};
         }
     }
 

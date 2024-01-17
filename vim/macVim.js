@@ -537,6 +537,7 @@ macVim.normal_keydown = function (e) {
                 keyFuncInput = keyCharacter; // We will pass in the actual char/string instead of the numeric code
             }
 
+
             const numRepeats = parseInt(macVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
                 // if we're at the end of a line, r should go on the current line
