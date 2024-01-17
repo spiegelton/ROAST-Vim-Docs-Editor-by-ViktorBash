@@ -524,7 +524,7 @@ macVim.normal_keydown = function (e) {
     const keyMapN = keyMap.keyMapN;
 
     switch (true) {
-        case(keyMapN.replaceCharacter[0] === this.currentSequence && (keyMapN.replaceCharacter[1] === true || keyMapN.replaceCharacter[2] === modifierInput)):
+        case (keyMapN.replaceCharacter[0] === this.currentSequence):
         {
             let keyCharacter = e.key;
 
