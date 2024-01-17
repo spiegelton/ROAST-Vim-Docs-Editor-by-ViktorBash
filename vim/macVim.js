@@ -57,7 +57,7 @@ macVim.switchToNormalMode = function () {
 	macVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- NORMAL --");
-	docs.setCursorWidth();
+	docs.setCursorWidth(this.mode);
 };
 
 macVim.switchToVisualMode = function () {
@@ -66,7 +66,7 @@ macVim.switchToVisualMode = function () {
 	macVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL --");
-	docs.setCursorWidth(true);
+	docs.setCursorWidth(this.mode);
 	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 };
 
@@ -76,7 +76,7 @@ macVim.switchToVisualLineMode = function () {
 	macVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL LINE --");
-	docs.setCursorWidth(true);
+	docs.setCursorWidth(this.mode);
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 }
 
@@ -86,7 +86,7 @@ macVim.switchToInsertMode = function () {
 	macVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- INSERT --");
-	docs.setCursorWidth(true);
+	docs.setCursorWidth(this.mode);
 };
 
 /*
@@ -189,7 +189,7 @@ macVim.clearData = function () {
 	macVim.num = "";
 	macVim.currentSequence = "";
 	UI.updateUISequenceText("");
-	docs.setCursorWidth();
+	docs.setCursorWidth(this.mode);
 	return;
 }
 
@@ -2027,7 +2027,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
 	// Basically catch here anything that is a valid keymap but is not fully finished typing yet (ex: "g", but not "gg" yet)
     UI.updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
-    docs.setCursorWidth();
+    docs.setCursorWidth(this.mode);
     return true;
 };
 
@@ -2082,7 +2082,6 @@ macVim.visual_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
                 this.clearData();
                 UI.updateUISequenceText(this.num + getCleanedSequence(this.currentSequence));
-                docs.setCursorWidth();
                 return true;
 
             }
