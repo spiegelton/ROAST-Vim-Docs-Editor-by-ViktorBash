@@ -152,7 +152,7 @@ function continueRunVim(vimVariant) {
 					}
 					else if (vimVariant.mode === "normal") {
 						// If we clicked around in normal mode, we still need to resize the cursor caret
-						docs.setCursorWidth();
+						docs.setCursorWidth("normal");
 					}
 				}
 				else {

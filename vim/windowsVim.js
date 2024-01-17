@@ -56,7 +56,7 @@ windowsVim.switchToNormalMode = function () {
 	windowsVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- NORMAL --");
-	docs.setCursorWidth();
+	docs.setCursorWidth(this.mode);
 };
 
 windowsVim.switchToVisualMode = function () {
@@ -65,7 +65,7 @@ windowsVim.switchToVisualMode = function () {
 	windowsVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL --");
-	docs.setCursorWidth(true);
+	docs.setCursorWidth(this.mode);
 	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 };
 
@@ -75,7 +75,7 @@ windowsVim.switchToVisualLineMode = function () {
 	windowsVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL LINE --");
-	docs.setCursorWidth(true);
+	docs.setCursorWidth(this.mode);
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 	docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
 }
@@ -86,7 +86,7 @@ windowsVim.switchToInsertMode = function () {
 	windowsVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- INSERT --");
-	docs.setCursorWidth(true);
+	docs.setCursorWidth(this.mode);
 };
 
 /*
@@ -204,7 +204,7 @@ windowsVim.clearData = function () {
     windowsVim.num = "";
     windowsVim.currentSequence = "";
     UI.updateUISequenceText("");
-    docs.setCursorWidth();
+    docs.setCursorWidth(this.mode);
     return;
 };
 /*
@@ -1966,7 +1966,7 @@ windowsVim.normal_keydown = function (e) {
     }
 
     UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
-    docs.setCursorWidth();
+    docs.setCursorWidth(this.mode);
     return true;
 };
 
@@ -2026,7 +2026,7 @@ windowsVim.visual_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
                 this.clearData();
                 UI.updateUISequenceText(windowsVim.num + getCleanedSequence(windowsVim.currentSequence));
-                docs.setCursorWidth();
+                docs.setCursorWidth(this.mode);
                 return true;
 
             }

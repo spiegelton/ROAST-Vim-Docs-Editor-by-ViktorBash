@@ -256,16 +256,18 @@ docs.pressSpecialKey = function (key) {
 
 // Sets the width of the user's insertion point marker. @width should be a
 // width value compatible with CSS border-width: @width;
-docs.setCursorWidth = function (isRegular) {
-    if (isRegular) {
-        // For normal mode, regular width cursor
-        docs.cursorCaret.style.borderWidth = "2px";
-    } else {
+docs.setCursorWidth = function (modeType) {
+    // Possible inputs are "normal", "visual", "visual_line", "insert"
+    if (modeType === "normal") {
         // The cursor width will be 41.5% the size of the cursor
         let cursorWidth = parseFloat(
             docs.cursorCaret.style.height.slice(0, -2) * 0.416
         );
         docs.cursorCaret.style.borderWidth = cursorWidth + "px";
+    }
+    else {
+        // The cursor is regularly styled (for insert mode, visual, visual line modes)
+        docs.cursorCaret.style.borderWidth = "2px";
     }
 };
 
