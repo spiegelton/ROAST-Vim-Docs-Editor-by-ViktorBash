@@ -2792,7 +2792,8 @@ macVim.replace_keydown = function (e) {
             this.switchToNormalMode();
             return true;
         }
-        case (e.key === "Backspace"): {
+        case (keyMapR.backspace[0] === e.key && (keyMapR.backspace[1] === true || keyMapR.backspace[2] === modifierInput)):
+        {
             // Backspace should undo what we have done
             e.preventDefault();
             e.stopPropagation();
