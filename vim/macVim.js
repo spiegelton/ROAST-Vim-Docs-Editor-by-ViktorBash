@@ -60,6 +60,15 @@ macVim.switchToNormalMode = function () {
 	docs.setCursorWidth(this.mode);
 };
 
+macVim.switchToReplaceMode = function () {
+    this.currentSequence = "";
+    this.mode = "replace";
+    this.num = "";
+    UI.updateUISequenceText("");
+    UI.updateUIModeText("-- REPLACE --");
+    docs.setCursorWidth(this.mode);
+};
+
 macVim.switchToVisualMode = function (highlightText = true) {
 	macVim.currentSequence = "";
 	macVim.mode = "visual";
@@ -1935,6 +1944,12 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
             this.clearData();
             return true;
         }
+        case (keyMapN.replaceMode[0] === this.currentSequence && (keyMapN.replaceMode[1] === true || keyMapN.replaceMode[2] === modifierInput)):
+        {
+            this.clearData();
+            this.switchToReplaceMode();
+            return true;
+        }
 	}
 
     // Check for numbers
@@ -2740,5 +2755,27 @@ macVim.insert_keydown = function (e) {
 		}
 	}
 };
+
+macVim.replace_keydown = function (e) {
+    // Basically, we must let all keys pass through, but also delete things as well
+    // Very similar to insert mode
+    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const keyMapR = keyMap.keyMapR;
+
+    switch (true) {
+        case (keyMapR.escape[0] === e.key && (keyMapR.escape[1] === true || keyMapR.escape[2] === modifierInput)):
+        case (keyMapR.ctrlC[0] === e.key && (keyMapR.ctrlC[1] === true || keyMapR.ctrlC[2] === modifierInput)):
+        {
+            // TODO: Actually add the keybinding stuff: keyMapR
+            e.preventDefault();
+            e.stopPropagation();
+            this.clearData();
+            this.switchToNormalMode();
+            return true;
+        }
+    }
+    // We must move forward, delete one key (except if we're at the end of a line), and then let the user key pass through
+
+}
 
 export { macVim };
