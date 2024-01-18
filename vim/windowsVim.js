@@ -93,64 +93,6 @@ windowsVim.switchToInsertMode = function () {
 	docs.setCursorWidth(this.mode);
 };
 
-/*
- * This function copies a whole line and keeps the cursor in the original position
-*/
-windowsVim.copyWholeLine = async function () {
-	let cursorLocations = docs.getCursorLocations();
-	if (cursorLocations[0] && cursorLocations[3]) {
-		// We are at the start of a line and at the end of the file, there's nothing
-		// really to copy besides a blank line
-		docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-		docs.contentDocument.execCommand("copy");
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-	} else {
-		let [xCoord, yCoord] = docs.getCoords(); // This is how we will know our original location
-
-		if (cursorLocations[0]) {
-			// We are at the start of a line, so move to the right so that going up works properly
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-		}
-
-		// Here we traverse up and select the whole section we were on and copy it
-		docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-		docs.contentDocument.execCommand("copy");
-		docs.pressKey(docs.codeFromKey("ArrowRight")); // We are at the end, now we have to get back to our original location
-
-		let [newXCoord, newYCoord] = docs.getCoords();
-
-		let startTime = Date.now();
-		while (newXCoord !== xCoord || newYCoord !== yCoord) {
-			let curTime = Date.now();
-
-			if (curTime - startTime > 1500) {
-				// This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
-				// (1.5 seconds), we break out
-				break;
-			}
-			if (newYCoord < yCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowDown"));
-			} else if (newYCoord > yCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowUp"));
-			}
-
-			if (newXCoord < xCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-			} else if (newXCoord > xCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-
-			[newXCoord, newYCoord] = docs.getCoords();
-			newXCoord = parseInt(newXCoord);
-			newYCoord = parseInt(newYCoord);
-		}
-	}
-	windowsVim.num = "";
-	windowsVim.currentSequence = "";
-	UI.updateUISequenceText("");
-	// Not updating cursor because we're at the same place
-};
 
 windowsVim.moveToCoords = function (xCoord, yCoord) {
     let [newXCoord, newYCoord] = docs.getCoords();
@@ -1903,7 +1845,24 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.copyWholeLine2[0] === windowsVim.currentSequence && (keyMapN.copyWholeLine2[1] === true || keyMapN.copyWholeLine2[2] === modifierInput)): 
         {
             // yy or Y (copy the whole line)
-            windowsVim.copyWholeLine(); // All the heavy lifting in this
+            let numRepeats = parseInt(windowsVim.num) || 1;
+
+            let [startXCoord, startYCoord] = docs.getCoords();
+
+            this.moveToStartOfLine();
+
+            // Highlight what we're going to copy
+            while (numRepeats > 0) {
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                numRepeats -= 1;
+            }
+
+            // Copy the text
+            docs.contentDocument.execCommand("copy");
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+            // Move back to our original position
+            this.moveToCoords(startXCoord, startYCoord);
             windowsVim.clearData();
             return true;
         }
