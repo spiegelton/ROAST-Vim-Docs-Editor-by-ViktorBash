@@ -1903,6 +1903,12 @@ windowsVim.normal_keydown = function (e) {
             this.clearData();
             return true;
         }
+        case (keyMapN.replaceMode[0] === this.currentSequence && (keyMapN.replaceMode[1] === true || keyMapN.replaceMode[2] === modifierInput)):
+        {
+            this.clearData();
+            this.switchToReplaceMode();
+            return true;
+        }
 
     }
 
@@ -2713,7 +2719,9 @@ windowsVim.replace_keydown = function (e) {
     const keyMapR = keyMap.keyMapR;
 
     switch (true) {
-        case (e.key === "Escape"): {
+        case (keyMapR.escape[0] === e.key && (keyMapR.escape[1] === true || keyMapR.escape[2] === modifierInput)):
+        case (keyMapR.ctrlC[0] === e.key && (keyMapR.ctrlC[1] === true || keyMapR.ctrlC[2] === modifierInput)):
+        {
             // TODO: Actually add the keybinding stuff: keyMapR
             e.preventDefault();
             e.stopPropagation();
