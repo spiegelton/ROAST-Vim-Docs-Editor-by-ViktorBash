@@ -80,6 +80,11 @@ windowsVim.switchToVisualLineMode = function () {
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL LINE --");
 	docs.setCursorWidth(this.mode);
+
+    // Get to the start of the current line
+    this.moveToStartOfLine();
+
+    // Highlight down
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 	docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
 }
@@ -180,19 +185,27 @@ windowsVim.moveToEndOfLine = function () {
 
 
 windowsVim.moveToStartOfLine = function () {
+    // Insert at the beginning of the line
     let [startXCoord, startYCoord] = docs.getCoords();
-    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    docs.pressKey(docs.codeFromKey("ArrowRight"));
     let [endXCoord, endYCoord] = docs.getCoords();
     if (startXCoord === endXCoord && startYCoord === endYCoord) {
-        // We are at the start of the file already, do nothing
-    }
-    else if (startYCoord !== endYCoord) {
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
-        // We already were at the start of a line, so just go back
-    }
-    else {
-        // Move back and arrow-up to get to the start of the line
-        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        // We are at the end of a file (which may be an empty line, so we have to test for that)
+        let initialYCoord = docs.getYCoord();
+        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        let finalYCoord = docs.getYCoord();
+
+        // We are going to check Y-Values, if the y-value didn't change, hit arrow up
+        // If the y value did change, hit arrow right
+        if (initialYCoord === finalYCoord) {
+            // Y Coord didn't change, so we should get to the start of a line with arrow up
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+        } else {
+            // Y Coord changed, so we were at the start of a line (so just go back)
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+        }
+    } else {
+        // We can just arrow up from here in all scenarios
         docs.pressKey(docs.codeFromKey("ArrowUp"), true);
     }
 }
@@ -809,11 +822,6 @@ windowsVim.normal_keydown = function (e) {
             }
         case (keyMapN.enterVisualLine[0] === windowsVim.currentSequence && (keyMapN.enterVisualLine[1] === true || keyMapN.enterVisualLine[2] === modifierInput)):
             {
-                // Go to visual line based mode (select the whole current line)
-                let cursorLocations = docs.getCursorLocations();
-                if (!cursorLocations[0]) {
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-                }
                 windowsVim.clearData();
                 windowsVim.visualModeIsLinedBased = true;
                 windowsVim.switchToVisualLineMode();
@@ -882,29 +890,7 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.insertStartOfLine[0] === windowsVim.currentSequence && (keyMapN.insertStartOfLine[1] === true || keyMapN.insertStartOfLine[2] === modifierInput)): 
         {
             // Insert at the beginning of the line
-            let oldCoords = docs.userCursor.style.transform;
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-            let newCoords = docs.userCursor.style.transform;
-            if (oldCoords === newCoords) {
-                // We are at the end of a file (which may be an empty line, so we have to test for that)
-                let initialYCoord = docs.getYCoord();
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                let finalYCoord = docs.getYCoord();
-
-                // We we are going to check Y-Values, if the y-value didn't change, hit arrow up
-                // If the y value did change, hit arrow right
-                if (initialYCoord === finalYCoord) {
-                    // Y Coord didn't change, so we should get to the start of a line with arrow up
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-                } else {
-                    // Y Coord changed, so we were at the start of a line (so just go back)
-                    docs.pressKey(docs.codeFromKey("ArrowRight"));
-                }
-            } else {
-                // We can just arrow up from here in all scenarios
-                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-            }
-
+            windowsVim.moveToStartOfLine();
             windowsVim.clearData();
             windowsVim.switchToInsertMode();
             return true;
@@ -2164,7 +2150,6 @@ windowsVim.visual_keydown = function (e) {
         case (keyMapV.exitToVisualLineMode[0] === this.currentSequence && (keyMapV.exitToVisualLineMode[1] === true || keyMapV.exitToVisualLineMode[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                windowsVim.moveToStartOfLine();
                 windowsVim.clearData();
                 windowsVim.switchToVisualLineMode();
                 return true;
