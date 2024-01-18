@@ -104,6 +104,9 @@ function continueRunVim(vimVariant) {
 		if (vimVariant.mode === "visual_line") {
 			return vimVariant.visual_line_keydown(e);
 		}
+		if (vimVariant.mode === "replace") {
+			return vimVariant.replace_keydown(e);
+		}
 	};
 
 	// These 2 variables help us switch to visual mode whenever the user clicks and drags in normal mode

@@ -115,12 +115,18 @@ export function getDefaultKeyBindings() {
 		"0": ["0", false, 0b0000, "Go to start of the line", null],
 		indent: [">" + KEY_SEPARATOR + ">", true, 0b0000, "Indent", null],
 		outdent: ["<" + KEY_SEPARATOR + "<", true, 0b0000, "Outdent", null],
+		replaceMode: ["R", false, 0b0100, "Enter replace mode", null],
 	}
 
 	let keyMapI = {
 		// TODO: Tell user only single character mappings work in insert mode
 		// TODO: if user wants to disable a keymapping (ex: ctrl - c), we will store two key separators
 		//together in the keymap so that it won't ever run
+		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
+		ctrlC: ["c", false, 0b1000, "Exit to normal mode", null],
+	}
+
+	let keyMapR = {
 		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
 		ctrlC: ["c", false, 0b1000, "Exit to normal mode", null],
 	}
@@ -331,6 +337,7 @@ export function getDefaultKeyBindings() {
 	return {
 		keyMapN: keyMapN,
 		keyMapI: keyMapI,
+		keyMapR: keyMapR,
 		keyMapV: keyMapV,
 		keyMapVLine: keyMapVLine,
 		keyMapNative: keyMapNative,
@@ -355,7 +362,7 @@ export function getUltimateKeyMapInCallback(callback) {
 
 		// Now, let's go through keyMapN, keyMapI, keyMapV, and keyMapVLine and set any keybindings that aren't present
 		// Also, if one of these isn't present (ex: keyMapVLine), we would set that as well
-		let keyMapNames = ["keyMapN", "keyMapI", "keyMapV", "keyMapVLine", "keyMapNative"];
+		let keyMapNames = ["keyMapN", "keyMapI", "keyMapR", "keyMapV", "keyMapVLine", "keyMapNative"];
 
 		// Set the keymaps as properties of savedKeyMap if they don't exist
 		for (let i = 0; i < keyMapNames.length; i++) {
@@ -371,6 +378,7 @@ export function getUltimateKeyMapInCallback(callback) {
 		let outputKeyMap = {
 			keyMapN: {},
 			keyMapI: {},
+			keyMapR: {},
 			keyMapV: {},
 			keyMapVLine: {},
 			keyMapNative: {},
@@ -428,6 +436,20 @@ export function getUltimateKeyMapInCallback(callback) {
 			else {
 				// Set the keybinding to the default
 				outputKeyMap.keyMapI[key] = defaultKeyMap.keyMapI[key];
+			}
+		});
+
+		// keyMapR
+		const keyMapRKeys = Object.keys(defaultKeyMap.keyMapR);
+		keyMapRKeys.forEach((key) => {
+			if (key in savedKeyMap.keyMapR) {
+				// Set the keybinding to the one in the storage keymap
+				outputKeyMap.keyMapR[key] = savedKeyMap.keyMapR[key];
+				outputKeyMap.keyMapR[key][3] = defaultKeyMap.keyMapR[key][3]; // Set the description to the default (in case it was updated)
+			}
+			else {
+				// Set the keybinding to the default
+				outputKeyMap.keyMapR[key] = defaultKeyMap.keyMapR[key];
 			}
 		});
 

@@ -1,6 +1,7 @@
 let nativeElem = document.getElementById("native");
 let normalElem = document.getElementById("normal");
 let insertElem = document.getElementById("insert");
+let replaceElem = document.getElementById("replace");
 let visualElem = document.getElementById("visual");
 let visualLineElem = document.getElementById("visual-line");
 
@@ -82,7 +83,8 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
                 return;
             }
 
-            if (keyMapStr === "keyMapI" && curSequence.length > 0) {
+            if ((keyMapStr === "keyMapI" || keyMapStr === "keyMapR") && curSequence.length > 0) {
+                // For both these modes, keybindings longer than 1 key are not allowed
                 return;
             }
 
@@ -417,6 +419,17 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
         id += 1;
     }
 
+    // Add replace mode keymaps
+    let keyMapR = ultimateKeyMap["keyMapR"];
+    let replaceKeys = Object.keys(keyMapR);
+
+    for (let i = 0; i < replaceKeys.length; i++) {
+        // Loop through each keymap in the insert mode keymaps
+        let key = keyMapR[replaceKeys[i]]; // We now have the array holding the specific keybinding's data
+        addHTML(replaceElem, key, id, "keyMapR", replaceKeys[i]);
+        id += 1;
+    }
+
     // Add visual mode keymaps
     let keyMapV = ultimateKeyMap["keyMapV"];
     let visualKeys = Object.keys(keyMapV);
@@ -444,6 +457,7 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
         [document.getElementById("dropdown-native"), document.getElementById("native-table")],
         [document.getElementById("dropdown-normal"), document.getElementById("normal-table")],
         [document.getElementById("dropdown-insert"), document.getElementById("insert-table")],
+        [document.getElementById("dropdown-replace"), document.getElementById("replace-table")],
         [document.getElementById("dropdown-visual"), document.getElementById("visual-table")],
         [document.getElementById("dropdown-visual-line"), document.getElementById("visual-line-table")]
     ]

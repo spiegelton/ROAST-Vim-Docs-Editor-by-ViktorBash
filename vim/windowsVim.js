@@ -59,6 +59,15 @@ windowsVim.switchToNormalMode = function () {
 	docs.setCursorWidth(this.mode);
 };
 
+windowsVim.switchToReplaceMode = function () {
+    windowsVim.currentSequence = "";
+    windowsVim.mode = "replace";
+    windowsVim.num = "";
+    UI.updateUISequenceText("");
+    UI.updateUIModeText("-- REPLACE --");
+    docs.setCursorWidth(this.mode);
+};
+
 windowsVim.switchToVisualMode = function (highlightText = true) {
 	windowsVim.currentSequence = "";
 	windowsVim.mode = "visual";
@@ -2696,5 +2705,26 @@ windowsVim.insert_keydown = function (e) {
 
 	// If nothing in the switch statement runs, then we just let the key pass through
 };
+
+windowsVim.replace_keydown = function (e) {
+    // Basically, we must let all keys pass through, but also delete things as well
+    // Very similar to insert mode
+    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const keyMapR = keyMap.keyMapR;
+
+    switch (true) {
+        case (e.key === "Escape"): {
+            // TODO: Actually add the keybinding stuff: keyMapR
+            e.preventDefault();
+            e.stopPropagation();
+            this.clearData();
+            this.switchToNormalMode();
+            return true;
+        }
+    }
+
+    // We must move forward, delete one key (except if we're at the end of a line), and then let the user key pass through
+
+}
 
 export { windowsVim };
