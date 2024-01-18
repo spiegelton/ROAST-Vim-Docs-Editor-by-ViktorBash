@@ -94,65 +94,6 @@ macVim.switchToInsertMode = function () {
 };
 
 /*
- * This function copies a whole line and keeps the cursor in the original position
-*/
-macVim.copyWholeLine = async function () {
-	let cursorLocations = docs.getCursorLocations();
-	if (cursorLocations[0] && cursorLocations[3]) {
-		// We are at the start of a line and at the end of the file, there's nothing
-		// really to copy besides a blank line
-		docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-		docs.contentDocument.execCommand("copy");
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-	} else {
-		let [xCoord, yCoord] = docs.getCoords(); // This is how we will know our original location
-
-		if (cursorLocations[0]) {
-			// We are at the start of a line, so move to the right so that going up works properly
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-		}
-
-		// Here we traverse up and select the whole section we were on and copy it
-		docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-		docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-		docs.contentDocument.execCommand("copy");
-		docs.pressKey(docs.codeFromKey("ArrowRight")); // We are at the end, now we have to get back to our original location
-
-		let [newXCoord, newYCoord] = docs.getCoords();
-
-		let startTime = Date.now();
-		while (newXCoord !== xCoord || newYCoord !== yCoord) {
-			let curTime = Date.now();
-
-			if (curTime - startTime > 1500) {
-				// This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
-				// (1.5 seconds), we break out
-				break;
-			}
-			if (newYCoord < yCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowDown"));
-			} else if (newYCoord > yCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowUp"));
-			}
-
-			if (newXCoord < xCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-			} else if (newXCoord > xCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
-
-			[newXCoord, newYCoord] = docs.getCoords();
-			newXCoord = parseInt(newXCoord);
-			newYCoord = parseInt(newYCoord);
-		}
-	}
-	macVim.num = "";
-	macVim.currentSequence = "";
-	UI.updateUISequenceText("");
-	// Not updating cursor because we're at the same place
-};
-
-/*
 * Paste whatever is in the clipboard at the appropriate place (lot of logic to move the cursor around)
 * You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
 * with stuff like being at the end of a line or multiline
@@ -1905,68 +1846,55 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
         case (keyMapN.copyWholeLine[0] === this.currentSequence && (keyMapN.copyWholeLine[1] === true || keyMapN.copyWholeLine[2] === modifierInput)): 
         case (keyMapN.copyWholeLine2[0] === this.currentSequence && (keyMapN.copyWholeLine2[1] === true || keyMapN.copyWholeLine2[2] === modifierInput)): 
         {
-	    // yy or Y
-		// Unlike y0 or y$ on an empty line we want to copy the empty line/enter if we're on one
-		let [xCoord, yCoord] = docs.getCoords(); // Handy later for getting back to original position
-		macVim.moveToEndOfLine();
-		let [startXCoord, startYCoord] = docs.getCoords();
-		docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		let [midXCoord, midYCoord] = docs.getCoords();
-		if (startXCoord === midXCoord && startYCoord === midYCoord) {
-			// At the start of the file
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-			docs.contentDocument.execCommand("copy");
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		}
-		else if (startYCoord === midYCoord) {
-			// Not on start of line
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-			docs.contentDocument.execCommand("copy");
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            // yy or Y (copy the whole line)
+            const numRepeats = parseInt(this.num) || 1;
 
-		}
-		else {
-			// We are on an empty line
-			docs.pressKey(docs.codeFromKey("ArrowRight"));
-			docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-			docs.contentDocument.execCommand("copy");
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		}
+            let [startXCoord, startYCoord] = docs.getCoords();
 
-		// Now we need to find where we were and go back there potentially
-		let startTime = Date.now();
-		let [newXCoord, newYCoord] = docs.getCoords();
-		while (newXCoord !== xCoord || newYCoord !== yCoord) {
-			let curTime = Date.now();
+            // Since we're on Mac we can't just highlight down the specified number of lines :C, we have to get more
+            // creative :D
 
-			if (curTime - startTime > 1500) {
-				// This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
-				// (1.5 seconds), we break out
-				break;
-			}
-			if (newYCoord < yCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowDown"));
-			} else if (newYCoord > yCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowUp"));
-			}
+            this.moveToEndOfLine();
 
-			if (newXCoord < xCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowRight"));
-			} else if (newXCoord > xCoord) {
-				docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			}
+            // Navigate as many lines down as we need (we are always on the end of any line we're on now)
+            let downCounter = numRepeats - 1;
+            while (downCounter > 0) {
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (initialXCoord === endXCoord && initialYCoord === endYCoord) {
+                    // We tried to move down but couldn't (we are at the end of the file)
+                    break;
+                }
+                else {
+                    downCounter -= 1;
+                }
+            }
 
-			[newXCoord, newYCoord] = docs.getCoords();
-		}
+            docs.pressKey(docs.codeFromKey("ArrowRight")) // Highlight the newline character on the way up
 
-		macVim.clearData();
-		return true;
+            // Now we're going to highlight up everything, copy it, and then move back to the original position
+            let upCounter;
+            if (numRepeats === 1) {
+                upCounter = 1;
+            }
+            else {
+                upCounter = numRepeats - downCounter;
+            }
 
+            while (upCounter > 0) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                upCounter -= 1;
+            }
+
+            docs.contentDocument.execCommand("copy");
+
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+            this.moveToCoords(startXCoord, startYCoord);
+
+            macVim.clearData();
+            return true;
         }
         case (keyMapN.u[0] === this.currentSequence && (keyMapN.u[1] === true || keyMapN.u[2] === modifierInput)): 
         case (keyMapN.U[0] === this.currentSequence && (keyMapN.U[1] === true || keyMapN.U[2] === modifierInput)): 
