@@ -81,6 +81,10 @@ macVim.switchToVisualLineMode = function () {
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL LINE --");
 	docs.setCursorWidth(this.mode);
+
+    // Get to the start of the current line
+    this.moveToStartOfLine();
+    // Highlight down
 	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
 }
 
@@ -819,13 +823,6 @@ macVim.normal_keydown = function (e) {
             }
         case (keyMapN.enterVisualLine[0] === this.currentSequence && (keyMapN.enterVisualLine[1] === true || keyMapN.enterVisualLine[2] === modifierInput)):
             {
-                let cursorLocations = docs.getCursorLocations();
-                if (!cursorLocations[0]) {
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true);
-                }
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-
                 macVim.clearData();
                 macVim.switchToVisualLineMode();
                 return true;
@@ -2188,8 +2185,8 @@ macVim.visual_keydown = function (e) {
             }
         case (keyMapV.exitToVisualLineMode[0] === this.currentSequence && (keyMapV.exitToVisualLineMode[1] === true || keyMapV.exitToVisualLineMode[2] === modifierInput)):
             {
+                // TODO: Eventually we're going to highlight in visual line mode all the lines that were highlighted in visual mode
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                this.moveToStartOfLine();
                 this.clearData();
                 this.switchToVisualLineMode();
                 return true;
