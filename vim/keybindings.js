@@ -129,6 +129,7 @@ export function getDefaultKeyBindings() {
 	let keyMapR = {
 		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
 		ctrlC: ["c", false, 0b1000, "Exit to normal mode", null],
+		backspace: ["Backspace", false, 0b0000, "Undo last character change", null],
 	}
 
 	let keyMapV = {

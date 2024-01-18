@@ -10,6 +10,7 @@ let windowsVim = {
     mode: "insert", // Keep track of current mode, options: ["insert", "normal", "visual", "visual_line"]
     num: "", // Keep track of number keys pressed by the user if they want to repeat a command
     currentSequence: "", // Keep track of key sequences (ex: "gg")
+    replaceModeUndoCounterStack: [],
 };
 
 // List of shortcuts for normal, visual and visual line mode that we will let pass through, primarily Chrome shortcuts
@@ -2713,6 +2714,21 @@ windowsVim.insert_keydown = function (e) {
 };
 
 windowsVim.replace_keydown = function (e) {
+    if (e.key.match(/F\d+/)) {
+        // Let function keys (F1 to F12), go through normally
+        return true;
+    }
+
+    if (
+        e.key === "Shift" ||
+        e.key === "Control" ||
+        e.key === "Alt" ||
+        e.key === "Meta"
+    ) {
+        return true;
+    }
+
+
     // Basically, we must let all keys pass through, but also delete things as well
     // Very similar to insert mode
     const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
@@ -2722,16 +2738,77 @@ windowsVim.replace_keydown = function (e) {
         case (keyMapR.escape[0] === e.key && (keyMapR.escape[1] === true || keyMapR.escape[2] === modifierInput)):
         case (keyMapR.ctrlC[0] === e.key && (keyMapR.ctrlC[1] === true || keyMapR.ctrlC[2] === modifierInput)):
         {
-            // TODO: Actually add the keybinding stuff: keyMapR
             e.preventDefault();
             e.stopPropagation();
+            this.replaceModeUndoCounterStack = [];
             this.clearData();
             this.switchToNormalMode();
+            return true;
+        }
+        case (keyMapR.backspace[0] === e.key && (keyMapR.backspace[1] === true || keyMapR.backspace[2] === modifierInput)):
+        {
+            // Backspace should undo what we have done, character by character
+            e.preventDefault();
+            e.stopPropagation();
+
+            let undoCounter = this.replaceModeUndoCounterStack.pop();
+
+            if (undoCounter === undefined) {
+                // If there is nothing to undo, we do nothing
+            }
+            else {
+                // undoCounter should be either 1 or 2
+                for (let i = 0; i < undoCounter; i++) {
+                    docs.pressKey(docs.codeFromKey("Z"), true);
+                }
+                if (undoCounter === 2) {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+            }
+
+            return true;
+        }
+        case (e.key === "Enter"):
+        {
+            // Let enter pass through
+            this.replaceModeUndoCounterStack.push(1);
             return true;
         }
     }
 
     // We must move forward, delete one key (except if we're at the end of a line), and then let the user key pass through
+
+    // Beyond this point we have to see if we are at the end of the line or not
+    let [startXCoord, startYCoord] = docs.getCoords();
+    docs.pressKey(docs.codeFromKey("ArrowRight"));
+    let [midXCoord, midYCoord] = docs.getCoords();
+
+    if (startXCoord === midXCoord && startYCoord === midYCoord) {
+        // We are at the end of the file
+        this.replaceModeUndoCounterStack.push(1);
+    }
+    else if (startYCoord === midYCoord) {
+        // We are in the middle of a line
+        docs.pressKey(docs.codeFromKey("Backspace"));
+        this.replaceModeUndoCounterStack.push(2);
+    }
+    else {
+        // We are at the end of a line or multiline, more work is needed to determine which
+        docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+        let [endXCoord, endYCoord] = docs.getCoords();
+        if (startXCoord === endXCoord && startYCoord === endYCoord) {
+            // New line, now we are positioned where we should be, don't need to do anything else
+            this.replaceModeUndoCounterStack.push(1);
+        }
+        else {
+            // In the middle of a multiline
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true);
+            // Delete the character
+            docs.pressKey(docs.codeFromKey("Backspace"));
+            // Now we're in the right place
+            this.replaceModeUndoCounterStack.push(2);
+        }
+    }
 
 }
 
