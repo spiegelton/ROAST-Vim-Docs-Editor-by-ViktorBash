@@ -60,14 +60,18 @@ macVim.switchToNormalMode = function () {
 	docs.setCursorWidth(this.mode);
 };
 
-macVim.switchToVisualMode = function () {
+macVim.switchToVisualMode = function (highlightText = true) {
 	macVim.currentSequence = "";
 	macVim.mode = "visual";
 	macVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL --");
 	docs.setCursorWidth(this.mode);
-	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+
+    // We do not highlight text if we switch to visual mode from mouse movement (false is passed in during that scenario)
+    if (highlightText) {
+        docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+    }
 };
 
 macVim.switchToVisualLineMode = function () {

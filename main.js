@@ -141,7 +141,8 @@ function continueRunVim(vimVariant) {
 				if (lastMouseUp - oldTime < MAX_TIME_FOR_DOUBLE_CLICK && mouseDownCoords[0] === event.clientX && mouseDownCoords[1] === event.clientY) {
 					// This is a double click, because the last click was less than 400 ms ago
 					if (vimVariant.mode === "normal") {
-						vimVariant.switchToVisualMode();
+
+						vimVariant.switchToVisualMode(false);
 					}
 				}
 				else if (mouseDownCoords[0] === event.clientX && mouseDownCoords[1] === event.clientY)
@@ -158,7 +159,7 @@ function continueRunVim(vimVariant) {
 				else {
 					// We dragged
 					if (vimVariant.mode === "normal") {
-						vimVariant.switchToVisualMode();
+						vimVariant.switchToVisualMode(false);
 					}
 				}
 

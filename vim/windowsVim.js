@@ -59,14 +59,18 @@ windowsVim.switchToNormalMode = function () {
 	docs.setCursorWidth(this.mode);
 };
 
-windowsVim.switchToVisualMode = function () {
+windowsVim.switchToVisualMode = function (highlightText = true) {
 	windowsVim.currentSequence = "";
 	windowsVim.mode = "visual";
 	windowsVim.num = "";
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL --");
 	docs.setCursorWidth(this.mode);
-	docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+
+    // We do not highlight text if we switch to visual mode from mouse movement (false is passed in during that scenario)
+    if (highlightText) {
+        docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+    }
 };
 
 windowsVim.switchToVisualLineMode = function () {
