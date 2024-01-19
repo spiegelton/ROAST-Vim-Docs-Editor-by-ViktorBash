@@ -114,7 +114,6 @@ windowsVim.moveToCoords = function (xCoord, yCoord) {
 
     let startTime = Date.now();
     while (newXCoord !== xCoord || newYCoord !== yCoord) {
-        console.log("Move step", newXCoord, newYCoord, xCoord, yCoord);
         let curTime = Date.now();
 
         if (curTime - startTime > 1500) {
@@ -123,19 +122,15 @@ windowsVim.moveToCoords = function (xCoord, yCoord) {
             break;
         }
         if (newYCoord < yCoord) {
-            // console.log("Aye");
             docs.pressKey(docs.codeFromKey("ArrowDown"));
         }
         else if (newYCoord > yCoord) {
-            // console.log("Nay");
             docs.pressKey(docs.codeFromKey("ArrowUp"));
         }
         else if (newXCoord < xCoord) {
-            // console.log("Woo");
             docs.pressKey(docs.codeFromKey("ArrowRight"));
         }
         else if (newXCoord > xCoord) {
-            // console.log("Noo");
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
         [newXCoord, newYCoord] = docs.getCoords();
@@ -488,7 +483,16 @@ windowsVim.normal_keydown = function (e) {
 
     switch (true) {
         case (keyMapN.f[0] === windowsVim.currentSequence):
+        case (keyMapN.t[0] === windowsVim.currentSequence):
         {
+            let searchLineOption;
+            if (keyMapN.f[0] === windowsVim.currentSequence) {
+                searchLineOption = docs.searchLineOptions.f;
+            }
+            else {
+                searchLineOption = docs.searchLineOptions.t;
+            }
+
             // Find character on the current line (or do nothing if there is no character on the current line)
             let character = e.key;
 
@@ -504,7 +508,8 @@ windowsVim.normal_keydown = function (e) {
                 lineEndYCoord: lineEndYCoord
             }
 
-            docs.inputIntoSearchBox(character, this.moveToCoords, coords);
+
+            docs.inputIntoSearchBox(character, this.moveToCoords, coords, searchLineOption);
 
             this.clearData();
             return true;

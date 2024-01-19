@@ -607,7 +607,7 @@ docs.clickButton = function (buttonOption) {
     buttonOption[1](buttonOption[0]);
 }
 
-docs._handleAfterSearch = function (moveFunction, coords) {
+docs._handleAfterSearch = function (moveFunction, coords, searchLineOption) {
     // Now we either have highlighted a character (that may or may not be on the line we want), or we have not
     let checkCounter = 0;
     let checkingForHighlightedText = setInterval(() => {
@@ -627,7 +627,6 @@ docs._handleAfterSearch = function (moveFunction, coords) {
             let [curXCoord, curYCoord] = docs.getCoords();
 
             // Check the top boundary (that we're below it)
-            console.log(curYCoord, coords.yCoord);
             if (curYCoord > coords.yCoord || (curYCoord === coords.yCoord && curXCoord >= coords.xCoord)) {
                 belowTheTopBoundary = true;
             }
@@ -637,6 +636,14 @@ docs._handleAfterSearch = function (moveFunction, coords) {
             }
 
             if (belowTheTopBoundary && aboveTheBottomBoundary) {
+                // The character is in bounds
+
+                console.log(searchLineOption);
+                if (searchLineOption === docs.searchLineOptions.t) {
+                    // We must be on the character before the one we want for "t" command
+                    console.log("WOO");
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
 
             }
             else {
@@ -652,7 +659,14 @@ docs._handleAfterSearch = function (moveFunction, coords) {
 
 }
 
-docs.inputIntoSearchBox = function (text, moveFunction, coords) {
+docs.searchLineOptions = {
+    f: "f",
+    t: "t",
+    F: "F",
+    T: "T",
+}
+
+docs.inputIntoSearchBox = function (text, moveFunction, coords, searchLineOption) {
     let findBox = document.getElementById("docs-findandreplacedialog-input");
     if (findBox === null) {
         // The find box is not loaded in yet, so we're actually good to go and there are no edge cases whatsoever
@@ -676,7 +690,7 @@ docs.inputIntoSearchBox = function (text, moveFunction, coords) {
         let exitSpan = document.querySelector(".modal-dialog-title-close");
         docs._simulateClick(exitSpan, true);
 
-        docs._handleAfterSearch(moveFunction, coords);
+        docs._handleAfterSearch(moveFunction, coords, searchLineOption);
         return;
     }
 
@@ -726,7 +740,7 @@ docs.inputIntoSearchBox = function (text, moveFunction, coords) {
     let exitSpan = document.querySelector(".modal-dialog-title-close");
     docs._simulateClick(exitSpan, true);
 
-    docs._handleAfterSearch(moveFunction, coords);
+    docs._handleAfterSearch(moveFunction, coords, searchLineOption);
 }
 
 docs.toolbarMenuButtonOptions = {
