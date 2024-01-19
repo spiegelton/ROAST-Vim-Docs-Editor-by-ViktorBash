@@ -607,6 +607,128 @@ docs.clickButton = function (buttonOption) {
     buttonOption[1](buttonOption[0]);
 }
 
+docs._handleAfterSearch = function (moveFunction, coords) {
+    // Now we either have highlighted a character (that may or may not be on the line we want), or we have not
+    let checkCounter = 0;
+    let checkingForHighlightedText = setInterval(() => {
+        if (checkCounter > 50) {
+            // We have waited for 500 ms, and still have not found any highlighted text
+            // This likely means the key we were searching for was not found (so just do nothing and stay where we are)
+            clearInterval(checkingForHighlightedText);
+        }
+        else if (docs.isTextSelected()) {
+            clearInterval(checkingForHighlightedText);
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+            // Now we are cooking and must handle the stuff
+
+            let belowTheTopBoundary = false;
+            let aboveTheBottomBoundary = false;
+            let [curXCoord, curYCoord] = docs.getCoords();
+
+            // Check the top boundary (that we're below it)
+            console.log(curYCoord, coords.yCoord);
+            if (curYCoord > coords.yCoord || (curYCoord === coords.yCoord && curXCoord >= coords.xCoord)) {
+                belowTheTopBoundary = true;
+            }
+            // Check the bottom boundary (that we're above it)
+            if (curYCoord < coords.lineEndYCoord || (curYCoord === coords.lineEndYCoord && curXCoord <= coords.lineEndXCoord)) {
+                aboveTheBottomBoundary = true;
+            }
+
+            if (belowTheTopBoundary && aboveTheBottomBoundary) {
+
+            }
+            else {
+                // We must move back to the original position because the character was out of bounds
+                moveFunction(coords.xCoord, coords.yCoord);
+            }
+
+        }
+        else {
+            checkCounter++;
+        }
+    }, 10)
+
+}
+
+docs.inputIntoSearchBox = function (text, moveFunction, coords) {
+    let findBox = document.getElementById("docs-findandreplacedialog-input");
+    if (findBox === null) {
+        // The find box is not loaded in yet, so we're actually good to go and there are no edge cases whatsoever
+        docs.clickButton(docs.toolbarMenuButtonOptions.findAndReplace);
+
+        document.querySelector(".modal-dialog.docs-dialog.docs-findandreplacedialog").style.display = "none";
+
+        let findBox = document.getElementById("docs-findandreplacedialog-input");
+        findBox.value = text;
+
+        let matchCaseCheckbox = document.getElementById("docs-findandreplacedialog-match-case");
+
+        let checkedOriginallyStr = matchCaseCheckbox.getAttribute("aria-checked");
+        let checkedOriginally = checkedOriginallyStr === "true";
+
+        if (!checkedOriginally) {
+            // If match case is not checked we must check it
+            docs._simulateClick(matchCaseCheckbox, true);
+        }
+
+        let exitSpan = document.querySelector(".modal-dialog-title-close");
+        docs._simulateClick(exitSpan, true);
+
+        docs._handleAfterSearch(moveFunction, coords);
+        return;
+    }
+
+    // Beyond this point means the find box has already been loaded in, and may have some stuff in it already (edge
+    // case), so we must check for that
+
+    let resetStuff; // True if there is already any text in the search box
+    if (findBox.value === "") {
+        resetStuff = false;
+    }
+    else {
+        findBox.value = "";
+        resetStuff = true;
+    }
+
+    // Open the search box and add our stuff to it
+    docs.clickButton(docs.toolbarMenuButtonOptions.findAndReplace);
+
+    document.querySelector(".modal-dialog.docs-dialog.docs-findandreplacedialog").style.display = "none";
+
+    findBox.value = text;
+
+    let matchCaseCheckbox = document.getElementById("docs-findandreplacedialog-match-case");
+
+    let checkedOriginallyStr = matchCaseCheckbox.getAttribute("aria-checked");
+    let checkedOriginally = checkedOriginallyStr === "true";
+
+    if (!checkedOriginally) {
+        // If match case is not checked we must check it
+        docs._simulateClick(matchCaseCheckbox, true);
+    }
+
+    if (resetStuff) {
+        // If there was already text in the search box, we click the ignore Latin button twice to get stuff to work
+        // If this is not here, then we end up actually finding/searching for whatever old stuff was in the search box.
+        // This is purely because there wasn't enough time for the old stuff to get removed and new stuff to take effect
+        // As a consequence, this is the workaround
+        let ignoreLatin = document.getElementById("docs-findandreplacedialog-ignore-diacritics");
+        docs._simulateClick(ignoreLatin, true);
+        docs._simulateClick(ignoreLatin, true);
+
+        let previousButton = document.getElementById("docs-findandreplacedialog-button-previous");
+        docs._simulateClick(previousButton, true);
+    }
+
+    // Exit the search box
+    let exitSpan = document.querySelector(".modal-dialog-title-close");
+    docs._simulateClick(exitSpan, true);
+
+    docs._handleAfterSearch(moveFunction, coords);
+}
+
 docs.toolbarMenuButtonOptions = {
     bold: ["boldButton", docs._clickMainToolBarButton],
     italic: ["italicButton", docs._clickMainToolBarButton],

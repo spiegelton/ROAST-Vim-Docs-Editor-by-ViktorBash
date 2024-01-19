@@ -114,6 +114,7 @@ windowsVim.moveToCoords = function (xCoord, yCoord) {
 
     let startTime = Date.now();
     while (newXCoord !== xCoord || newYCoord !== yCoord) {
+        console.log("Move step", newXCoord, newYCoord, xCoord, yCoord);
         let curTime = Date.now();
 
         if (curTime - startTime > 1500) {
@@ -122,17 +123,21 @@ windowsVim.moveToCoords = function (xCoord, yCoord) {
             break;
         }
         if (newYCoord < yCoord) {
+            // console.log("Aye");
             docs.pressKey(docs.codeFromKey("ArrowDown"));
-        } else if (newYCoord > yCoord) {
+        }
+        else if (newYCoord > yCoord) {
+            // console.log("Nay");
             docs.pressKey(docs.codeFromKey("ArrowUp"));
         }
-
-        if (newXCoord < xCoord) {
+        else if (newXCoord < xCoord) {
+            // console.log("Woo");
             docs.pressKey(docs.codeFromKey("ArrowRight"));
-        } else if (newXCoord > xCoord) {
+        }
+        else if (newXCoord > xCoord) {
+            // console.log("Noo");
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
         }
-
         [newXCoord, newYCoord] = docs.getCoords();
     }
 }
@@ -482,6 +487,28 @@ windowsVim.normal_keydown = function (e) {
     const keyMapN = keyMap.keyMapN;
 
     switch (true) {
+        case (keyMapN.f[0] === windowsVim.currentSequence):
+        {
+            // Find character on the current line (or do nothing if there is no character on the current line)
+            let character = e.key;
+
+            let [xCoord, yCoord] = docs.getCoords();
+            this.moveToEndOfLine();
+            let [lineEndXCoord, lineEndYCoord] = docs.getCoords();
+            this.moveToCoords(xCoord, yCoord);
+
+            let coords = {
+                xCoord: xCoord,
+                yCoord: yCoord,
+                lineEndXCoord: lineEndXCoord,
+                lineEndYCoord: lineEndYCoord
+            }
+
+            docs.inputIntoSearchBox(character, this.moveToCoords, coords);
+
+            this.clearData();
+            return true;
+        }
         case (keyMapN.replaceCharacter[0] === windowsVim.currentSequence):
             {
                 // We don't check the .replaceCharacter modifierInput because we want to be able to replace a character

@@ -116,6 +116,7 @@ export function getDefaultKeyBindings() {
 		indent: [">" + KEY_SEPARATOR + ">", true, 0b0000, "Indent", null],
 		outdent: ["<" + KEY_SEPARATOR + "<", true, 0b0000, "Outdent", null],
 		replaceMode: ["R", false, 0b0100, "Enter replace mode", null],
+		f: ["f", false, 0b0000, "Find character on the current line", null],
 	}
 
 	let keyMapI = {
@@ -420,7 +421,7 @@ export function getUltimateKeyMapInCallback(callback) {
 
 			// Edge case: For the replace command we also want to just add the whole command as an
 			// incomplete key map
-			if (key === "replaceCharacter") {
+			if (key === "replaceCharacter" || key === "f") {
 				outputKeyMap.incompleteKeyMapN.push(keyVal);
 			}
 			
