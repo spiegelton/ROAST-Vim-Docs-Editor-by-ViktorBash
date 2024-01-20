@@ -591,6 +591,58 @@ docs.clickButton = function (buttonOption) {
     buttonOption[1](buttonOption[0]);
 }
 
+docs._handleAfterSearchCapital = function (coords, searchLineOption) {
+    // For F and T commands
+
+    // Now we either have highlighted a character (that may or may not be on the line we want), or we have not
+    let checkCounter = 0;
+    let checkingForHighlightedText = setInterval(() => {
+        if (checkCounter > 50) {
+            // We have waited for 500 ms, and still have not found any highlighted text
+            // This likely means the key we were searching for was not found (so just do nothing and stay where we are)
+            clearInterval(checkingForHighlightedText);
+        }
+        else if (docs.isTextSelected()) {
+            clearInterval(checkingForHighlightedText);
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+            // Now we are cooking and must handle the stuff
+
+            let belowTheTopBoundary = false;
+            let aboveTheBottomBoundary = false;
+            let [curXCoord, curYCoord] = docs.getCoords();
+
+            // Check the top boundary (that we're below it)
+            if (curYCoord > coords.lineStartYCoord || (curYCoord === coords.lineStartYCoord && curXCoord >= coords.lineStartXCoord)) {
+                belowTheTopBoundary = true;
+            }
+
+            // Check the bottom boundary (that we're above it)
+            if (curYCoord < coords.yCoord || (curYCoord === coords.yCoord && curXCoord <= coords.xCoord)) {
+                aboveTheBottomBoundary = true;
+            }
+
+            if (belowTheTopBoundary && aboveTheBottomBoundary) {
+                // The character is in bounds
+
+                if (searchLineOption === docs.searchLineOptions.T) {
+                    // We must be on the character before the one we want for "T" command
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+
+            }
+            else {
+                // We must move back to the original position because the character was out of bounds
+                this.moveToCoords(coords.xCoord, coords.yCoord);
+            }
+
+        }
+        else {
+            checkCounter++;
+        }
+    }, 10)
+}
+
 docs._handleAfterSearch = function (coords, searchLineOption) {
     // Now we either have highlighted a character (that may or may not be on the line we want), or we have not
     let checkCounter = 0;
@@ -669,23 +721,29 @@ docs.inputIntoSearchBox = function (text, coords, searchLineOption) {
             docs._simulateClick(matchCaseCheckbox, true);
         }
 
+        if (searchLineOption === docs.searchLineOptions.T || searchLineOption === docs.searchLineOptions.F) {
+            // We must go backwards
+            let previousButton = document.getElementById("docs-findandreplacedialog-button-previous");
+            docs._simulateClick(previousButton, true);
+        }
+
         let exitSpan = document.querySelector(".modal-dialog-title-close");
         docs._simulateClick(exitSpan, true);
 
-        docs._handleAfterSearch(coords, searchLineOption);
+        if (searchLineOption === docs.searchLineOptions.T || searchLineOption === docs.searchLineOptions.F) {
+            docs._handleAfterSearchCapital(coords, searchLineOption);
+        }
+        else {
+            docs._handleAfterSearch(coords, searchLineOption);
+        }
         return;
     }
 
     // Beyond this point means the find box has already been loaded in, and may have some stuff in it already (edge
     // case), so we must check for that
 
-    let resetStuff; // True if there is already any text in the search box
-    if (findBox.value === "") {
-        resetStuff = false;
-    }
-    else {
+    if (findBox.value !== "") {
         findBox.value = "";
-        resetStuff = true;
     }
 
     // Open the search box and add our stuff to it
@@ -705,16 +763,16 @@ docs.inputIntoSearchBox = function (text, coords, searchLineOption) {
         docs._simulateClick(matchCaseCheckbox, true);
     }
 
-    if (resetStuff) {
-        // If there was already text in the search box, we click the ignore Latin button twice to get stuff to work
-        // If this is not here, then we end up actually finding/searching for whatever old stuff was in the search box.
-        // This is purely because there wasn't enough time for the old stuff to get removed and new stuff to take effect
-        // As a consequence, this is the workaround
-        let ignoreLatin = document.getElementById("docs-findandreplacedialog-ignore-diacritics");
-        docs._simulateClick(ignoreLatin, true);
-        docs._simulateClick(ignoreLatin, true);
+    let previousButton = document.getElementById("docs-findandreplacedialog-button-previous");
 
-        let previousButton = document.getElementById("docs-findandreplacedialog-button-previous");
+    // These 3 lines below are critical to get the search to register properly, otherwise it's possible
+    // that nothing will happen or the old search will have been executed after we exit the search box
+    let ignoreLatin = document.getElementById("docs-findandreplacedialog-ignore-diacritics");
+    docs._simulateClick(ignoreLatin, true);
+    docs._simulateClick(ignoreLatin, true);
+    docs._simulateClick(previousButton, true);
+
+    if (searchLineOption === docs.searchLineOptions.T || searchLineOption === docs.searchLineOptions.F) {
         docs._simulateClick(previousButton, true);
     }
 
@@ -722,7 +780,12 @@ docs.inputIntoSearchBox = function (text, coords, searchLineOption) {
     let exitSpan = document.querySelector(".modal-dialog-title-close");
     docs._simulateClick(exitSpan, true);
 
-    docs._handleAfterSearch(coords, searchLineOption);
+    if (searchLineOption === docs.searchLineOptions.T || searchLineOption === docs.searchLineOptions.F) {
+        docs._handleAfterSearchCapital(coords, searchLineOption);
+    }
+    else {
+        docs._handleAfterSearch(coords, searchLineOption);
+    }
 }
 
 docs.toolbarMenuButtonOptions = {
