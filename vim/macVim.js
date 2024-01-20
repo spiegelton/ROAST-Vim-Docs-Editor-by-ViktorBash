@@ -181,10 +181,11 @@ macVim.moveToEndOfLine = function () {
 };
 
 macVim.moveToStartOfLine = function () {
-	let oldCoords = docs.userCursor.style.transform;
+    let [startXCoord, startYCoord] = docs.getCoords();
 	docs.pressKey(docs.codeFromKey("ArrowRight"));
 	let newCoords = docs.userCursor.style.transform;
-	if (oldCoords === newCoords) {
+    let [newXCoord, newYCoord] = docs.getCoords();
+    if (startXCoord === newXCoord && startYCoord === newYCoord) {
 		// We are at the end of a file (which may be an empty line, so we have to test for that)
         let [initialXCoord, initialYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
