@@ -1,6 +1,11 @@
 // The key separator used between keys in the keybinding (ex: "d•w" for delete word)
 // The character is U+0095, and can't appear itself as a key
 const KEY_SEPARATOR = "•";
+
+export function getModifierInput(e) {
+	// Get bitmask from e (keyboard event)
+	return ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+}
 export { KEY_SEPARATOR };
 
 // Save 1 keybinding to the ultimateKeyMap in chrome.storage.local

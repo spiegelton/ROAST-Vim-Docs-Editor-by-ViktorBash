@@ -1,5 +1,5 @@
 import { getCleanedSequence } from "./UI.js";
-import { KEY_SEPARATOR } from "./keybindings.js";
+import {getModifierInput, KEY_SEPARATOR} from "./keybindings.js";
 
 let docs;
 let UI;
@@ -454,7 +454,7 @@ macVim.normal_keydown = function (e) {
     }
 
     // Bit mask of what modifier keys are pressed
-    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const modifierInput = getModifierInput(e);
     const keyMapN = keyMap.keyMapN;
 
     switch (true) {
@@ -1982,7 +1982,7 @@ macVim.visual_keydown = function (e) {
     }
 
     // Bit mask of what modifier keys are pressed
-    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const modifierInput = getModifierInput(e);
     const keyMapV = keyMap.keyMapV;
 
     if (this.nativeKeyCheck(modifierInput)) {
@@ -2450,7 +2450,7 @@ macVim.visual_line_keydown = function (e) {
     }
 
     // Bit mask of what modifier keys are pressed
-    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const modifierInput = getModifierInput(e);
     const keyMapVLine = keyMap.keyMapVLine;
 
     if (this.nativeKeyCheck(modifierInput)) {
@@ -2717,7 +2717,7 @@ macVim.visual_line_keydown = function (e) {
 };
 
 macVim.insert_keydown = function (e) {
-    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const modifierInput = getModifierInput(e);
     const keyMapI = keyMap.keyMapI;
 
 	switch (true) {
@@ -2750,7 +2750,7 @@ macVim.replace_keydown = function (e) {
 
     // Basically, we must let all keys pass through, but also delete things as well
     // Very similar to insert mode
-    const modifierInput = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+    const modifierInput = getModifierInput(e);
     const keyMapR = keyMap.keyMapR;
 
     switch (true) {

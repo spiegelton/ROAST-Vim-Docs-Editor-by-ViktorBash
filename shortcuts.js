@@ -5,7 +5,14 @@ let replaceElem = document.getElementById("replace");
 let visualElem = document.getElementById("visual");
 let visualLineElem = document.getElementById("visual-line");
 
-import { KEY_SEPARATOR, getUltimateKeyMapInCallback, getDefaultKeyBindings, saveKeyInKeyMap, resetToDefaultKeyMap } from "./vim/keybindings.js";
+import {
+    KEY_SEPARATOR,
+    getUltimateKeyMapInCallback,
+    getDefaultKeyBindings,
+    saveKeyInKeyMap,
+    resetToDefaultKeyMap,
+    getModifierInput
+} from "./vim/keybindings.js";
 
 // If we are in the middle of recording a new keybinding, any clicks to other keybindings will be ignored until the 
 // user hits one of the following buttons: "Save", "Cancel" or "Default"
@@ -91,7 +98,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
             // Past this point the key is a valid keybinding that we need to handle it (record, update UIs)
 
             // Let's update the bitmask with any modifiers that were pressed
-            let newBitmask = ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
+            let newBitmask = getModifierInput(e);
             curBitmask = curBitmask | newBitmask;
 
             selectedKey.innerHTML += e.key; // Update the UI text of the keybinding so the user can see it
