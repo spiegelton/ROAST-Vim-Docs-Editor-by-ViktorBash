@@ -272,22 +272,6 @@ docs.getFontSize = function () {
     return docs.fontSizeInput.value;
 };
 
-// Edge case: Your view may scroll up or down a line if you're view is of the cursor at the very top
-docs.atStartOfLine = function () {
-    // We are going to get the initial Y Coordinate, move one character left, get the y coord (move back), and compare the two
-    // If they are different, we are at the start of the line
-    let coords = docs.userCursor.style.transform;
-    let xIndex = coords.indexOf("px");
-    let initialYCoord = coords.slice(xIndex + 4, coords.length - 3);
-    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-    coords = docs.userCursor.style.transform;
-    xIndex = coords.indexOf("px");
-    let finalYCoord = coords.slice(xIndex + 4, coords.length - 3);
-    docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our key action
-
-    return initialYCoord !== finalYCoord;
-};
-
 // Returns an array of booleans representing the cursor's location [atStartOfLine, atEndOfLine, atStartOfFile, atEndOfFile]
 // The point of coupling so many functions together is to reduce the number of times we have to move the cursor
 // This function moves the cursor 3 times

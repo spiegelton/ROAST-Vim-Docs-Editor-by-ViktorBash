@@ -829,14 +829,12 @@ windowsVim.normal_keydown = function (e) {
             {
                 // Go to visual mode
                 windowsVim.clearData();
-                windowsVim.visualModeIsLinedBased = false;
                 windowsVim.switchToVisualMode();
                 return true;
             }
         case (keyMapN.enterVisualLine[0] === windowsVim.currentSequence && (keyMapN.enterVisualLine[1] === true || keyMapN.enterVisualLine[2] === modifierInput)):
             {
                 windowsVim.clearData();
-                windowsVim.visualModeIsLinedBased = true;
                 windowsVim.switchToVisualLineMode();
                 return true;
             }
