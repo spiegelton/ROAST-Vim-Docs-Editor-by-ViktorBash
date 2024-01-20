@@ -109,34 +109,6 @@ windowsVim.switchToInsertMode = function () {
 };
 
 
-windowsVim.moveToCoords = function (xCoord, yCoord) {
-    let [newXCoord, newYCoord] = docs.getCoords();
-
-    let startTime = Date.now();
-    while (newXCoord !== xCoord || newYCoord !== yCoord) {
-        let curTime = Date.now();
-
-        if (curTime - startTime > 1500) {
-            // This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
-            // (1.5 seconds), we break out
-            break;
-        }
-        if (newYCoord < yCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowDown"));
-        }
-        else if (newYCoord > yCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowUp"));
-        }
-        else if (newXCoord < xCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-        }
-        else if (newXCoord > xCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        }
-        [newXCoord, newYCoord] = docs.getCoords();
-    }
-}
-
 // shouldWeCut is boolean
 windowsVim.deleteOrCut = function(shouldWeCut) {
     if (shouldWeCut === true) {
@@ -499,7 +471,7 @@ windowsVim.normal_keydown = function (e) {
             let [xCoord, yCoord] = docs.getCoords();
             this.moveToEndOfLine();
             let [lineEndXCoord, lineEndYCoord] = docs.getCoords();
-            this.moveToCoords(xCoord, yCoord);
+            docs.moveToCoords(xCoord, yCoord);
 
             let coords = {
                 xCoord: xCoord,
@@ -509,7 +481,7 @@ windowsVim.normal_keydown = function (e) {
             }
 
 
-            docs.inputIntoSearchBox(character, this.moveToCoords, coords, searchLineOption);
+            docs.inputIntoSearchBox(character, coords, searchLineOption);
 
             this.clearData();
             return true;
@@ -1890,7 +1862,7 @@ windowsVim.normal_keydown = function (e) {
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
 
             // Move back to our original position
-            this.moveToCoords(startXCoord, startYCoord);
+            docs.moveToCoords(startXCoord, startYCoord);
             windowsVim.clearData();
             return true;
         }

@@ -207,34 +207,6 @@ macVim.moveToStartOfLine = function () {
 	}
 };
 
-macVim.moveToCoords = function (xCoord, yCoord) {
-    let [newXCoord, newYCoord] = docs.getCoords();
-
-    let startTime = Date.now();
-    while (newXCoord !== xCoord || newYCoord !== yCoord) {
-        let curTime = Date.now();
-
-        if (curTime - startTime > 1500) {
-            // This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
-            // (1.5 seconds), we break out
-            break;
-        }
-        if (newYCoord < yCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowDown"));
-        } else if (newYCoord > yCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowUp"));
-        }
-
-        if (newXCoord < xCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowRight"));
-        } else if (newXCoord > xCoord) {
-            docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        }
-
-        [newXCoord, newYCoord] = docs.getCoords();
-    }
-}
-
 // shouldWeCut is boolean
 macVim.deleteOrCut = function(shouldWeCut) {
     if (shouldWeCut === true) {
@@ -1901,7 +1873,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
 
-            this.moveToCoords(startXCoord, startYCoord);
+            docs.moveToCoords(startXCoord, startYCoord);
 
             macVim.clearData();
             return true;

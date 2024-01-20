@@ -607,7 +607,7 @@ docs.clickButton = function (buttonOption) {
     buttonOption[1](buttonOption[0]);
 }
 
-docs._handleAfterSearch = function (moveFunction, coords, searchLineOption) {
+docs._handleAfterSearch = function (coords, searchLineOption) {
     // Now we either have highlighted a character (that may or may not be on the line we want), or we have not
     let checkCounter = 0;
     let checkingForHighlightedText = setInterval(() => {
@@ -648,7 +648,7 @@ docs._handleAfterSearch = function (moveFunction, coords, searchLineOption) {
             }
             else {
                 // We must move back to the original position because the character was out of bounds
-                moveFunction(coords.xCoord, coords.yCoord);
+                this.moveToCoords(coords.xCoord, coords.yCoord);
             }
 
         }
@@ -666,7 +666,7 @@ docs.searchLineOptions = {
     T: "T",
 }
 
-docs.inputIntoSearchBox = function (text, moveFunction, coords, searchLineOption) {
+docs.inputIntoSearchBox = function (text, coords, searchLineOption) {
     let findBox = document.getElementById("docs-findandreplacedialog-input");
     if (findBox === null) {
         // The find box is not loaded in yet, so we're actually good to go and there are no edge cases whatsoever
@@ -690,7 +690,7 @@ docs.inputIntoSearchBox = function (text, moveFunction, coords, searchLineOption
         let exitSpan = document.querySelector(".modal-dialog-title-close");
         docs._simulateClick(exitSpan, true);
 
-        docs._handleAfterSearch(moveFunction, coords, searchLineOption);
+        docs._handleAfterSearch(coords, searchLineOption);
         return;
     }
 
@@ -740,7 +740,7 @@ docs.inputIntoSearchBox = function (text, moveFunction, coords, searchLineOption
     let exitSpan = document.querySelector(".modal-dialog-title-close");
     docs._simulateClick(exitSpan, true);
 
-    docs._handleAfterSearch(moveFunction, coords, searchLineOption);
+    docs._handleAfterSearch(coords, searchLineOption);
 }
 
 docs.toolbarMenuButtonOptions = {
@@ -789,5 +789,33 @@ docs.toolbarMenuButtonOptions = {
     voiceTyping: ["Voice typing v", docs._clickToolsButton],
     searchTheMenus: ["Search the menus m", docs._clickHelpButton], // Clicking via main toolbar doesn't work
 };
+
+docs.moveToCoords = function(xCoord, yCoord) {
+    let [newXCoord, newYCoord] = docs.getCoords();
+
+    let startTime = Date.now();
+    while (newXCoord !== xCoord || newYCoord !== yCoord) {
+        let curTime = Date.now();
+
+        if (curTime - startTime > 1500) {
+            // This is a safeguard to prevent freezing. If traversing back takes more than 1500 milliseconds,
+            // (1.5 seconds), we break out
+            break;
+        }
+        if (newYCoord < yCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowDown"));
+        }
+        else if (newYCoord > yCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowUp"));
+        }
+        else if (newXCoord < xCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+        }
+        else if (newXCoord > xCoord) {
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        }
+        [newXCoord, newYCoord] = docs.getCoords();
+    }
+}
 
 export {docs};
