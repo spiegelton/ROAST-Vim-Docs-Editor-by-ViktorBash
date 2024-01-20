@@ -2576,7 +2576,6 @@ windowsVim.visual_line_keydown = function (e) {
                 // TODO: Remove eventually
                 let cursorLocations = docs.getCursorLocations();
                 if (!cursorLocations[3]) {
-                    console.log("AYE");
                     // If we're not at the end of a file, move left
                     docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
