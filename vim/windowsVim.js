@@ -937,12 +937,7 @@ windowsVim.normal_keydown = function (e) {
         case (keyMapN.endOfLine[0] === windowsVim.currentSequence && (keyMapN.endOfLine[1] === true || keyMapN.endOfLine[2] === modifierInput)): 
         {
             // Go to the end of the line
-            let cursorLocations = docs.getCursorLocations();
-            docs.pressKey(docs.codeFromKey("ArrowDown"), true);
-            if (!cursorLocations[3]) {
-                // If we're not at the end of a file, move back left
-                docs.pressKey(docs.codeFromKey("ArrowLeft"));
-            }
+            this.moveToEndOfLine();
 
             windowsVim.clearData();
             return true;
@@ -2175,13 +2170,6 @@ windowsVim.visual_keydown = function (e) {
         case (keyMapV.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapV.appendEndOfHighlight[1] === true || keyMapV.appendEndOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
-                if (windowsVim.visualModeIsLinedBased) {
-                    let cursorLocations = docs.getCursorLocations();
-                    if (!cursorLocations[3]) {
-                        // If we're not at the end of a file, move left
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }
-                }
 
                 windowsVim.clearData();
                 windowsVim.switchToInsertMode();
@@ -2586,12 +2574,13 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
-                if (windowsVim.visualModeIsLinedBased) {
-                    let cursorLocations = docs.getCursorLocations();
-                    if (!cursorLocations[3]) {
-                        // If we're not at the end of a file, move left
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }
+
+                // TODO: Remove eventually
+                let cursorLocations = docs.getCursorLocations();
+                if (!cursorLocations[3]) {
+                    console.log("AYE");
+                    // If we're not at the end of a file, move left
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
 
                 windowsVim.clearData();

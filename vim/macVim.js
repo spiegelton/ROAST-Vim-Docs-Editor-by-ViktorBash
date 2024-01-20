@@ -2185,13 +2185,7 @@ macVim.visual_keydown = function (e) {
         case (keyMapV.appendEndOfHighlight[0] === this.currentSequence && (keyMapV.appendEndOfHighlight[1] === true || keyMapV.appendEndOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
-                if (macVim.visualModeIsLinedBased) {
-                    let cursorLocations = docs.getCursorLocations();
-                    if (!cursorLocations[3]) {
-                        // If we're not at the end of a file, move left
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }
-                }
+
                 macVim.clearData();
                 macVim.switchToInsertMode();
                 return true;
@@ -2608,12 +2602,12 @@ macVim.visual_line_keydown = function (e) {
         case (keyMapVLine.appendEndOfHighlight[0] === this.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
-                if (macVim.visualModeIsLinedBased) {
-                    let cursorLocations = docs.getCursorLocations();
-                    if (!cursorLocations[3]) {
-                        // If we're not at the end of a file, move left
-                        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                    }
+
+                // TODO: Remove eventually
+                let cursorLocations = docs.getCursorLocations();
+                if (!cursorLocations[3]) {
+                    // If we're not at the end of a file, move left
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
                 macVim.clearData();
                 macVim.switchToInsertMode();
