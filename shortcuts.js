@@ -42,7 +42,7 @@ function updateCheckboxes(intId, bitmask) {
 }
 
 // Take in a keybinding and it's associated data, and add it to the HTML DOM
-// This includes also creating handling functionsf for when we want to update this keybinding
+// This includes also creating handling functions for when we want to update this keybinding
 function addHTML(elem, key, id, keyMapStr, keyNameStr) {
 
     let bitmask = key[2]; // The saved bitmask for this keybinding
@@ -195,7 +195,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
         // Get the default keybinding entry from the default keybindings return function
         let defaultArr = getDefaultKeyBindings()[keyMapStr][keyNameStr];
 
-        let defaultRawValue = defaultArr[0]; // Include KEY_SEPARATOR, for savingg
+        let defaultRawValue = defaultArr[0]; // Include KEY_SEPARATOR, for saving
         let defaultDisplayValue = ""; // Does not include KEY_SEPARATOR, for displaying
 
         // Build defaultDisplayValue from defaultRawValue
@@ -377,7 +377,7 @@ function addHTML(elem, key, id, keyMapStr, keyNameStr) {
     descriptionCol.innerHTML = key[3];
     tr.appendChild(descriptionCol);
 
-    // Now tr has everything inside of it, so append it to it's parent element
+    // Now tr has everything inside of it, so append it to its parent element
     // (which is passed in as an argument to this function)
     elem.appendChild(tr);
 }

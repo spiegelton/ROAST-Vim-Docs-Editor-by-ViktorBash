@@ -18,7 +18,7 @@ UI.setUp = function() {
 	this.UISequenceContainer.innerHTML = "<span></span>";
 	this.UIDocHead.appendChild(this.UISequenceContainer);
 
-	// UIModeContainer goes on the left and shows the current mode (insert, normal, etc..), or even if
+	// UIModeContainer goes on the left and shows the current mode (insert, normal, etc.), or even if
 	// the user needs to activate their free trial, it expired, etc
 	this.UIModeContainer = document.createElement("div");
 	this.UIModeContainer.style.position = "absolute";

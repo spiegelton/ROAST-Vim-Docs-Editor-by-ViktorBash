@@ -45,7 +45,7 @@ menu buttons.
 
 ### Architecture:
 **Core:** `docs.js` and the JavaScript in the `vim` folder
-- `docs.js` interacts directly with the google docs to serve as a layer of abstraction, so that you can just
+- `docs.js` interacts directly with the Google Docs to serve as a layer of abstraction, so that you can just
 call functions like `docs.isTextSelected()`
 - `windowsVim.js` and `macVim.js` contain the respective copies of vim and are the majority of the programming. 
 Here you find the handling of keys in all the modes

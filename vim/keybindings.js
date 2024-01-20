@@ -19,7 +19,7 @@ export function saveKeyInKeyMap(keyMapStr, keyNameStr, keyValue, bitMask, cutTex
 
 	// Build the actual entry
 	let keyArr = [keyValue, ignoreModifierKeys, bitMask, null, cutText]; // NOTE: null is the description placeholder index value
-	// It is not necessary to save the description because when we load the keymap, we always are just using the default description
+	// It is not necessary to save the description because when we load the keymap, we are always just using the default description
 
 	getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 		// Get the current keyMap, change the entry we want to, then save it back
@@ -355,7 +355,7 @@ export function getDefaultKeyBindings() {
 }
 
 /*
-* Returns the current keymap of the user as a argument to a callback function
+* Returns the current keymap of the user as an argument to a callback function
 * We first get the default keymap, then we go through and set any keybindings that are in the local storage keymap
 * After effectively "merging" both, we call the callback with the merged keymap as the argument
 */

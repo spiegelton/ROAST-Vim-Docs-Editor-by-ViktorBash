@@ -120,7 +120,7 @@ windowsVim.deleteOrCut = function(shouldWeCut) {
 }
 
 // shouldWeCut is boolean
-// There are 2 ways to undo and which one is the correct one to do depends on whether you deleted (Backspaceed) or cut the text
+// There are 2 ways to undo and which one is the correct one to do depends on whether you deleted (Backspaced) or cut the text
 // Consequently this function does both since undo depends on how you deleted/cut the text
 windowsVim.deleteOrCutAndUndo = function(shouldWeCut) {
     if (shouldWeCut === true) {
@@ -138,7 +138,6 @@ windowsVim.clearData = function () {
     windowsVim.currentSequence = "";
     UI.updateUISequenceText("");
     docs.setCursorWidth(this.mode);
-    return;
 };
 /*
  * Move to the end of a line
@@ -1013,7 +1012,7 @@ windowsVim.normal_keydown = function (e) {
             }
 
             if (rightCounter > 0) {
-                // Characters to delete that we can
+                // Characters to delete that we can,
                 // We will highlight going to the left
                 while (rightCounter > 0) {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
@@ -1022,7 +1021,7 @@ windowsVim.normal_keydown = function (e) {
                 // Only delete based whether or not text is selected
                 if (docs.isTextSelected() && numRepeats > 1) {
                     this.deleteOrCutAndUndo(shouldWeCut);
-                    // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
+                    // Undo our delete, and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
                     docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
                     docs.pressKey(docs.codeFromKey("Backspace"));
                 }
@@ -1483,7 +1482,6 @@ windowsVim.normal_keydown = function (e) {
             // 5. Backspace
             this.moveToStartOfLine();
             let numRepeats = parseInt(windowsVim.num) || 1;
-            let counter = numRepeats;
             while (numRepeats > 0) {
                 docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
                 numRepeats--;
@@ -1795,7 +1793,7 @@ windowsVim.normal_keydown = function (e) {
             let [startXCoord, startYCoord] = docs.getCoords();
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
             let [middleXCoord, middleYCoord] = docs.getCoords();
-            if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+            if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
                 // At start of file, do nothing
                 navigator.clipboard.writeText("");
             } else if (startYCoord === middleYCoord) {

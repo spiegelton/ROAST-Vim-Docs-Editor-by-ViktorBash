@@ -115,7 +115,7 @@ macVim.switchToInsertMode = function () {
 * You don't just simply paste because for 'p', you paste after the cursor, so there's logic to deal
 * with stuff like being at the end of a line or multiline
 */
-macVim.moveRightToPasteAfterCursor = function (e) {
+macVim.moveRightToPasteAfterCursor = function () {
 	// The main thing is to check that if we're at the end, are we at the end of a multiline or real line
 	let [xCoord, yCoord] = docs.getCoords();
 	docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
@@ -152,7 +152,6 @@ macVim.clearData = function () {
 	macVim.currentSequence = "";
 	UI.updateUISequenceText("");
 	docs.setCursorWidth(this.mode);
-	return;
 }
 
 // Move to the end of a real line
@@ -974,7 +973,7 @@ macVim.normal_keydown = function (e) {
             }
 
             if (rightCounter > 0) {
-                // Characters to delete that we can
+                // Characters to delete that we can,
                 // We will highlight going to the left
                 while (rightCounter > 0) {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
@@ -983,7 +982,7 @@ macVim.normal_keydown = function (e) {
                 // Only delete based whether or not text is selected
                 if (docs.isTextSelected() && numRepeats > 1) {
                     this.deleteOrCutAndUndo(shouldWeCut);
-                    // Undo our delete and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
+                    // Undo our delete, and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
                     docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
                     docs.pressKey(docs.codeFromKey("Backspace"));
                 }
@@ -1296,7 +1295,7 @@ macVim.normal_keydown = function (e) {
                         docs.pressKey(docs.codeFromKey("ArrowRight"));
                     }
                     else {
-                        // There is stuff on the line so we have to go back and delete it actually
+                        // There is stuff on the line, so we have to go back and delete it actually
                         docs.pressKey(docs.codeFromKey("ArrowRight"));
                         docs.pressKey(docs.codeFromKey("Backspace"));
                     }
@@ -1705,7 +1704,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 					else {
 						// Trailing spaces are currently highlighted, which we will destroy
 						docs.pressKey(docs.codeFromKey("Backspace"));
-						docs.pressKey(docs.codeFromKey("Delete")); // **Different than Windows** Like actual vim, we now have to bring the previous line up
+						docs.pressKey(docs.codeFromKey("Delete")); // **Different from Windows** Like actual vim, we now have to bring the previous line up
 
 						// Delete the next word on the next line as well (one arrow right for the enter, one for the actual word)
 						docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
@@ -1772,7 +1771,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 		let [startXCoord, startYCoord] = docs.getCoords();
 		docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		let [middleXCoord, middleYCoord] = docs.getCoords();
-		if (startXCoord == middleXCoord && startYCoord == middleYCoord) {
+		if (startXCoord === middleXCoord && startYCoord === middleYCoord) {
 			// At start of file, do nothing
 			navigator.clipboard.writeText("");
 		}
