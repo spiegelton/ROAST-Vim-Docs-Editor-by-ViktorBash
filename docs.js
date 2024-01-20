@@ -622,10 +622,8 @@ docs._handleAfterSearch = function (coords, searchLineOption) {
             if (belowTheTopBoundary && aboveTheBottomBoundary) {
                 // The character is in bounds
 
-                console.log(searchLineOption);
                 if (searchLineOption === docs.searchLineOptions.t) {
                     // We must be on the character before the one we want for "t" command
-                    console.log("WOO");
                     docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
 

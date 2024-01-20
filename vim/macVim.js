@@ -458,6 +458,38 @@ macVim.normal_keydown = function (e) {
     const keyMapN = keyMap.keyMapN;
 
     switch (true) {
+        case (keyMapN.f[0] === this.currentSequence):
+        case (keyMapN.t[0] === this.currentSequence):
+        {
+            let searchLineOption;
+            if (keyMapN.f[0] === this.currentSequence) {
+                searchLineOption = docs.searchLineOptions.f;
+            }
+            else {
+                searchLineOption = docs.searchLineOptions.t;
+            }
+
+            // Find character on the current line (or do nothing if there is no character on the current line)
+            let character = e.key;
+
+            let [xCoord, yCoord] = docs.getCoords();
+            this.moveToEndOfLine();
+            let [lineEndXCoord, lineEndYCoord] = docs.getCoords();
+            docs.moveToCoords(xCoord, yCoord);
+
+            let coords = {
+                xCoord: xCoord,
+                yCoord: yCoord,
+                lineEndXCoord: lineEndXCoord,
+                lineEndYCoord: lineEndYCoord
+            }
+
+
+            docs.inputIntoSearchBox(character, coords, searchLineOption);
+
+            this.clearData();
+            return true;
+        }
         case (keyMapN.replaceCharacter[0] === this.currentSequence):
         {
             let keyCharacter = e.key;
