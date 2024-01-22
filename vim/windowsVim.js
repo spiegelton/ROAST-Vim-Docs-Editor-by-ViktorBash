@@ -614,6 +614,44 @@ windowsVim.normal_keydown = function (e) {
     }
 
     switch (true) {
+        case (keyMapN.joinLine[0] === windowsVim.currentSequence && (keyMapN.joinLine[1] === true || keyMapN.joinLine[2] === modifierInput)):
+        {
+            this.moveToEndOfLine();
+            docs.pressSpecialKey(" ");
+            let [startXCoord, startYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [endXCoord, endYCoord] = docs.getCoords();
+
+            if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                // We are at the end of the file, reverse what we did and do nothing
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                this.clearData();
+                return true;
+            }
+
+            docs.pressKey(docs.codeFromKey("Backspace"));
+            // Let's check that it's not an empty line on the bottom that we're joining to the top line
+            let [initialXCoord, initialYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [finalXCoord, finalYCoord] = docs.getCoords()
+            if (initialYCoord === finalYCoord && initialXCoord === finalXCoord) {
+                // Empty line at end of file
+                docs.pressKey(docs.codeFromKey("Backspace"));
+            }
+            else if (initialYCoord === finalYCoord) {
+                // Not an empty line
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft")); // Position ourselves on the space that we added
+            }
+            else {
+                // Empty line
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("Backspace")); // Undo our space
+            }
+
+            this.clearData();
+            return true;
+        }
         case (keyMapN["0"][0] === this.currentSequence && (keyMapN["0"][1] === true || keyMapN["0"][2] === modifierInput)):
             {
                 let regexNumMatch = /\d/;

@@ -47,7 +47,6 @@ if (!docs.isMac) {
             Shift: 16,
             Control: 17,
             Escape: 27,
-            Space: 32,
             End: 35,
             Home: 36,
             ArrowLeft: 37,
