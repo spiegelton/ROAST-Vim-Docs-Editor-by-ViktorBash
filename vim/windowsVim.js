@@ -2860,6 +2860,7 @@ windowsVim.replace_keydown = function (e) {
         }
         case (keyMapR.escape[0] === e.key && (keyMapR.escape[1] === true || keyMapR.escape[2] === modifierInput)):
         case (keyMapR.ctrlC[0] === e.key && (keyMapR.ctrlC[1] === true || keyMapR.ctrlC[2] === modifierInput)):
+        case (e.key === "Escape"):
         {
             e.preventDefault();
             e.stopPropagation();
