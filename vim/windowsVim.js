@@ -528,10 +528,32 @@ windowsVim.normal_keydown = function (e) {
                 let keyFunc = docs.pressKey;
                 let keyFuncInput = e.key.charCodeAt(0);
 
+                if (docs.passThroughKeys.has(keyCharacter)) {
+                    // We do not clear data, because we actually want to repeat this command on the next keyboard event
+                    // For example, if the user has pressed "AudioVolumeUp", we still want them to be in the middle of
+                    // executing the replace command
+                    return true;
+                }
+
+                switch (true) {
+                    case (keyMapN.ctrlC[0] === e.key && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+                    case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+                    case (keyCharacter === "Enter"):
+                    {
+                        // We want to clear data if the user is trying to escape
+                        this.clearData();
+                        return true;
+                    }
+                }
+
                 if ("-,. '!#$%&*()+\“-".indexOf(keyCharacter) > -1 || keyCharacter === "Tab" || keyCharacter === "\"") {
                     // Instead of using the regular press Key, we need to handle edge cases of special keys
                     keyFunc = docs.pressSpecialKey;
                     keyFuncInput = keyCharacter; // We will pass in the actual char/string instead of the numeric code
+                }
+
+                if (keyCharacter === "Enter") {
+                    keyFuncInput = docs.codeFromKey("Enter");
                 }
 
                 // if we're at the end of a line, r should go on the current line

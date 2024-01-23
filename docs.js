@@ -36,6 +36,10 @@ docs.setUp = function () {
 
 }
 
+// Function keys (F1-F32), modifier keys (Ctrl, Alt, Shift, Meta), and "Escape" are not included
+// Intended for keybindings where we input a key to add to the screen or something (like with "r" or "f", etc)
+docs.passThroughKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete", "Home", "End", "PageUp", "PageDown", "Insert", "NumLock", "ScrollLock", "AudioVolumeMute", "AudioVolumeUp", "AudioVolumeDown", "MediaTrackNext", "MediaTrackPrevious", "MediaStop", "MediaPlayPause", "Pause", "Select", "Dead", "LaunchMail", "KanjiMode"]);
+
 // Helper method to translate keys (including a few special/command keys) to
 // keyCodes for use with docs.pressKey(keyCode, ...).
 if (!docs.isMac) {

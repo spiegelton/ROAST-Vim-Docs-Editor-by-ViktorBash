@@ -527,13 +527,24 @@ macVim.normal_keydown = function (e) {
         case (keyMapN.replaceCharacter[0] === this.currentSequence):
         {
             let keyCharacter = e.key;
-            let passThroughKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete", "Home", "End", "PageUp", "PageDown", "Insert", "Escape"])
 
             let keyFunc = docs.pressKey
             let keyFuncInput = e.key.charCodeAt(0);
-            if (passThroughKeys.has(keyCharacter)) {
+
+            if (docs.passThroughKeys.has(keyCharacter)) {
                 this.clearData();
                 return true;
+            }
+
+            switch (true) {
+                case (keyMapN.ctrlC[0] === e.key && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+                case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+                case (keyCharacter === "Enter"):
+                {
+                    // We want to clear data if the user is trying to escape
+                    this.clearData();
+                    return true;
+                }
             }
 
             if ("-,. '!#$%&*()+\“-".indexOf(keyCharacter) > -1 || keyCharacter === "Tab" || keyCharacter === "\"") {
