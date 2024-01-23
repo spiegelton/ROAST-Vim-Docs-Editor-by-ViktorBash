@@ -2304,7 +2304,9 @@ macVim.visual_keydown = function (e) {
         case (keyMapV.pasteBeforeCursor[0] === this.currentSequence && (keyMapV.pasteBeforeCursor[1] === true || keyMapV.pasteBeforeCursor[2] === modifierInput)):
             {
                 // Paste
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
 
                 setTimeout(() => {
                     docs.pasteRegular();
@@ -2318,7 +2320,10 @@ macVim.visual_keydown = function (e) {
         case (keyMapV.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+
                 docs.pastePlainText();
 
                 this.clearData();
@@ -2732,7 +2737,9 @@ macVim.visual_line_keydown = function (e) {
         case (keyMapVLine.pasteBeforeCursor[0] === this.currentSequence && (keyMapVLine.pasteBeforeCursor[1] === true || keyMapVLine.pasteBeforeCursor[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
 
                 setTimeout(() => {
                     docs.pasteRegular();
@@ -2745,7 +2752,10 @@ macVim.visual_line_keydown = function (e) {
         case (keyMapVLine.pasteNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
         case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+
                 docs.pastePlainText();
 
                 macVim.clearData();
