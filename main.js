@@ -169,8 +169,20 @@ function continueRunVim(vimVariant) {
 				}
 				else {
 					// We dragged
+					// HOWEVER, there's a chance we dragged and selected no text still. If that happens
+					// we want to highlight one character (for UX) still
 					if (vimVariant.mode === "normal") {
-						vimVariant.switchToVisualMode(false);
+						// We use a setTimeout() because it doesn't work without one
+						setTimeout(() => {
+							if (docs.isTextSelected()) {
+								// We dragged and selected text, good to go
+								vimVariant.switchToVisualMode(false);
+							}
+							else {
+								// We dragged and did not select text, so we want to highlight one character
+								vimVariant.switchToVisualMode(true);
+							}
+						}, 1)
 					}
 				}
 
