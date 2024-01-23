@@ -126,6 +126,7 @@ export function getDefaultKeyBindings() {
 		F: ["F", false, 0b0100, "Move cursor to previous occurrence of character on current line", null],
 		T: ["T", false, 0b0100, "Move cursor to right after previous occurrence of character on current line", null],
 		joinLine: ["J", false, 0b0100, "Join current line with the line below it with a space in between", null],
+		space: [" ", false, 0b0000, "Move cursor right", null],
 	}
 
 	let keyMapI = {
@@ -192,6 +193,7 @@ export function getDefaultKeyBindings() {
 		"0": ["0", false, 0b000, "Highlight to start of the line", null],
 		indent: [">", false, 0b0100, "Indent", null],
 		outdent: ["<", false, 0b0100, "Outdent", null],
+		space: [" ", false, 0b0000, "Highlight right", null],
 	}
 
 	let keyMapVLine = {

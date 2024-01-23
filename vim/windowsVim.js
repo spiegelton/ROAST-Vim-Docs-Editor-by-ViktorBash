@@ -797,6 +797,7 @@ windowsVim.normal_keydown = function (e) {
                 return true;
             }
         case (keyMapN.l[0] === windowsVim.currentSequence && (keyMapN.l[1] === true || keyMapN.l[2] === modifierInput)):
+        case (keyMapN.space[0] === windowsVim.currentSequence && (keyMapN.space[1] === true || keyMapN.space[2] === modifierInput)):
             {
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
@@ -2134,6 +2135,7 @@ windowsVim.visual_keydown = function (e) {
             }
         case (keyMapV.arrowRight[0] === windowsVim.currentSequence && (keyMapV.arrowRight[1] === true || keyMapV.arrowRight[2] === modifierInput)):
         case (keyMapV.l[0] === windowsVim.currentSequence && (keyMapV.l[1] === true || keyMapV.l[2] === modifierInput)):
+        case (keyMapV.space[0] === windowsVim.currentSequence && (keyMapV.space[1] === true || keyMapV.space[2] === modifierInput)):
             {
                 const numRepeats = parseInt(windowsVim.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
