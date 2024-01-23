@@ -539,7 +539,7 @@ macVim.normal_keydown = function (e) {
             switch (true) {
                 case (keyMapN.ctrlC[0] === e.key && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
                 case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
-                case (keyCharacter === "Enter"):
+                case (keyCharacter === "Escape"):
                 {
                     // We want to clear data if the user is trying to escape
                     this.clearData();
