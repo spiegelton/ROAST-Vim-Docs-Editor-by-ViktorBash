@@ -807,6 +807,7 @@ macVim.normal_keydown = function (e) {
                 return true;
             }
         case (keyMapN.l[0] === this.currentSequence && (keyMapN.l[1] === true || keyMapN.l[2] === modifierInput)):
+        case (keyMapN.space[0] === this.currentSequence && (keyMapN.space[1] === true || keyMapN.space[2] === modifierInput)):
             {
                 const numRepeats = parseInt(this.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
@@ -2178,6 +2179,7 @@ macVim.visual_keydown = function (e) {
             }
         case (keyMapV.arrowRight[0] === this.currentSequence && (keyMapV.arrowRight[1] === true || keyMapV.arrowRight[2] === modifierInput)):
         case (keyMapV.l[0] === this.currentSequence && (keyMapV.l[1] === true || keyMapV.l[2] === modifierInput)):
+        case (keyMapV.space[0] === this.currentSequence && (keyMapV.space[1] === true || keyMapV.space[2] === modifierInput)):
             {
                 const numRepeats = parseInt(this.num) || 1;
                 for (let i = 0; i < numRepeats; i++) {
