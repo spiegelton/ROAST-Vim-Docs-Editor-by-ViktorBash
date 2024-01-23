@@ -603,8 +603,8 @@ docs._handleAfterSearchCapital = function (coords, searchLineOption) {
     // Now we either have highlighted a character (that may or may not be on the line we want), or we have not
     let checkCounter = 0;
     let checkingForHighlightedText = setInterval(() => {
-        if (checkCounter > 50) {
-            // We have waited for 500 ms, and still have not found any highlighted text
+        if (checkCounter > 150) {
+            // We have waited for 1500 ms, and still have not found any highlighted text
             // This likely means the key we were searching for was not found (so just do nothing and stay where we are)
             clearInterval(checkingForHighlightedText);
         }
@@ -653,8 +653,8 @@ docs._handleAfterSearch = function (coords, searchLineOption) {
     // Now we either have highlighted a character (that may or may not be on the line we want), or we have not
     let checkCounter = 0;
     let checkingForHighlightedText = setInterval(() => {
-        if (checkCounter > 50) {
-            // We have waited for 500 ms, and still have not found any highlighted text
+        if (checkCounter > 150) {
+            // We have waited for 1500 ms, and still have not found any highlighted text
             // This likely means the key we were searching for was not found (so just do nothing and stay where we are)
             clearInterval(checkingForHighlightedText);
         }
