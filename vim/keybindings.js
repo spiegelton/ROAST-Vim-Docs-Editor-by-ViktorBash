@@ -4,6 +4,7 @@ const KEY_SEPARATOR = "•";
 
 export function getModifierInput(e) {
 	// Get bitmask from e (keyboard event)
+	// Bitmask: (ctrl, shift, alt, meta)
 	return ((+ e.ctrlKey) << 3) | ((+ e.shiftKey) << 2) | ((+ e.altKey) << 1) | (+ e.metaKey)
 }
 export { KEY_SEPARATOR };

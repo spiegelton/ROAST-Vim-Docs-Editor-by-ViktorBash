@@ -517,12 +517,7 @@ docs._clickPageBreakButton = async function (ariaLabel) {
     docs._simulateClick(buttonElem);
 }
 
-// Execute a command that opens a popup menu, which requires us to "reactivate" our event listeners afterwards (for
-// some reason)
-docs._clickPopupButton = function (ariaLabel) {
-    // Click whichever button we are trying to click
-    docs.__clickButtonFromAriaLabel(ariaLabel, true);
-
+docs.reactivateAfterPopupButton = function () {
     // We must detect when the menu is exited out of, and then click the "Bold" button twice
     // This is hacky, but it works. Otherwise, our event handlers for keydown events are not active for some reason.
     // We're basically refocusing the document so the event handlers are live again (Even though .hasfocus() returns true for some reason)
@@ -544,6 +539,14 @@ docs._clickPopupButton = function (ariaLabel) {
         }
 
     }, 10)
+}
+
+// Execute a command that opens a popup menu, which requires us to "reactivate" our event listeners afterwards (for
+// some reason)
+docs._clickPopupButton = function (ariaLabel) {
+    // Click whichever button we are trying to click
+    docs.__clickButtonFromAriaLabel(ariaLabel, true);
+    docs.reactivateAfterPopupButton();
 }
 
 docs._clickToolsButton = function (ariaLabel) {
