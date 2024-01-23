@@ -682,6 +682,15 @@ macVim.normal_keydown = function (e) {
     }
 
 	switch (true) {
+        case (keyMapN.escape[0] === this.currentSequence && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+        case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+        case (keyMapN.ctrlC[0] === this.currentSequence && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+        case (keyMapN.ctrlC[0] === e.key && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+        {
+            // Remove any saved queries that the user had
+            macVim.clearData();
+            return true;
+        }
         case (keyMapN.joinLine[0] === this.currentSequence && (keyMapN.joinLine[1] === true || keyMapN.joinLine[2] === modifierInput)):
         {
             this.moveToEndOfLine();
@@ -879,13 +888,6 @@ macVim.normal_keydown = function (e) {
                 for (let i = 0; i < numRepeats; i++) {
                     docs.pressKey(docs.codeFromKey("ArrowUp"), true);
                 }
-                macVim.clearData();
-                return true;
-            }
-        case (keyMapN.escape[0] === this.currentSequence && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
-        case (keyMapN.ctrlC[0] === this.currentSequence && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
-            {
-		        // Remove any saved queries that the user had
                 macVim.clearData();
                 return true;
             }
@@ -2151,6 +2153,18 @@ macVim.visual_keydown = function (e) {
     }
 
 	switch (true) {
+        case (keyMapV.escape[0] === this.currentSequence && (keyMapV.escape[1] === true || keyMapV.escape[2] === modifierInput)):
+        case (keyMapV.escape[0] === e.key && (keyMapV.escape[1] === true || keyMapV.escape[2] === modifierInput)):
+        case (keyMapV.ctrlC[0] === this.currentSequence && (keyMapV.ctrlC[1] === true || keyMapV.ctrlC[2] === modifierInput)):
+        case (keyMapV.ctrlC[0] === e.key && (keyMapV.ctrlC[1] === true || keyMapV.ctrlC[2] === modifierInput)):
+        {
+            // Escape visual mode.
+            docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+            // go to the right side when the left side could be a solution as well
+            macVim.clearData();
+            macVim.switchToNormalMode();
+            return true;
+        }
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
             {
                 let regexNumMatch = /\d/;
@@ -2256,16 +2270,6 @@ macVim.visual_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                 }
                 this.clearData();
-                return true;
-            }
-        case (keyMapV.escape[0] === this.currentSequence && (keyMapV.escape[1] === true || keyMapV.escape[2] === modifierInput)):
-        case (keyMapV.ctrlC[0] === this.currentSequence && (keyMapV.ctrlC[1] === true || keyMapV.ctrlC[2] === modifierInput)):
-            {
-                // Escape visual mode.
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                // go to the right side when the left side could be a solution as well
-                macVim.clearData();
-                macVim.switchToNormalMode();
                 return true;
             }
         case (keyMapV.u[0] === this.currentSequence && (keyMapV.u[1] === true || keyMapV.u[2] === modifierInput)):
@@ -2614,7 +2618,20 @@ macVim.visual_line_keydown = function (e) {
     }
 
 	switch (true) {
-        case (keyMapVLine.arrowUp[0] === this.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
+        case (keyMapVLine.escape[0] === this.currentSequence && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
+        case (keyMapVLine.escape[0] === e.key && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
+        case (keyMapVLine.ctrlC[0] === this.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
+        case (keyMapVLine.ctrlC[0] === e.key && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
+        case (keyMapVLine.exitVisualLineMode[0] === this.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
+        {
+            // Escape visual mode.
+            docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+            // go to the right side when the left side could be a solution as well
+            macVim.clearData();
+            macVim.switchToNormalMode();
+            return true;
+        }
+        case (keyMapVLine.arrowUp[0] === this.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)):
         case (keyMapVLine.arrowUpCtrl[0] === this.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)): 
         case (keyMapVLine.k[0] === this.currentSequence && (keyMapVLine.k[1] === true || keyMapVLine.k[2] === modifierInput)): 
         {
@@ -2681,17 +2698,6 @@ macVim.visual_line_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
                 }
                 this.clearData();
-                return true;
-            }
-        case (keyMapVLine.escape[0] === this.currentSequence && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
-        case (keyMapVLine.ctrlC[0] === this.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
-        case (keyMapVLine.exitVisualLineMode[0] === this.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
-            {
-                // Escape visual mode.
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                // go to the right side when the left side could be a solution as well
-                macVim.clearData();
-                macVim.switchToNormalMode();
                 return true;
             }
         case (keyMapVLine.u[0] === this.currentSequence && (keyMapVLine.u[1] === true || keyMapVLine.u[2] === modifierInput)):
