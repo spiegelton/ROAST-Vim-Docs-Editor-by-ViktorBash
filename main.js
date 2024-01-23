@@ -133,6 +133,14 @@ function continueRunVim(vimVariant) {
 			area.addEventListener("mousedown", (event) => {
 				mouseDown = true;
 				mouseDownCoords = [event.clientX, event.clientY];
+
+				// If we're in normal mode, let's update the cursor caret width on mousedown for better UX
+				// We use a setTimeout() because it doesn't work without one
+				if (vimVariant.mode === "normal") {
+					setTimeout(() => {
+						docs.setCursorWidth(vimVariant.mode);
+					}, 1)
+				}
 			});
 
 			// Mouse up (bulk of the logic)
