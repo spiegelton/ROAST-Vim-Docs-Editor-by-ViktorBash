@@ -527,9 +527,14 @@ macVim.normal_keydown = function (e) {
         case (keyMapN.replaceCharacter[0] === this.currentSequence):
         {
             let keyCharacter = e.key;
+            let passThroughKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete", "Home", "End", "PageUp", "PageDown", "Insert", "Escape"])
 
             let keyFunc = docs.pressKey
             let keyFuncInput = e.key.charCodeAt(0);
+            if (passThroughKeys.has(keyCharacter)) {
+                this.clearData();
+                return true;
+            }
 
             if ("-,. '!#$%&*()+\“-".indexOf(keyCharacter) > -1 || keyCharacter === "Tab" || keyCharacter === "\"") {
                 // Instead of using the regular press Key, we need to handle edge cases of special keys
@@ -537,6 +542,9 @@ macVim.normal_keydown = function (e) {
                 keyFuncInput = keyCharacter; // We will pass in the actual char/string instead of the numeric code
             }
 
+            if (keyCharacter === "Enter") {
+                keyFuncInput = docs.codeFromKey("Enter");
+            }
 
             const numRepeats = parseInt(macVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
