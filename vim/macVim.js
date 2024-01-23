@@ -2896,8 +2896,8 @@ macVim.insert_keydown = function (e) {
             // User has pressed "find and replace" in insert mode, or "word count"
             // We'll let it pass through like normal, but we need to actually watch out because
             // we need to reattach our event listeners/stuff afterward (Vim stops working otherwise)
-            console.log("AYE");
             docs.reactivateAfterPopupButton();
+            return true;
         }
 	}
 };

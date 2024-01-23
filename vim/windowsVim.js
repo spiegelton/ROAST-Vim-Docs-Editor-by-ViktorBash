@@ -2828,6 +2828,15 @@ windowsVim.insert_keydown = function (e) {
 			windowsVim.switchToNormalMode();
 			return true;
 		}
+        case (e.key === "h" && modifierInput === 0b1000):
+        case (e.key === "C" && modifierInput === 0b1100):
+        {
+            // User has pressed "find and replace" in insert mode, or "word count"
+            // We'll let it pass through like normal, but we need to actually watch out because
+            // we need to reattach our event listeners/stuff afterward (Vim stops working otherwise)
+            docs.reactivateAfterPopupButton();
+            return true;
+        }
 	}
 
 	// If nothing in the switch statement runs, then we just let the key pass through
