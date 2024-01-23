@@ -470,6 +470,24 @@ windowsVim.normal_keydown = function (e) {
             // Find character on the current line (or do nothing if there is no character on the current line)
             let character = e.key;
 
+            switch (true) {
+                case (keyMapN.ctrlC[0] === e.key && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+                case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+                case (character === "Escape"):
+                {
+                    // We want to clear data if the user is trying to escape
+                    this.clearData();
+                    return true;
+                }
+            }
+
+            if (docs.passThroughKeys.has(character)) {
+                // We do not clear data, because we actually want to repeat this command on the next keyboard event
+                // For example, if the user has pressed "AudioVolumeUp", we still want them to be in the middle of
+                // executing the replace command
+                return true;
+            }
+
             let [xCoord, yCoord] = docs.getCoords();
             this.moveToStartOfLine();
             let [lineStartXCoord, lineStartYCoord] = docs.getCoords();
@@ -500,6 +518,24 @@ windowsVim.normal_keydown = function (e) {
 
             // Find character on the current line (or do nothing if there is no character on the current line)
             let character = e.key;
+
+            switch (true) {
+                case (keyMapN.ctrlC[0] === e.key && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+                case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+                case (character === "Escape"):
+                {
+                    // We want to clear data if the user is trying to escape
+                    this.clearData();
+                    return true;
+                }
+            }
+
+            if (docs.passThroughKeys.has(character)) {
+                // We do not clear data, because we actually want to repeat this command on the next keyboard event
+                // For example, if the user has pressed "AudioVolumeUp", we still want them to be in the middle of
+                // executing the replace command
+                return true;
+            }
 
             let [xCoord, yCoord] = docs.getCoords();
             this.moveToEndOfLine();
