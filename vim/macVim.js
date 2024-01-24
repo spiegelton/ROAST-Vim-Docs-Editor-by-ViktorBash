@@ -11,10 +11,10 @@ let macVim = {
 	num: "", // Keep track of number keys pressed by the user if they want to repeat a command
 	currentSequence: "", // Keep track of key sequences (ex: "gg")
     // Note: There is no "incompleteKeyMapsI" because commands can be a max of 1 character in insert mode
-
     replaceModeUndoCounterStack: [],
     // The reason we use a stack instead of a counter is because if we hit enter we need to do 1 undo, but if
     // we hit any other regular key we need to do 2 undos, if we added to the end of a line we need to do 1 undo
+    visualLineModeDown: true, // Keep track of whether we're highlighting up or down
 };
 
 // List of shortcuts for normal, visual and visual line mode that we will let pass through, primarily Chrome shortcuts
@@ -91,14 +91,33 @@ macVim.switchToVisualLineMode = function () {
 	macVim.currentSequence = "";
 	macVim.mode = "visual_line";
 	macVim.num = "";
+    macVim.visualLineModeDown = true;
 	UI.updateUISequenceText("");
 	UI.updateUIModeText("-- VISUAL LINE --");
 	docs.setCursorWidth(this.mode);
 
     // Get to the start of the current line
     this.moveToStartOfLine();
-    // Highlight down
-	docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+
+    // Detect if we're on an empty line or not
+    let [startXCoord, startYCoord] = docs.getCoords();
+    docs.pressKey(docs.codeFromKey("ArrowRight"));
+    let [endXCoord, endYCoord] = docs.getCoords();
+
+    if (startXCoord === endXCoord && startYCoord === endYCoord) {
+        // At end of file on empty line, highlight
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+    }
+    else if (startYCoord !== endYCoord) {
+        // On empty line, highlight the empty line
+        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+    }
+    else {
+        // On non-empty line
+        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+    }
 }
 
 macVim.switchToInsertMode = function () {
@@ -2585,6 +2604,28 @@ macVim.visual_keydown = function (e) {
 
 };
 
+macVim.switchVisualLineDirection = function () {
+    // We know that no text is highlighted if this function is called
+
+    this.visualLineModeDown =  !this.visualLineModeDown;
+    if (this.visualLineModeDown === false) {
+        // We have to change our direction to up now
+        this.moveToEndOfLine();
+        docs.pressKey(docs.codeFromKey("ArrowRight"));
+        docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+
+        docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+    }
+    else {
+        // We have to change our direction to down now
+        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        this.moveToStartOfLine();
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+        docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+
+    }
+}
+
 macVim.visual_line_keydown = function (e) {
 	if (e.key.match(/F\d+/)) {
 		// Pass through any function keys.
@@ -2628,80 +2669,161 @@ macVim.visual_line_keydown = function (e) {
         case (keyMapVLine.ctrlC[0] === this.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
         case (keyMapVLine.ctrlC[0] === e.key && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
         case (keyMapVLine.exitVisualLineMode[0] === this.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
+        case (keyMapVLine.exitToVisualMode[0] === macVim.currentSequence && (keyMapVLine.exitToVisualMode[1] === true || keyMapVLine.exitToVisualMode[2] === modifierInput)):
+        case (keyMapVLine.redo[0] === this.currentSequence && (keyMapVLine.redo[1] === true || keyMapVLine.redo[2] === modifierInput)):
         {
             // Escape visual mode.
-            docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-            // go to the right side when the left side could be a solution as well
+            if (!docs.isTextSelected()) {
+                // Do nothing (this should never hit though)
+            }
+            else if (this.visualLineModeDown) {
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                this.moveToEndOfLine();
+            }
+            else {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            }
+
+            if (keyMapVLine.exitToVisualMode[0] === macVim.currentSequence && (keyMapVLine.exitToVisualMode[1] === true || keyMapVLine.exitToVisualMode[2] === modifierInput)) {
+                this.clearData();
+                this.switchToVisualMode();
+                return true;
+            }
+
             macVim.clearData();
             macVim.switchToNormalMode();
             return true;
         }
         case (keyMapVLine.arrowUp[0] === this.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)):
         case (keyMapVLine.arrowUpCtrl[0] === this.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)): 
-        case (keyMapVLine.k[0] === this.currentSequence && (keyMapVLine.k[1] === true || keyMapVLine.k[2] === modifierInput)): 
+        case (keyMapVLine.k[0] === this.currentSequence && (keyMapVLine.k[1] === true || keyMapVLine.k[2] === modifierInput)):
+        case (keyMapVLine["{"][0] === this.currentSequence && (keyMapVLine["{"][1] === true || keyMapVLine["{"][2] === modifierInput)):
         {
 			const numRepeats = parseInt(macVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
 				docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+
+                if (!docs.isTextSelected()) {
+                    this.switchVisualLineDirection();
+                }
 			}
 			macVim.clearData();
 			return true;
         }
         case (keyMapVLine.arrowDown[0] === this.currentSequence && (keyMapVLine.arrowDown[1] === true || keyMapVLine.arrowDown[2] === modifierInput)): 
         case (keyMapVLine.arrowDownCtrl[0] === this.currentSequence && (keyMapVLine.arrowDownCtrl[1] === true || keyMapVLine.arrowDownCtrl[2] === modifierInput)): 
-        case (keyMapVLine.j[0] === this.currentSequence && (keyMapVLine.j[1] === true || keyMapVLine.j[2] === modifierInput)): 
+        case (keyMapVLine.j[0] === this.currentSequence && (keyMapVLine.j[1] === true || keyMapVLine.j[2] === modifierInput)):
+        case (keyMapVLine["}"][0] === this.currentSequence && (keyMapVLine["}"][1] === true || keyMapVLine["}"][2] === modifierInput)):
         {
 			// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
 			const numRepeats = parseInt(macVim.num) || 1;
 			for (let i = 0; i < numRepeats; i++) {
-				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-				docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                if (this.visualLineModeDown === true) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                }
+                else {
+                    // We are going down when our position is up, so we can only go down without using the ctrlKey
+                    // unfortunately, otherwise we nuke ourselves and go all the way down to the end.
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), false, true);
+                }
+
+                if (!docs.isTextSelected()) {
+                    this.switchVisualLineDirection();
+                }
 			}
 			macVim.clearData();
 			return true;
         }
         case (keyMapVLine.ctrlDPageDown[0] === this.currentSequence && (keyMapVLine.ctrlDPageDown[1] === true || keyMapVLine.ctrlDPageDown[2] === modifierInput)): 
         {
-			// Ctrl-d is page down
-			docs.pressKey(docs.codeFromKey("PageDown"), false, true);
-			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+            // Ctrl-d is page-down, so move down and then ensure we are still line-based
+            let iterations = 6;
+            if (e.repeat) {
+                iterations = 1;
+                if (this.visualLineModeDown === false) {
+                    iterations = 2;
+                }
+            }
+
+            for (let i = 0; i < iterations; i++) {
+                if (this.visualLineModeDown === true) {
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                } else {
+                    // We are going down when our position is up, so we can only go down without using the ctrlKey
+                    // unfortunately, otherwise we nuke ourselves and go all the way down to the end.
+                    docs.pressKey(docs.codeFromKey("ArrowDown"), false, true);
+                }
+
+                if (!docs.isTextSelected()) {
+                    this.switchVisualLineDirection();
+                }
+            }
+
 			macVim.clearData();
 			return true;
         }
         case (keyMapVLine.ctrlUPageUp[0] === this.currentSequence && (keyMapVLine.ctrlUPageUp[1] === true || keyMapVLine.ctrlUPageUp[2] === modifierInput)): 
         {
-			docs.pressKey(docs.codeFromKey("PageUp"), false, true);
-			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+            // Ctrl-u is page-up, so move up and then ensure we are still line-based
+            let iterations = 6
+            if (e.repeat) {
+                iterations = 0;
+            }
+
+            for (let i = 0; i < iterations; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), false, true);
+                if (!docs.isTextSelected()) {
+                    this.switchVisualLineDirection();
+                }
+            }
+
+            docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+            if (!docs.isTextSelected()) {
+                this.switchVisualLineDirection();
+            }
+
 			macVim.clearData();
 			return true;
         }
         case (keyMapVLine.gg[0] === this.currentSequence && (keyMapVLine.gg[1] === true || keyMapVLine.gg[2] === modifierInput)):
             {
-                docs.pressKey(docs.codeFromKey("Home"), true, true);
+                // We must traverse to the top
+                if (!this.visualLineModeDown) {
+                    // Base case
+                    docs.pressKey(docs.codeFromKey("Home"), true, true);
+                }
+                else {
+                    // Edge case
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    this.moveToEndOfLine();
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+
+                    docs.pressKey(docs.codeFromKey("Home"), true, true);
+                }
+
+                this.visualLineModeDown = false;
                 this.clearData();
                 return true;
             }
         case (keyMapVLine.G[0] === this.currentSequence && (keyMapVLine.G[1] === true || keyMapVLine.G[2] === modifierInput)):
             {
-                docs.pressKey(docs.codeFromKey("End"), true, true);
-                this.clearData();
-                return true;
-            }
-        case (keyMapVLine["{"][0] === this.currentSequence && (keyMapVLine["{"][1] === true || keyMapVLine["{"][2] === modifierInput)):
-            {
-                const numRepeats = parseInt(this.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
+                // We must traverse down
+                if (this.visualLineModeDown) {
+                    // Base case
+                    docs.pressKey(docs.codeFromKey("End"), true, true);
                 }
-                this.clearData();
-                return true;
-            }
-        case (keyMapVLine["}"][0] === this.currentSequence && (keyMapVLine["}"][1] === true || keyMapVLine["}"][2] === modifierInput)):
-            {
-                const numRepeats = parseInt(this.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+                else {
+                    // Edge case (we were going up)
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    this.moveToStartOfLine();
+                    docs.pressKey(docs.codeFromKey("End"), true, true);
                 }
+
+                this.visualLineModeDown = true;
                 this.clearData();
                 return true;
             }
@@ -2715,15 +2837,6 @@ macVim.visual_line_keydown = function (e) {
             {
                 docs.clickButton(docs.toolbarMenuButtonOptions.uppercase);
                 this.clearData();
-                return true;
-            }
-        case (keyMapVLine.redo[0] === this.currentSequence && (keyMapVLine.redo[1] === true || keyMapVLine.redo[2] === modifierInput)):
-            {
-                // Escape visual mode.
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                // go to the right side when the left side could be a solution as well
-                macVim.clearData();
-                macVim.switchToNormalMode();
                 return true;
             }
         case (keyMapVLine.slashSearch[0] === this.currentSequence && (keyMapVLine.slashSearch[1] === true || keyMapVLine.slashSearch[2] === modifierInput)):
@@ -2769,26 +2882,16 @@ macVim.visual_line_keydown = function (e) {
                 macVim.switchToInsertMode();
                 return true;
             }
-        case (keyMapVLine.exitToVisualMode[0] === this.currentSequence && (keyMapVLine.exitToVisualMode[1] === true || keyMapVLine.exitToVisualMode[2] === modifierInput)):
-            {
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                macVim.clearData();
-                macVim.switchToVisualMode();
-                return true;
-            }
         case (keyMapVLine.appendEndOfHighlight[0] === this.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                this.moveToEndOfLine();
 
-                // TODO: Remove eventually
-                let cursorLocations = docs.getCursorLocations();
-                if (!cursorLocations[3]) {
-                    // If we're not at the end of a file, move left
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                }
-                macVim.clearData();
-                macVim.switchToInsertMode();
+                this.clearData();
+                this.switchToInsertMode();
                 return true;
+
             }
         case (keyMapVLine.x[0] === this.currentSequence && (keyMapVLine.x[1] === true || keyMapVLine.x[2] === modifierInput)):
             {
