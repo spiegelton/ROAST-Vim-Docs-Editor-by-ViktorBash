@@ -2254,7 +2254,9 @@ windowsVim.visual_keydown = function (e) {
         case (keyMapV.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursor[1] === true || keyMapV.pasteBeforeCursor[2] === modifierInput)):
             {
                 // Paste
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
 
                 setTimeout(() => {
                     docs.pasteRegular();
@@ -2267,7 +2269,10 @@ windowsVim.visual_keydown = function (e) {
         case (keyMapV.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+
                 this.moveRightToPasteAfterCursor();
                 docs.pastePlainText();
 
@@ -2668,7 +2673,9 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursor[1] === true || keyMapVLine.pasteBeforeCursor[2] === modifierInput)):
             {
                 // Paste
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
 
                 setTimeout(() => {
                     docs.pasteRegular();
@@ -2681,7 +2688,10 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
                 // We have to first delete the highlighted text, then paste in the clipboard
-                docs.pressKey(docs.codeFromKey("Backspace"));
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+
                 docs.pastePlainText();
 
                 windowsVim.clearData();
