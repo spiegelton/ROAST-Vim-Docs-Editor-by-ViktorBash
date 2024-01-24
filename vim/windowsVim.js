@@ -672,6 +672,15 @@ windowsVim.normal_keydown = function (e) {
     }
 
     switch (true) {
+        case (keyMapN.escape[0] === windowsVim.currentSequence && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+        case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
+        case (keyMapN.ctrlC[0] === windowsVim.currentSequence && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+        case (keyMapN.ctrlC[0] === e.key && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
+        {
+            // Remove any saved queries that the user had
+            windowsVim.clearData();
+            return true;
+        }
         case (keyMapN.joinLine[0] === windowsVim.currentSequence && (keyMapN.joinLine[1] === true || keyMapN.joinLine[2] === modifierInput)):
         {
             this.moveToEndOfLine();
@@ -869,18 +878,6 @@ windowsVim.normal_keydown = function (e) {
                 for (let i = 0; i < numRepeats; i++) {
                     docs.pressKey(docs.codeFromKey("ArrowUp"), true);
                 }
-                windowsVim.clearData();
-                return true;
-            }
-        case (keyMapN.escape[0] === windowsVim.currentSequence && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
-            {
-                // Remove any saved queries that the user had
-                windowsVim.clearData();
-                return true;
-            }
-        case (keyMapN.ctrlC[0] === windowsVim.currentSequence && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
-            {
-                // Remove any saved queries that the user had
                 windowsVim.clearData();
                 return true;
             }
@@ -2105,6 +2102,18 @@ windowsVim.visual_keydown = function (e) {
     }
 
     switch (true) {
+        case (keyMapV.escape[0] === windowsVim.currentSequence && (keyMapV.escape[1] === true || keyMapV.escape[2] === modifierInput)):
+        case (keyMapV.escape[0] === e.key && (keyMapV.escape[1] === true || keyMapV.escape[2] === modifierInput)):
+        case (keyMapV.ctrlC[0] === windowsVim.currentSequence && (keyMapV.ctrlC[1] === true || keyMapV.ctrlC[2] === modifierInput)):
+        case (keyMapV.ctrlC[0] === e.key && (keyMapV.ctrlC[1] === true || keyMapV.ctrlC[2] === modifierInput)):
+        {
+            // Escape visual mode.
+            docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+            // go to the right side when the left side could be a solution as well
+            windowsVim.clearData();
+            windowsVim.switchToNormalMode();
+            return true;
+        }
         case (keyMapV["0"][0] === this.currentSequence && (keyMapV["0"][1] === true || keyMapV["0"][2] === modifierInput)):
             {
                 let regexNumMatch = /\d/;
@@ -2212,16 +2221,6 @@ windowsVim.visual_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                 }
                 windowsVim.clearData();
-                return true;
-            }
-        case (keyMapV.escape[0] === windowsVim.currentSequence && (keyMapV.escape[1] === true || keyMapV.escape[2] === modifierInput)):
-        case (keyMapV.ctrlC[0] === windowsVim.currentSequence && (keyMapV.ctrlC[1] === true || keyMapV.ctrlC[2] === modifierInput)):
-            {
-                // Escape visual mode.
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                // go to the right side when the left side could be a solution as well
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
                 return true;
             }
         case (keyMapV.u[0] === windowsVim.currentSequence && (keyMapV.u[1] === true || keyMapV.u[2] === modifierInput)):
@@ -2557,7 +2556,20 @@ windowsVim.visual_line_keydown = function (e) {
     }
 
     switch (true) {
-        case (keyMapVLine.arrowUp[0] === windowsVim.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)): 
+        case (keyMapVLine.escape[0] === windowsVim.currentSequence && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
+        case (keyMapVLine.escape[0] === e.key && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
+        case (keyMapVLine.ctrlC[0] === windowsVim.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
+        case (keyMapVLine.ctrlC[0] === e.key && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
+        case (keyMapVLine.exitVisualLineMode[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
+        {
+            // Escape visual mode.
+            docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
+            // go to the right side when the left side could be a solution as well
+            windowsVim.clearData();
+            windowsVim.switchToNormalMode();
+            return true;
+        }
+        case (keyMapVLine.arrowUp[0] === windowsVim.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)):
         case (keyMapVLine.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)): 
         case (keyMapVLine.k[0] === windowsVim.currentSequence && (keyMapVLine.k[1] === true || keyMapVLine.k[2] === modifierInput)): 
         {
@@ -2623,17 +2635,6 @@ windowsVim.visual_line_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
                 }
                 windowsVim.clearData();
-                return true;
-            }
-        case (keyMapVLine.escape[0] === windowsVim.currentSequence && (keyMapVLine.escape[1] === true || keyMapVLine.escape[2] === modifierInput)):
-        case (keyMapVLine.ctrlC[0] === windowsVim.currentSequence && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
-        case (keyMapVLine.exitVisualLineMode[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
-            {
-                // Escape visual mode.
-                docs.pressKey(docs.codeFromKey("ArrowRight")); // TODO: Make this better, right now we blindly
-                // go to the right side when the left side could be a solution as well
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
                 return true;
             }
         case (keyMapVLine.u[0] === windowsVim.currentSequence && (keyMapVLine.u[1] === true || keyMapVLine.u[2] === modifierInput)):
