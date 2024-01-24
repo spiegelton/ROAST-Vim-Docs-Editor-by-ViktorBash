@@ -2606,7 +2606,6 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.ctrlC[0] === e.key && (keyMapVLine.ctrlC[1] === true || keyMapVLine.ctrlC[2] === modifierInput)):
         case (keyMapVLine.exitVisualLineMode[0] === windowsVim.currentSequence && (keyMapVLine.exitVisualLineMode[1] === true || keyMapVLine.exitVisualLineMode[2] === modifierInput)):
         case (keyMapVLine.redo[0] === windowsVim.currentSequence && (keyMapVLine.redo[1] === true || keyMapVLine.redo[2] === modifierInput)):
-        case (keyMapVLine.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):
         case (keyMapVLine.exitToVisualMode[0] === windowsVim.currentSequence && (keyMapVLine.exitToVisualMode[1] === true || keyMapVLine.exitToVisualMode[2] === modifierInput)):
         {
             // Escape visual mode.
@@ -2622,11 +2621,6 @@ windowsVim.visual_line_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
             }
 
-            if (keyMapVLine.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)) {
-                this.clearData();
-                this.switchToInsertMode();
-                return true;
-            }
             if (keyMapVLine.exitToVisualMode[0] === windowsVim.currentSequence && (keyMapVLine.exitToVisualMode[1] === true || keyMapVLine.exitToVisualMode[2] === modifierInput)) {
                 this.clearData();
                 this.switchToVisualMode();
@@ -2635,6 +2629,15 @@ windowsVim.visual_line_keydown = function (e) {
 
             windowsVim.clearData();
             windowsVim.switchToNormalMode();
+            return true;
+        }
+        case (keyMapVLine.appendEndOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.appendEndOfHighlight[1] === true || keyMapVLine.appendEndOfHighlight[2] === modifierInput)):
+        {
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            docs.pressKey(docs.codeFromKey("ArrowLeft"));
+            this.moveToEndOfLine();
+            this.clearData();
+            this.switchToInsertMode();
             return true;
         }
         case (keyMapVLine.arrowUp[0] === windowsVim.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)):
