@@ -869,20 +869,8 @@ docs.moveToCoords = function(xCoord, yCoord) {
     }
 }
 
-docs.scrollSoCursorIsTop = function () {
-    // We will scroll and leave 2 lines above where the cursor
-    let scrollElem = document.querySelector(".kix-appview-editor");
-    // Our height to scroll to as the cursor's y coordinate means scroll to the cursor
-    let heightToScrollTo = docs.getYCoord();
-
-    // To leave 2 lines above us, we will need to calculate the width of 2 lines in pixels.
-    // This is done by taking the cursor height, multiplying it by the line formatting height, and then multiplying by 2
-    let cursorHeight = Math.round(parseFloat(docs.cursorCaret.style.height.slice(0, -2)));
+docs._getLineHeight = function () {
     let lineHeight = 1;
-    let linesToLeaveAbove = 2;
-
-    // Here we figure out the line height from the menu item
-
     // Parent element is the container/parent-div for the line height menu options
     let parentElem = document.querySelectorAll("span[aria-label='1.15 1']")[0].parentElement.parentElement.parentElement;
     for (let i = 0; i < parentElem.children.length; i++) {
@@ -910,6 +898,20 @@ docs.scrollSoCursorIsTop = function () {
             }
         }
     }
+    return lineHeight;
+}
+
+docs.scrollSoCursorIsTop = function () {
+    // We will scroll and leave 2 lines above where the cursor
+    let scrollElem = document.querySelector(".kix-appview-editor");
+    // Our height to scroll to as the cursor's y coordinate means scroll to the cursor
+    let heightToScrollTo = docs.getYCoord();
+    let lineHeight = docs._getLineHeight()
+
+    // To leave 2 lines above us, we will need to calculate the width of 2 lines in pixels.
+    // This is done by taking the cursor height, multiplying it by the line formatting height, and then multiplying by 2
+    let cursorHeight = Math.round(parseFloat(docs.cursorCaret.style.height.slice(0, -2)));
+    let linesToLeaveAbove = 2;
 
     // Now we can add 2 lines of space above our cursor
     heightToScrollTo -= cursorHeight * lineHeight * linesToLeaveAbove;
@@ -935,7 +937,28 @@ docs.scrollSoCursorIsCenter = function () {
 }
 
 docs.scrollSoCursorIsBottom = function () {
+    // We will scroll and leave 2 lines below where the cursor is
+    let scrollElem = document.querySelector(".kix-appview-editor");
+    let heightToScrollTo = docs.getYCoord();
 
+    let lineHeight = docs._getLineHeight()
+    let cursorHeight = Math.round(parseFloat(docs.cursorCaret.style.height.slice(0, -2)));
+    let linesToLeaveAbove = 2;
+
+    // Let's subtract so the cursor is the very last line visible
+    let topBar = document.getElementById("docs-bars");
+    if (topBar.offsetHeight > 70) {
+        heightToScrollTo -= Math.round((window.innerHeight - 105 - cursorHeight));
+    }
+    else {
+        heightToScrollTo -= Math.round((window.innerHeight - 46 - cursorHeight));
+    }
+
+    // Let's add 2 lines of space below our cursor
+    heightToScrollTo += cursorHeight * lineHeight * linesToLeaveAbove;
+
+    // Finally scroll
+    scrollElem.scrollTo(0, heightToScrollTo);
 }
 
 docs.simulateMouseScroll = function () {
