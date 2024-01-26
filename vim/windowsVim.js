@@ -691,6 +691,7 @@ windowsVim.normal_keydown = function (e) {
     }
 
     switch (true) {
+        // IMPORTANT: the escape case statements must always be first
         case (keyMapN.escape[0] === windowsVim.currentSequence && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
         case (keyMapN.escape[0] === e.key && (keyMapN.escape[1] === true || keyMapN.escape[2] === modifierInput)):
         case (keyMapN.ctrlC[0] === windowsVim.currentSequence && (keyMapN.ctrlC[1] === true || keyMapN.ctrlC[2] === modifierInput)):
@@ -700,9 +701,14 @@ windowsVim.normal_keydown = function (e) {
             windowsVim.clearData();
             return true;
         }
+        case (keyMapN.zz[0] === windowsVim.currentSequence && (keyMapN.zz[1] === true || keyMapN.zz[2] === modifierInput)):
+        {
+            docs.scrollSoCursorIsCenter();
+            this.clearData();
+            return true;
+        }
         case (keyMapN.joinLine[0] === windowsVim.currentSequence && (keyMapN.joinLine[1] === true || keyMapN.joinLine[2] === modifierInput)):
         {
-            this.moveToEndOfLine();
             docs.pressSpecialKey(" ");
             let [startXCoord, startYCoord] = docs.getCoords();
             docs.pressKey(docs.codeFromKey("ArrowRight"));

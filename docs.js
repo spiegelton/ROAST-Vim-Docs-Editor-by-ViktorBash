@@ -869,4 +869,60 @@ docs.moveToCoords = function(xCoord, yCoord) {
     }
 }
 
+docs.scrollSoCursorIsTop = function () {
+
+}
+
+docs.scrollSoCursorIsCenter = function () {
+    let scrollElem = document.querySelector(".kix-appview-editor");
+    let heightToScrollTo = docs.getYCoord();
+    let cursorHeight = Math.round(parseFloat(docs.cursorCaret.style.height.slice(0, -2)));
+
+    let topBar = document.getElementById("docs-bars");
+    if (topBar.offsetHeight > 70) {
+        heightToScrollTo -= Math.round((window.innerHeight - 105 - cursorHeight) / 2);
+    }
+    else {
+        heightToScrollTo -= Math.round((window.innerHeight - 46 - cursorHeight) / 2);
+    }
+
+    scrollElem.scrollTo(0, heightToScrollTo);
+}
+
+docs.scrollSoCursorIsBottom = function () {
+
+}
+
+docs.simulateMouseScroll = function () {
+    // We will scroll using the scrollElem
+    let scrollElem = document.querySelector(".kix-appview-editor");
+    let heightElem = document.querySelectorAll(".docs-ruler-inner")[1];
+
+    // One page = 1056 px
+    // Area between each page: 10px
+
+    // We can calculate based on the current cursor position where we are on the page (near the top, near the middle,
+    // near the bottom, etc);
+
+    // We can calculate our visual position based on the heightElem (style.top = 0px when the screen starts with the page
+    // directly at the top). NOTE: As long as our cursor is on the current page
+    // If style.top > 500px or style.top < -1000px, it is likely we are not where our cursor is
+
+    // // Base case: Cursor is near the top of the screen already
+    // let [startXCoord, startYCoord] = docs.getCoords();
+    // docs.pressKey(docs.codeFromKey("ArrowRight"));
+    // let [endXCoord, endYCoord] = docs.getCoords();
+    // if (startXCoord === endXCoord && startYCoord === endYCoord) {
+    //     // At end of file
+    // }
+    // else {
+    //     // Undo our arrow right
+    //     docs.pressKey(docs.codeFromKey("ArrowLeft"));
+    // }
+    let visualHeightElem = document.querySelector(".kix-appview-editor");
+    let visualHeight = visualHeightElem.scrollTop;
+    return;
+
+};
+
 export {docs};

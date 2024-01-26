@@ -128,6 +128,9 @@ export function getDefaultKeyBindings() {
 		T: ["T", false, 0b0100, "Move cursor to right after previous occurrence of character on current line", null],
 		joinLine: ["J", false, 0b0100, "Join current line with the line below it with a space in between", null],
 		space: [" ", false, 0b0000, "Move cursor right (Spacebar)", null],
+		zz: ["z" + KEY_SEPARATOR + "z", true, 0b0000, "Position cursor in middle of screen", null],
+		// zt: ["z" + KEY_SEPARATOR + "t", true, 0b0000, "Position cursor on top of screen", null],
+		// zb: ["z" + KEY_SEPARATOR + "b", true, 0b0000, "Position cursor on bottom of screen", null],
 	}
 
 	let keyMapI = {
