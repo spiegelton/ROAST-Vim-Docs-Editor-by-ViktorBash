@@ -870,7 +870,52 @@ docs.moveToCoords = function(xCoord, yCoord) {
 }
 
 docs.scrollSoCursorIsTop = function () {
+    // We will scroll and leave 2 lines above where the cursor
+    let scrollElem = document.querySelector(".kix-appview-editor");
+    // Our height to scroll to as the cursor's y coordinate means scroll to the cursor
+    let heightToScrollTo = docs.getYCoord();
 
+    // To leave 2 lines above us, we will need to calculate the width of 2 lines in pixels.
+    // This is done by taking the cursor height, multiplying it by the line formatting height, and then multiplying by 2
+    let cursorHeight = Math.round(parseFloat(docs.cursorCaret.style.height.slice(0, -2)));
+    let lineHeight = 1;
+    let linesToLeaveAbove = 2;
+
+    // Here we figure out the line height from the menu item
+
+    // Parent element is the container/parent-div for the line height menu options
+    let parentElem = document.querySelectorAll("span[aria-label='1.15 1']")[0].parentElement.parentElement.parentElement;
+    for (let i = 0; i < parentElem.children.length; i++) {
+        // Loop through each child and find the one that is selected (the actual line height we are using)
+        let child = parentElem.children[i];
+        if (child.classList.contains("goog-option-selected") && child.role === "menuitemradio") {
+            // We have found the selected line height child
+
+            // Now let's get the span element that contains the actual line height as an aria-label property
+            let label = child.children[0].children[1].getAttribute("aria-label");
+            // We are going to parse the label to get the line height (default is 1 if none of these hit, also
+            // we don't need to check for the "1" label then since it's the default)
+            if (label === "1.15 1") {
+                lineHeight = 1.15;
+            }
+            else if (label === "1.5 5") {
+                lineHeight = 1.5;
+            }
+            else if (label === "Double d") {
+                lineHeight = 2;
+            }
+            else if (label.charAt(0) === "C") {
+                // Custom
+                lineHeight = parseFloat(label.slice(8, label.length - 1));
+            }
+        }
+    }
+
+    // Now we can add 2 lines of space above our cursor
+    heightToScrollTo -= cursorHeight * lineHeight * linesToLeaveAbove;
+
+    // Finally scroll
+    scrollElem.scrollTo(0, heightToScrollTo);
 }
 
 docs.scrollSoCursorIsCenter = function () {

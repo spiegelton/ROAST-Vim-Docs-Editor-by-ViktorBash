@@ -707,6 +707,12 @@ windowsVim.normal_keydown = function (e) {
             this.clearData();
             return true;
         }
+        case (keyMapN.zt[0] === windowsVim.currentSequence && (keyMapN.zt[1] === true || keyMapN.zt[2] === modifierInput)):
+        {
+            docs.scrollSoCursorIsTop();
+            this.clearData();
+            return true;
+        }
         case (keyMapN.joinLine[0] === windowsVim.currentSequence && (keyMapN.joinLine[1] === true || keyMapN.joinLine[2] === modifierInput)):
         {
             docs.pressSpecialKey(" ");
