@@ -23,7 +23,7 @@ for (let i = 0; i < trialButtons.length; i++) {
 for (let i = 0; i < payLicenseButtons.length; i++) {
 	// Add event listener to each pay license button
 	payLicenseButtons[i].addEventListener("click", (event) => {
-		chrome.tabs.create({ url: "https://buy.stripe.com/dR67wn5omgoL19u9AD"})
+		chrome.tabs.create({ url: "https://buy.stripe.com/00gcQH2ca2xV5pK8ww"})
 	})
 }
 
