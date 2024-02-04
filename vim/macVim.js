@@ -710,6 +710,24 @@ macVim.normal_keydown = function (e) {
             macVim.clearData();
             return true;
         }
+        case (keyMapN.zz[0] === this.currentSequence && (keyMapN.zz[1] === true || keyMapN.zz[2] === modifierInput)):
+        {
+            docs.scrollSoCursorIsCenter();
+            this.clearData();
+            return true;
+        }
+        case (keyMapN.zt[0] === this.currentSequence && (keyMapN.zt[1] === true || keyMapN.zt[2] === modifierInput)):
+        {
+            docs.scrollSoCursorIsTop();
+            this.clearData();
+            return true;
+        }
+        case (keyMapN.zb[0] === this.currentSequence && (keyMapN.zb[1] === true || keyMapN.zb[2] === modifierInput)):
+        {
+            docs.scrollSoCursorIsBottom();
+            this.clearData();
+            return true;
+        }
         case (keyMapN.joinLine[0] === this.currentSequence && (keyMapN.joinLine[1] === true || keyMapN.joinLine[2] === modifierInput)):
         {
             this.moveToEndOfLine();
