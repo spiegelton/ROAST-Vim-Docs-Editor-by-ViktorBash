@@ -531,12 +531,23 @@ docs.reactivateAfterPopupButton = function () {
             // Element is not hidden anymore
             clearInterval(waitingForMenuClose); // Clear the interval we're in right now
 
-            // We click on the bold button twice to "refocus/reactivate" the document. We click this button
-            // because clicking it twice has no impact. Also, no bolding is actually visible to the end user :)
+            // We click on buttons to "refocus/reactive" the document (and make sure clicking the buttons doesn't
+            // actually do anything)
             let fontSizeDecrement = document.getElementById("fontSizeDecrement");
             let fontSizeIncrement = document.getElementById("fontSizeIncrement");
-            docs._simulateClick(fontSizeDecrement, true);
-            docs._simulateClick(fontSizeIncrement, true);
+
+            if (fontSizeDecrement.parentElement.classList.contains("goog-toolbar-horizontal")) {
+                // We can't increase/decrease font size quickly because the window is too small and it's not on the
+                // toolbar, let's just hide/un-hide the menu (slightly visible to end user, but it's okay)
+                let toggleMenu = document.getElementById("viewModeButton");
+                docs._simulateClick(toggleMenu, true);
+                docs._simulateClick(toggleMenu, true);
+            }
+            else {
+                // Base case, just increase/decrease font size (user doesn't even see it)
+                docs._simulateClick(fontSizeDecrement, true);
+                docs._simulateClick(fontSizeIncrement, true);
+            }
         }
 
     }, 10)
