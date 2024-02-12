@@ -109,6 +109,15 @@ function continueRunVim(vimVariant) {
 		}
 	};
 
+	vimVariant.switchToNormalMode();
+
+	// We will check whether we should start in insert mode or not
+	chrome.storage.sync.get("toggleStartMode", function(result) {
+		if (result.toggleStartMode === "false") {
+			vimVariant.switchToInsertMode();
+		}
+	});
+
 	// These 2 variables help us switch to visual mode whenever the user clicks and drags in normal mode
 	let mouseDown = false;
 	let mouseDownCoords = [-1, -1];

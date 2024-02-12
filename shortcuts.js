@@ -519,4 +519,32 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 
 });
 
-// Any code outside of the function (here) will likely run before the keybindings are loaded in (bad)
+// Any code outside of the function (here) will likely run before the keybindings are loaded in (!!!)
+
+// Let's add our code for handling whether the user wants to start in normal mode or insert mode
+// This script sets the "Show Updates" checkbox to the correct value, and also stores if the user changes the value by toggling the checkbox
+let toggleStartModeCheckBox = document.getElementById("toggleStartMode");
+
+
+// Set the value of the checkbox
+chrome.storage.sync.get("toggleStartMode", function(result) {
+    if (result.toggleStartMode === "false") {
+        toggleStartModeCheckBox.checked = false;
+    }
+    else {
+        toggleStartModeCheckBox.checked = true;
+    }
+
+});
+
+// Handle checkbox change
+function handleCheckboxChange(event) {
+    if (event.target.checked) {
+        chrome.storage.sync.set({"toggleStartMode": "true"});
+    }
+    else {
+        chrome.storage.sync.set({"toggleStartMode": "false"});
+    }
+}
+
+toggleStartModeCheckBox.addEventListener("change", handleCheckboxChange);
