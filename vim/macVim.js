@@ -3106,6 +3106,11 @@ macVim.replace_keydown = function (e) {
             this.replaceModeUndoCounterStack.push(1);
             return true;
         }
+        case (modifierInput > 0 && modifierInput !== 0b0100 && modifierInput !== 0b0110 && modifierInput !== 0b0010):
+        {
+            // We are running commands or something
+            return true;
+        }
     }
 
     // We must move forward, delete one key (except if we're at the end of a line), and then let the user key pass through
