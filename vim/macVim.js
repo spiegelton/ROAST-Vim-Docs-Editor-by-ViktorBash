@@ -441,6 +441,11 @@ macVim.nativeKeyCheck = function (modifierInput) {
             docs.clickButton(docs.toolbarMenuButtonOptions.searchTheMenus);
             return true;
         }
+        case (keyMapNative.hideTheMenus[0] === this.currentSequence && (keyMapNative.hideTheMenus[1] === true || keyMapNative.hideTheMenus[2] === modifierInput)):
+        {
+            docs.clickButton(docs.toolbarMenuButtonOptions.hideTheMenus);
+            return true;
+        }
     }
 
     return false;

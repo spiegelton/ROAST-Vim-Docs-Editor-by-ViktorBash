@@ -330,6 +330,7 @@ export function getDefaultKeyBindings() {
 			dictionary: ["y", false, 0b0101, "Open dictionary", null],
 			voiceTyping: ["s", false, 0b0101, "Use voice typing", null],
 			searchTheMenus: ["÷", false, 0b0010, "Search docs menus", null],
+			hideTheMenus: ["F", false, 0b1100, "Toggle hiding the menus", null],
 		}
 
 	}
