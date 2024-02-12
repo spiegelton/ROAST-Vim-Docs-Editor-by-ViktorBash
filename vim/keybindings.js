@@ -131,6 +131,7 @@ export function getDefaultKeyBindings() {
 		zz: ["z" + KEY_SEPARATOR + "z", true, 0b0000, "Position cursor in middle of screen", null],
 		zt: ["z" + KEY_SEPARATOR + "t", true, 0b0000, "Position cursor on top of screen", null],
 		zb: ["z" + KEY_SEPARATOR + "b", true, 0b0000, "Position cursor on bottom of screen", null],
+		// ctrlE: ["e", false, 0b1000, "Move screen down", null],
 	}
 
 	let keyMapI = {
@@ -273,7 +274,7 @@ export function getDefaultKeyBindings() {
 			heading4: ["4", false, 0b1010, "Apply 'Heading 4' styling", null],
 			heading5: ["5", false, 0b1010, "Apply 'Heading 5' styling", null],
 			heading6: ["6", false, 0b1010, "Apply 'Heading 6' styling", null],
-			strikethrough: ["5", false, 0b0110, "Strikethrough text", null],
+			strikethrough: ["%", false, 0b0110, "Strikethrough text", null],
 			superscript: [".", false, 0b1000, "Superscript", null],
 			subscript: [",", false, 0b1000, "Subscript", null],
 			selectAll: ["a", false, 0b1000, "Select All", null],

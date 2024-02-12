@@ -898,7 +898,9 @@ docs._getLineHeight = function () {
             }
         }
     }
-    return lineHeight;
+
+    let cursorHeight = Math.round(parseFloat(docs.cursorCaret.style.height.slice(0, -2)));
+    return lineHeight * cursorHeight;
 }
 
 docs.scrollSoCursorIsTop = function () {
@@ -910,11 +912,10 @@ docs.scrollSoCursorIsTop = function () {
 
     // To leave 2 lines above us, we will need to calculate the width of 2 lines in pixels.
     // This is done by taking the cursor height, multiplying it by the line formatting height, and then multiplying by 2
-    let cursorHeight = Math.round(parseFloat(docs.cursorCaret.style.height.slice(0, -2)));
     let linesToLeaveAbove = 2;
 
     // Now we can add 2 lines of space above our cursor
-    heightToScrollTo -= cursorHeight * lineHeight * linesToLeaveAbove;
+    heightToScrollTo -= lineHeight * linesToLeaveAbove;
 
     // Finally scroll
     scrollElem.scrollTo(0, heightToScrollTo);
@@ -955,16 +956,74 @@ docs.scrollSoCursorIsBottom = function () {
     }
 
     // Let's add 2 lines of space below our cursor
-    heightToScrollTo += cursorHeight * lineHeight * linesToLeaveAbove;
+    heightToScrollTo += lineHeight * linesToLeaveAbove;
 
     // Finally scroll
     scrollElem.scrollTo(0, heightToScrollTo);
 }
 
-docs.simulateMouseScroll = function () {
-    // We will scroll using the scrollElem
+docs.moveToYCoordQuitEarly = function (yCoord) {
+    // TODO: Still have a timer just in case we get stuck in an infinite loop somehow
+    // We are going to traverse up/down and quit immediately once we hit or are just going back and forth between a line
+    let newYCoord = docs.getCoords();
+    let lastMoveUp = null;
+
+    while (newYCoord !== yCoord) {
+        if ((newYCoord < yCoord && lastMoveUp === true) || (newYCoord > yCoord && lastMoveUp === false)) {
+            console.log("DONE");
+            break;
+        }
+        if (newYCoord < yCoord) {
+            lastMoveUp = false;
+            docs.pressKey(docs.codeFromKey("ArrowDown"));
+        }
+        else if (newYCoord > yCoord) {
+            lastMoveUp = true;
+            docs.pressKey(docs.codeFromKey("ArrowUp"));
+        }
+        newYCoord = docs.getCoords();
+    }
+
+
+}
+
+docs.scrollDownWithCursor = function () {
+    // Ctrl + E functionality
+
+    // Step 1: Calculate where we want to be and where we want our cursor to be
     let scrollElem = document.querySelector(".kix-appview-editor");
-    let heightElem = document.querySelectorAll(".docs-ruler-inner")[1];
+
+    let visualHeightElem = document.querySelector(".kix-appview-editor");
+    let visualHeight = visualHeightElem.scrollTop;
+    let linesToMove = 1;
+    let lineHeight = docs._getLineHeight();
+
+    let linesOfBuffer = 2;
+    let wantedVisualHeight = visualHeight + linesToMove * lineHeight;
+    let wantedCursorPosition = wantedVisualHeight + linesOfBuffer * lineHeight;
+
+    // Step 2: Move the cursor as needed
+    console.log(wantedVisualHeight, wantedCursorPosition);
+    docs.moveToYCoordQuitEarly(wantedCursorPosition); // TODO: Ensure that this works properly
+
+    // Step 3: Scroll to the new position
+    scrollElem.scrollTo(0, wantedVisualHeight);
+
+
+    // REVISED STEPS:
+    // 1. Figure out where the cursor should be
+    // 2. Ensure that the cursor is there
+    // 3. use .scrollTo() to ensure the visual page is also where it should be
+
+    // STEPS:
+    // 1. Move the visual page to where it should be (we go down a little bit basically)
+    // 2. Ensure that the cursor is in a good place, modify if need be
+    // 3. Readjust so we're still at the spot from #1 if need be (if the cursor was off the screen for example)
+
+}
+
+// docs.simulateMouseScroll = function () {
+    // We will scroll using the scrollElem
 
     // One page = 1056 px
     // Area between each page: 10px
@@ -987,10 +1046,7 @@ docs.simulateMouseScroll = function () {
     //     // Undo our arrow right
     //     docs.pressKey(docs.codeFromKey("ArrowLeft"));
     // }
-    let visualHeightElem = document.querySelector(".kix-appview-editor");
-    let visualHeight = visualHeightElem.scrollTop;
-    return;
 
-};
+// };
 
 export {docs};
