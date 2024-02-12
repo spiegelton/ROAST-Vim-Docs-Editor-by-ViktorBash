@@ -533,9 +533,10 @@ docs.reactivateAfterPopupButton = function () {
 
             // We click on the bold button twice to "refocus/reactivate" the document. We click this button
             // because clicking it twice has no impact. Also, no bolding is actually visible to the end user :)
-            let boldButton = document.getElementById("boldButton");
-            docs._simulateClick(boldButton, true);
-            docs._simulateClick(boldButton, true);
+            let fontSizeDecrement = document.getElementById("fontSizeDecrement");
+            let fontSizeIncrement = document.getElementById("fontSizeIncrement");
+            docs._simulateClick(fontSizeDecrement, true);
+            docs._simulateClick(fontSizeIncrement, true);
         }
 
     }, 10)
