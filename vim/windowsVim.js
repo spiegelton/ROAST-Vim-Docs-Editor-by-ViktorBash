@@ -111,10 +111,9 @@ windowsVim.switchToVisualLineMode = function () {
         docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
     }
     else {
-        // On non-empty line, highlight everything except the last enter character thing (the user can press j to get that)
+        // On non-empty line, highlight everything
         docs.pressKey(docs.codeFromKey("ArrowLeft"));
         docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-        docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
     }
 }
 
@@ -2725,6 +2724,7 @@ windowsVim.visual_line_keydown = function (e) {
         }
         case (keyMapVLine.ctrlUPageUp[0] === windowsVim.currentSequence && (keyMapVLine.ctrlUPageUp[1] === true || keyMapVLine.ctrlUPageUp[2] === modifierInput)): 
         {
+            console.log("Ahoy");
             // Ctrl-u is page-up, so move up and then ensure we are still line-based
             let iterations = 6
             if (e.repeat) {
