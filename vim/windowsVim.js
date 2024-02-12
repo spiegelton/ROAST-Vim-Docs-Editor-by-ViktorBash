@@ -3031,6 +3031,11 @@ windowsVim.replace_keydown = function (e) {
             this.replaceModeUndoCounterStack.push(1);
             return true;
         }
+        case (modifierInput > 0 && modifierInput !== 0b0100):
+        {
+            // Anything else with modifier input we will let pass through (except if the only modifier is shift)
+            return true;
+        }
     }
 
     // We must move forward, delete one key (except if we're at the end of a line), and then let the user key pass through
