@@ -814,6 +814,7 @@ docs.toolbarMenuButtonOptions = {
     // print: ["printButton", docs._clickMainToolBarButton],
     spellingAndGrammarCheck: ["spellGrammarCheckButton", docs._clickMainToolBarButton],
     clearFormatting: ["clearFormattingButton", docs._clickMainToolBarButton],
+    hideTheMenus: ["viewModeButton", docs._clickMainToolBarButton],
     normalText: [0, docs._clickParagraphStylesButton],
     // title: [1, docs._clickParagraphStylesButton],
     // subtitle: [2, docs._clickParagraphStylesButton],

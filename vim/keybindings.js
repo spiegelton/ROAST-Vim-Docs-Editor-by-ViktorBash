@@ -135,8 +135,6 @@ export function getDefaultKeyBindings() {
 	}
 
 	let keyMapI = {
-		// TODO: Tell user only single character mappings work in insert mode
-		// TODO: if user wants to disable a keymapping (ex: ctrl - c), we will store two key separators
 		//together in the keymap so that it won't ever run
 		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
 		ctrlC: ["c", false, 0b1000, "Exit to normal mode", null],
@@ -288,6 +286,7 @@ export function getDefaultKeyBindings() {
 			dictionary: ["Y", false, 0b1100, "Open dictionary", null],
 			voiceTyping: ["S", false, 0b1100, "Use voice typing", null],
 			searchTheMenus: ["/", false, 0b0010, "Search docs menus", null],
+			hideTheMenus: ["F", false, 0b1100, "Toggle hiding the menus", null],
 		}
 
 	}
