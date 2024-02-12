@@ -743,24 +743,25 @@ macVim.normal_keydown = function (e) {
                 return true;
             }
 
-            docs.pressKey(docs.codeFromKey("Backspace"));
-            // Let's check that it's not an empty line on the bottom that we're joining to the top line
-            let [initialXCoord, initialYCoord] = docs.getCoords();
+            // We are at the start of the line that we want to join to above
             docs.pressKey(docs.codeFromKey("ArrowRight"));
-            let [finalXCoord, finalYCoord] = docs.getCoords()
-            if (initialYCoord === finalYCoord && initialXCoord === finalXCoord) {
-                // Empty line at end of file
-                docs.pressKey(docs.codeFromKey("Backspace"));
+            let [finalXCoord, finalYCoord] = docs.getCoords();
+            if (endXCoord === finalXCoord && endYCoord === finalYCoord) {
+                // We are trying to join an empty line that is the end of the file
+                docs.pressKey(docs.codeFromKey("Backspace")); // Delete the empty line
+                docs.pressKey(docs.codeFromKey("Backspace")); // Delete the space we added
             }
-            else if (initialYCoord === finalYCoord) {
-                // Not an empty line
-                docs.pressKey(docs.codeFromKey("ArrowRight"));
-                docs.pressKey(docs.codeFromKey("ArrowLeft")); // Position ourselves on the space that we added
+            else if (endYCoord !== finalYCoord) {
+                // On an empty line
+                docs.pressKey(docs.codeFromKey("ArrowLeft")); // Get back to the empty line
+                docs.pressKey(docs.codeFromKey("Backspace")); // Delete the empty line
+                docs.pressKey(docs.codeFromKey("Backspace")); // Delete the space we added
             }
             else {
-                // Empty line
+                // Base case
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
-                docs.pressKey(docs.codeFromKey("Backspace")); // Undo our space
+                docs.pressKey(docs.codeFromKey("Backspace"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
             }
 
             this.clearData();
