@@ -116,6 +116,9 @@ function continueRunVim(vimVariant) {
 	// For double-click
 	let lastMouseUp = 0; // ms
 
+	// For middle mouse
+	let middleMouseDown = false;
+
 	// validMouseArea: 
 	// Clicks on the extreme far left or the extreme far right or the top menu bar are not registered, only clicks on the left, document, and right
 	// We don't want to change modes or do anything if the user is clicking some buttons on the top menu for instance
@@ -131,6 +134,14 @@ function continueRunVim(vimVariant) {
 
 			// Mouse down (Just used in mouse-up really to check if we dragged or not)
 			area.addEventListener("mousedown", (event) => {
+				if (event.buttons === 4) {
+					middleMouseDown = true;
+					// Middle click
+					// We don't want to do anything if the user middle clicks (aka click on the scroll wheel)
+					return;
+				}
+
+				middleMouseDown = false;
 				mouseDown = true;
 				mouseDownCoords = [event.clientX, event.clientY];
 
@@ -145,6 +156,16 @@ function continueRunVim(vimVariant) {
 
 			// Mouse up (bulk of the logic)
 			area.addEventListener("mouseup", (event) => {
+				if (event.button === 1) {
+					// Middle click
+					// We don't want to do anything if the user middle clicks (aka click on the scroll wheel)
+					return;
+				}
+				if (middleMouseDown) {
+					middleMouseDown = false;
+					return;
+				}
+
 				mouseDown = false;
 				let oldTime = lastMouseUp;
 				lastMouseUp = Date.now();
