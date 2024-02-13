@@ -2233,24 +2233,6 @@ windowsVim.visual_keydown = function (e) {
                 windowsVim.clearData();
                 return true;
             }
-        case (keyMapV["{"][0] === windowsVim.currentSequence && (keyMapV["{"][1] === true || keyMapV["{"][2] === modifierInput)):
-            {
-                const numRepeats = parseInt(windowsVim.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                }
-                windowsVim.clearData();
-                return true;
-            }
-        case (keyMapV["}"][0] === windowsVim.currentSequence && (keyMapV["}"][1] === true || keyMapV["}"][2] === modifierInput)):
-            {
-                const numRepeats = parseInt(windowsVim.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
-                    docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-                }
-                windowsVim.clearData();
-                return true;
-            }
         case (keyMapV.e[0] === windowsVim.currentSequence && (keyMapV.e[1] === true || keyMapV.e[2] === modifierInput)):
         case (keyMapV.E[0] === windowsVim.currentSequence && (keyMapV.E[1] === true || keyMapV.E[2] === modifierInput)):
             {
