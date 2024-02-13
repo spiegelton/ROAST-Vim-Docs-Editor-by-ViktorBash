@@ -2662,7 +2662,6 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.arrowUp[0] === windowsVim.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)):
         case (keyMapVLine.arrowUpCtrl[0] === windowsVim.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)): 
         case (keyMapVLine.k[0] === windowsVim.currentSequence && (keyMapVLine.k[1] === true || keyMapVLine.k[2] === modifierInput)):
-        case (keyMapVLine["{"][0] === windowsVim.currentSequence && (keyMapVLine["{"][1] === true || keyMapVLine["{"][2] === modifierInput)):
         {
             const numRepeats = parseInt(windowsVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
@@ -2677,7 +2676,6 @@ windowsVim.visual_line_keydown = function (e) {
         case (keyMapVLine.arrowDown[0] === windowsVim.currentSequence && (keyMapVLine.arrowDown[1] === true || keyMapVLine.arrowDown[2] === modifierInput)): 
         case (keyMapVLine.arrowDownCtrl[0] === windowsVim.currentSequence && (keyMapVLine.arrowDownCtrl[1] === true || keyMapVLine.arrowDownCtrl[2] === modifierInput)): 
         case (keyMapVLine.j[0] === windowsVim.currentSequence && (keyMapVLine.j[1] === true || keyMapVLine.j[2] === modifierInput)):
-        case (keyMapVLine["}"][0] === windowsVim.currentSequence && (keyMapVLine["}"][1] === true || keyMapVLine["}"][2] === modifierInput)):
         {
             const numRepeats = parseInt(windowsVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
