@@ -360,9 +360,164 @@ docs.isTextSelected = function () {
 
 }
 
-/*
-    Attempt to paste HTML into the document if possible (called if execCommand fa
- */
+docs.lastPasteTime = Date.now();
+
+docs.paste = async function (moveToEndOfLineFunc, moveRightToPasteAfterCursor) {
+    let text = await navigator.clipboard.readText();
+    let containsNewLine = false;
+    if (text.indexOf("\n") !== -1) {
+        containsNewLine = true;
+    }
+
+    // Pasting line(s) (contains new line)
+    if (containsNewLine) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
+        if (Date.now() - docs.lastPasteTime < 225) {
+            // We have pasted too recently, and pasting again will break stuff
+            return;
+        }
+        docs.lastPasteTime = Date.now();
+
+        moveToEndOfLineFunc();
+        docs.pressKey(docs.codeFromKey("Enter"));
+
+        setTimeout(() => {
+            let success = docs.contentDocument.execCommand("paste");
+            if (!success) {
+                console.error("execCommand(paste) failed, trying to paste plain text...");
+                // execCommand failed, let's try to paste any plain text at least
+                docs.pastePlainText();
+            }
+
+            setTimeout(() => {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+            }, 10)
+        }, 10)
+
+    }
+
+    // Pasting inline (no new line)
+    else {
+        moveRightToPasteAfterCursor();
+        setTimeout(() => {
+            let success = docs.contentDocument.execCommand("paste");
+            if (!success) {
+                console.error("execCommand(paste) failed, trying to paste plain text...");
+                // execCommand failed, let's try to paste any plain text at least
+                docs.pastePlainText();
+            }
+        }, 1)
+    }
+}
+
+docs.pasteNoFormatting = async function (moveToEndOfLineFunc, moveRightToPasteAfterCursor) {
+    let text = await navigator.clipboard.readText();
+    let containsNewLine = false;
+    if (text.indexOf("\n") !== -1) {
+        containsNewLine = true;
+    }
+
+    // Pasting line(s) (contains new line)
+    if (containsNewLine) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
+        if (Date.now() - docs.lastPasteTime < 50) {
+            // We have pasted too recently, and pasting again will break stuff
+            return;
+        }
+        docs.lastPasteTime = Date.now();
+
+        moveToEndOfLineFunc();
+        docs.pressKey(docs.codeFromKey("Enter"));
+
+        setTimeout(() => {
+            docs.pastePlainText();
+
+            setTimeout(() => {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+            }, 10)
+        }, 10)
+
+    }
+
+    // Pasting inline (no new line)
+    else {
+        moveRightToPasteAfterCursor();
+        setTimeout(() => {
+            docs.pastePlainText();
+        }, 1)
+    }
+}
+
+docs.pasteBeforeCursor = async function (moveToStartOfLineFunc) {
+    let text = await navigator.clipboard.readText();
+    let containsNewLine = false;
+    if (text.indexOf("\n") !== -1) {
+        containsNewLine = true;
+    }
+
+    // Pasting line(s) (contains new line)
+    if (containsNewLine) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
+        if (Date.now() - docs.lastPasteTime < 225) {
+            // We have pasted too recently, and pasting again will break stuff
+            return;
+        }
+        docs.lastPasteTime = Date.now();
+
+        moveToStartOfLineFunc();
+        let success = docs.contentDocument.execCommand("paste");
+        if (!success) {
+            console.error("execCommand(paste) failed, trying to paste plain text...");
+            // execCommand failed, let's try to paste any plain text at least
+            docs.pastePlainText();
+        }
+
+    }
+
+    // Pasting inline (no new line)
+    else {
+        setTimeout(() => {
+            let success = docs.contentDocument.execCommand("paste");
+            if (!success) {
+                console.error("execCommand(paste) failed, trying to paste plain text...");
+                // execCommand failed, let's try to paste any plain text at least
+                docs.pastePlainText();
+            }
+        }, 1)
+    }
+}
+
+docs.pasteBeforeCursorNoFormatting = async function (moveToStartOfLineFunc) {
+    let text = await navigator.clipboard.readText();
+    let containsNewLine = false;
+    if (text.indexOf("\n") !== -1) {
+        containsNewLine = true;
+    }
+
+    // Pasting line(s) (contains new line)
+    if (containsNewLine) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
+        if (Date.now() - docs.lastPasteTime < 50) {
+            // We have pasted too recently, and pasting again will break stuff
+            return;
+        }
+        docs.lastPasteTime = Date.now();
+
+        moveToStartOfLineFunc();
+        docs.pastePlainText();
+    }
+
+    // Pasting inline (no new line)
+    else {
+        docs.pastePlainText();
+    }
+}
+
+// For visual and visual line mode use only
 docs.pasteRegular = function () {
     let success = docs.contentDocument.execCommand("paste");
     if (success) {
