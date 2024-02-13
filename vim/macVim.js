@@ -110,12 +110,13 @@ macVim.switchToVisualLineMode = function () {
     }
     else if (startYCoord !== endYCoord) {
         // On empty line, highlight the empty line
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
-        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+        docs.pressKey(docs.codeFromKey("ArrowLeft")); // Reverse our ArrowRight
+        docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
     }
     else {
         // On non-empty line
-        docs.pressKey(docs.codeFromKey("ArrowLeft"));
+        docs.pressKey(docs.codeFromKey("ArrowLeft")); // Reverse our ArrowRight
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
         docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
     }
 }
