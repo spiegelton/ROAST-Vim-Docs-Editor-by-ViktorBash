@@ -160,8 +160,6 @@ export function getDefaultKeyBindings() {
 		l: ["l", false, 0b0000, "Highlight right", null],
 		gg: ["g" + KEY_SEPARATOR + "g", true, 0b0000, "Highlight to top of document", null],
 		G: ["G", false, 0b0100, "Highlight to bottom of document", null],
-		"{": ["{", false, 0b0100, "Highlight to previous paragraph", null],
-		"}": ["}", false, 0b0100, "Highlight to next paragraph", null],
 		e: ["e", false, 0b0000, "Highlight to end of word", null],
 		E: ["E", false, 0b0100, "Highlight to end of word", null],
 		escape: ["Escape", true, 0b0000, "Exit to normal mode", null],
