@@ -117,7 +117,7 @@ macVim.switchToVisualLineMode = function () {
         // On non-empty line
         docs.pressKey(docs.codeFromKey("ArrowLeft")); // Reverse our ArrowRight
         docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+        docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
     }
 }
 
