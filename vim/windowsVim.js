@@ -962,36 +962,25 @@ windowsVim.normal_keydown = function (e) {
             }
         case (keyMapN.paste[0] === windowsVim.currentSequence && (keyMapN.paste[1] === true || keyMapN.paste[2] === modifierInput)):
             {
-                this.moveRightToPasteAfterCursor();
-                // Now we're in the right position to paste
-
-                // We set a timeout because otherwise the paste may not work (from testing)
-                setTimeout(() => {
-                    docs.pasteRegular();
-                }, 1)
+                docs.paste(this.moveToEndOfLine, this.moveRightToPasteAfterCursor);
                 this.clearData();
                 return true;
             }
         case (keyMapN.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteNoFormatting[1] === true || keyMapN.pasteNoFormatting[2] === modifierInput)):
             {
-                this.moveRightToPasteAfterCursor();
-                // Now we're in the right position to paste
-
-                docs.pastePlainText()
+                docs.pasteNoFormatting(this.moveToEndOfLine, this.moveRightToPasteAfterCursor);
                 this.clearData();
                 return true;
             }
         case (keyMapN.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursor[1] === true || keyMapN.pasteBeforeCursor[2] === modifierInput)):
             {
-                setTimeout(() => {
-                    docs.pasteRegular();
-                }, 1)
+                docs.pasteBeforeCursor(this.moveToStartOfLine);
                 this.clearData();
                 return true;
             }
         case (keyMapN.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursorNoFormatting[1] === true || keyMapN.pasteBeforeCursorNoFormatting[2] === modifierInput)):
             {
-                docs.pastePlainText()
+                docs.pasteBeforeCursorNoFormatting(this.moveToStartOfLine);
                 this.clearData();
                 return true;
             }
