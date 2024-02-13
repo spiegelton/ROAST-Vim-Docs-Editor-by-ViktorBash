@@ -878,19 +878,49 @@ windowsVim.normal_keydown = function (e) {
             }
         case (keyMapN["{"][0] === windowsVim.currentSequence && (keyMapN["{"][1] === true || keyMapN["{"][2] === modifierInput)):
             {
-                const numRepeats = parseInt(windowsVim.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                let [endXCoord, endYCoord] = docs.getCoords();
+                while ((initialYCoord === endYCoord) && (initialXCoord !== endXCoord)) {
                     docs.pressKey(docs.codeFromKey("ArrowUp"), true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    [initialXCoord, initialYCoord] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                    [endXCoord, endYCoord] = docs.getCoords();
                 }
+
+                if (initialXCoord === endXCoord && initialYCoord === endYCoord) {
+                    // At end of file, do nothing
+                }
+                else {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                }
+
                 windowsVim.clearData();
                 return true;
             }
         case (keyMapN["}"][0] === windowsVim.currentSequence && (keyMapN["}"][1] === true || keyMapN["}"][2] === modifierInput)):
             {
-                const numRepeats = parseInt(windowsVim.num) || 1;
-                for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                let [initialXCoord, initialYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let [endXCoord, endYCoord] = docs.getCoords();
+                while ((initialYCoord === endYCoord) && (initialXCoord !== endXCoord)) {
                     docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                    [initialXCoord, initialYCoord] = docs.getCoords();
+                    docs.pressKey(docs.codeFromKey("ArrowRight"));
+                    [endXCoord, endYCoord] = docs.getCoords();
                 }
+
+                if (initialXCoord === endXCoord && initialYCoord === endYCoord) {
+                    // At end of file, do nothing
+                }
+                else {
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                }
+
                 windowsVim.clearData();
                 return true;
             }
