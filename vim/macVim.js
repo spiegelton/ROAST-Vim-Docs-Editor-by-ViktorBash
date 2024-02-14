@@ -2153,6 +2153,34 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
             this.switchToReplaceMode();
             return true;
         }
+        case(keyMapN.db[0] === this.currentSequence && (keyMapN.db[1] === true || keyMapN.db[2] === modifierInput)):
+        case(keyMapN.cb[0] === this.currentSequence && (keyMapN.cb[1] === true || keyMapN.cb[2] === modifierInput)):
+        {
+            let enterInsertMode = false;
+
+            if (keyMapN.cb[0] === this.currentSequence && (keyMapN.cb[1] === true || keyMapN.cb[2] === modifierInput)) {
+                enterInsertMode = true;
+            }
+
+            // Highlight backwards
+            const numRepeats = parseInt(this.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+            }
+
+            // Delete or cut the selection
+            if (!enterInsertMode) {
+                this.deleteOrCut(keyMapN.db[4]);
+                this.clearData();
+            }
+            else {
+                this.deleteOrCut(keyMapN.cb[4]);
+                this.clearData();
+                this.switchToInsertMode();
+            }
+
+            return true;
+        }
 	}
 
     // Check for numbers
@@ -2651,6 +2679,8 @@ macVim.switchVisualLineDirection = function () {
         docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
         docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 
+        // We need to select the next line down too because that's technically what we were trying to do at the
+        // very start
         docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
         docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 
