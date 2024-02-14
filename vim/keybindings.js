@@ -123,7 +123,7 @@ export function getDefaultKeyBindings() {
 		outdent: ["<" + KEY_SEPARATOR + "<", true, 0b0000, "Outdent", null],
 		replaceMode: ["R", false, 0b0100, "Enter replace mode", null],
 		f: ["f", false, 0b0000, "Move cursor to next occurrence of character on current line", null],
-		t: ["t", false, 0b0000, "Move cursor to right before next occurrence of character on current line"],
+		t: ["t", false, 0b0000, "Move cursor to right before next occurrence of character on current line", null],
 		F: ["F", false, 0b0100, "Move cursor to previous occurrence of character on current line", null],
 		T: ["T", false, 0b0100, "Move cursor to right after previous occurrence of character on current line", null],
 		joinLine: ["J", false, 0b0100, "Join current line with the line below it with a space in between", null],
