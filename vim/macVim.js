@@ -137,34 +137,29 @@ macVim.switchToInsertMode = function () {
 */
 macVim.moveRightToPasteAfterCursor = function () {
 	// The main thing is to check that if we're at the end, are we at the end of a multiline or real line
-	let [xCoord, yCoord] = docs.getCoords();
-	docs.pressKey(docs.codeFromKey("ArrowLeft")); // We do this to check if we're at the start of a line
-	let [leftXCoord, leftYCoord] = docs.getCoords();
-	if (leftXCoord === xCoord && leftYCoord === yCoord) {
-		// We are the start of a file
-		let startYCoord = docs.getYCoord();
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		let endYCoord = docs.getYCoord();
-		if (startYCoord !== endYCoord) {
-			// We are at the start of an empty line, so don't move right actually
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-		}
-	} else {
-		docs.pressKey(docs.codeFromKey("ArrowRight")); // Undo our ArrowLeft because we're not at the start of the file
-		let yCoord = docs.getYCoord();
-		docs.pressKey(docs.codeFromKey("ArrowRight"));
-		let newYCoord = docs.getYCoord();
-		if (yCoord === newYCoord) {
-			// Either we are in the middle of a line or at the end of a file, good to go
-		} else {
-			// We are at the end of a multiline (fake line) or a real line,
-			// Even though we do the same thing for both scenarios, the below key movements are still necessary
-			// to either put us at the right position for either scenario
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			docs.pressKey(docs.codeFromKey("ArrowLeft"));
-			docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-		}
-	}
+    let [startXCoord, startYCoord] = docs.getCoords();
+    docs.pressKey(docs.codeFromKey("ArrowRight"));
+    let [midXCoord, midYCoord] = docs.getCoords();
+    if (startXCoord === midXCoord && startYCoord === midYCoord) {
+        // At end of file, do nothing (in right place)
+    }
+    else if (startYCoord !== midYCoord) {
+        // Need to check whether on end of line or multiline
+        docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
+        let [endXCoord, endYCoord] = docs.getCoords();
+        if (startXCoord === endXCoord && startYCoord === endYCoord) {
+            // At end of a real line, we already are in the right place now
+        }
+        else {
+            // Must deal with multiline
+            docs.pressKey(docs.codeFromKey("ArrowRight"), true); // Get back to original position
+            docs.pressKey(docs.codeFromKey("ArrowRight")); // Move one right
+        }
+
+    }
+    else {
+        // In the middle of a line, we are in the right place already since we moved 1 left
+    }
 };
 
 macVim.clearData = function () {
