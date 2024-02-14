@@ -2651,6 +2651,9 @@ macVim.switchVisualLineDirection = function () {
         docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
         docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
 
+        docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
+        docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+
     }
 }
 
