@@ -132,6 +132,7 @@ export function getDefaultKeyBindings() {
 		zt: ["z" + KEY_SEPARATOR + "t", true, 0b0000, "Position cursor on top of screen", null],
 		zb: ["z" + KEY_SEPARATOR + "b", true, 0b0000, "Position cursor on bottom of screen", null],
 		// ctrlE: ["e", false, 0b1000, "Move screen down", null],
+		db: ["d" + KEY_SEPARATOR + "b", true, 0b0000, "Delete backwards to the start of a word", false],
 	}
 
 	let keyMapI = {

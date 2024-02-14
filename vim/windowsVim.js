@@ -2101,6 +2101,20 @@ windowsVim.normal_keydown = function (e) {
             this.switchToReplaceMode();
             return true;
         }
+        case(keyMapN.db[0] === this.currentSequence && (keyMapN.db[1] === true || keyMapN.db[2] === modifierInput)):
+        {
+            // Highlight backwards
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), true, true);
+            }
+
+            // Delete or cut the selection
+            this.deleteOrCut(keyMapN.db[4]);
+
+            this.clearData();
+            return true;
+        }
 
     }
 
