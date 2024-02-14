@@ -2102,7 +2102,14 @@ windowsVim.normal_keydown = function (e) {
             return true;
         }
         case(keyMapN.db[0] === this.currentSequence && (keyMapN.db[1] === true || keyMapN.db[2] === modifierInput)):
+        case(keyMapN.cb[0] === this.currentSequence && (keyMapN.cb[1] === true || keyMapN.cb[2] === modifierInput)):
         {
+            let enterInsertMode = false;
+
+            if (keyMapN.cb[0] === this.currentSequence && (keyMapN.cb[1] === true || keyMapN.cb[2] === modifierInput)) {
+                enterInsertMode = true;
+            }
+
             // Highlight backwards
             const numRepeats = parseInt(windowsVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
@@ -2110,9 +2117,16 @@ windowsVim.normal_keydown = function (e) {
             }
 
             // Delete or cut the selection
-            this.deleteOrCut(keyMapN.db[4]);
+            if (!enterInsertMode) {
+                this.deleteOrCut(keyMapN.db[4]);
+                this.clearData();
+            }
+            else {
+                this.deleteOrCut(keyMapN.cb[4]);
+                this.clearData();
+                this.switchToInsertMode();
+            }
 
-            this.clearData();
             return true;
         }
 

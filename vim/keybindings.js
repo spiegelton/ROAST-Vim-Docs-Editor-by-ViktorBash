@@ -133,6 +133,7 @@ export function getDefaultKeyBindings() {
 		zb: ["z" + KEY_SEPARATOR + "b", true, 0b0000, "Position cursor on bottom of screen", null],
 		// ctrlE: ["e", false, 0b1000, "Move screen down", null],
 		db: ["d" + KEY_SEPARATOR + "b", true, 0b0000, "Delete backwards to the start of a word", false],
+		cb: ["c" + KEY_SEPARATOR + "b", true, 0b0000, "Delete backwards to the start of a word and enter insert mode", false],
 	}
 
 	let keyMapI = {
