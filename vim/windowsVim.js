@@ -2428,8 +2428,9 @@ windowsVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.c[0] === windowsVim.currentSequence && (keyMapV.c[1] === true || keyMapV.c[2] === modifierInput)):
+        case (keyMapV.s[0] === windowsVim.currentSequence && (keyMapV.s[1] === true || keyMapV.s[2] === modifierInput)):
             {
-                let shouldWeCut = keyMapV.c[4];
+                let shouldWeCut = keyMapV.s[4];
                 this.deleteOrCut(shouldWeCut);
                 windowsVim.clearData();
                 windowsVim.switchToInsertMode();
@@ -2465,6 +2466,7 @@ windowsVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.C[0] === windowsVim.currentSequence && (keyMapV.C[1] === true || keyMapV.C[2] === modifierInput)):
+        case (keyMapV.S[0] === windowsVim.currentSequence && (keyMapV.S[1] === true || keyMapV.S[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("Backspace"));
                 windowsVim.moveToEndOfLine();
