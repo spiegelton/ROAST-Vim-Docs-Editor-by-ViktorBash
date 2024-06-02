@@ -136,6 +136,7 @@ export function getDefaultKeyBindings() {
 		cb: ["c" + KEY_SEPARATOR + "b", true, 0b0000, "Delete backwards to the start of a word and enter insert mode", false],
 		de: ["d" + KEY_SEPARATOR + "e", true, 0b0000, "Delete forwards to the end of a word", false],
 		ce: ["c" + KEY_SEPARATOR + "e", true, 0b0000, "Delete forwards to the end of a word and enter insert mode", false],
+		enter: ["Enter", false, 0b0000, "Move to start of next line", null],
 	}
 
 	let keyMapI = {

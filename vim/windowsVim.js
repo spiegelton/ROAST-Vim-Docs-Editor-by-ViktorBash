@@ -2129,6 +2129,23 @@ windowsVim.normal_keydown = function (e) {
 
             return true;
         }
+        case(keyMapN.enter[0] === this.currentSequence && (keyMapN.enter[1] === true || keyMapN.enter[2] === modifierInput)):
+        {
+            // Move to the start of the next line
+            const numRepeats = parseInt(windowsVim.num) || 1;
+            for (let i = 0; i < numRepeats; i++) {
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                let [endXCoord, endYCoord] = docs.getCoords();
+                if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                    // We are at the end of the file, do nothing
+                    break;
+                }
+            }
+
+            this.clearData();
+            return true;
+        }
 
     }
 
