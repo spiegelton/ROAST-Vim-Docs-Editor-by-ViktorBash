@@ -2176,6 +2176,61 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
             return true;
         }
+        case(keyMapN.de[0] === this.currentSequence && (keyMapN.de[1] === true || keyMapN.de[2] === modifierInput)):
+        case(keyMapN.ce[0] === this.currentSequence && (keyMapN.ce[1] === true || keyMapN.ce[2] === modifierInput)):
+        {
+            let enterInsertMode = false;
+            if (keyMapN.ce[0] === this.currentSequence && (keyMapN.ce[1] === true || keyMapN.ce[2] === modifierInput)) {
+                // "ce" keybinding
+                enterInsertMode = true;
+            }
+
+            const numRepeats = parseInt(macVim.num) || 1;
+            let [initialXCoord, initialYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"), false, false);
+            let [endXCoord, endYCoord] = docs.getCoords();
+            if (initialXCoord === endXCoord && initialYCoord === endYCoord) {
+                // We are at the end of the file
+                this.clearData();
+                if (enterInsertMode) {
+                    this.switchToInsertMode();
+                }
+            }
+            else {
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, false);
+                // Continue as regularly after checking that we're not at the end of a file
+
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+
+                // Check if text is highlighted or not
+                if (docs.isTextSelected() === true) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                } else {
+                    // We are at the end of a word, so we need to highlight more
+                    // This is because de/ce deletes more than 1 character in the event
+                    // that we're on the last character.
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                }
+
+                // For any additional iterations we just press the right arrow key
+                for (let i = 1; i < numRepeats; i++) {
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                }
+
+                // Delete or cut the selection
+                if (!enterInsertMode) {
+                    this.deleteOrCut(keyMapN.de[4]);
+                    this.clearData();
+                } else {
+                    this.deleteOrCut(keyMapN.ce[4]);
+                    this.clearData();
+                    this.switchToInsertMode();
+                }
+            }
+            return true;
+        }
 	}
 
     // Check for numbers
