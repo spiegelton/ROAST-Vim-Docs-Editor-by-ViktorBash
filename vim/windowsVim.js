@@ -2905,11 +2905,19 @@ windowsVim.visual_line_keydown = function (e) {
                 return true;
             }
         case (keyMapVLine.c[0] === windowsVim.currentSequence && (keyMapVLine.c[1] === true || keyMapVLine.c[2] === modifierInput)):
+        case (keyMapVLine.s[0] === windowsVim.currentSequence && (keyMapVLine.s[1] === true || keyMapVLine.s[2] === modifierInput)):
         case (keyMapVLine.C[0] === windowsVim.currentSequence && (keyMapVLine.C[1] === true || keyMapVLine.C[2] === modifierInput)):
+        case (keyMapVLine.S[0] === windowsVim.currentSequence && (keyMapVLine.S[1] === true || keyMapVLine.S[2] === modifierInput)):
             {
                 let shouldWeCut = keyMapVLine.c[4];
                 if (keyMapVLine.C[0] === windowsVim.currentSequence && (keyMapVLine.C[1] === true || keyMapVLine.C[2] === modifierInput)) {
                     shouldWeCut = keyMapVLine.C[4];
+                }
+                if (keyMapVLine.s[0] === windowsVim.currentSequence && (keyMapVLine.s[1] === true || keyMapVLine.s[2] === modifierInput)) {
+                    shouldWeCut = keyMapVLine.s[4];
+                }
+                if (keyMapVLine.S[0] === windowsVim.currentSequence && (keyMapVLine.S[1] === true || keyMapVLine.S[2] === modifierInput)) {
+                    shouldWeCut = keyMapVLine.S[4];
                 }
                 this.deleteOrCut(shouldWeCut);
                 windowsVim.clearData();
