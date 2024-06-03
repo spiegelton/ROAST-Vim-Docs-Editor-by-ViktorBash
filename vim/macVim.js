@@ -2176,6 +2176,28 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
             return true;
         }
+        case(keyMapN.enter[0] === this.currentSequence && (keyMapN.enter[1] === true || keyMapN.enter[2] === modifierInput)):
+        {
+            // We have to end up on the next line at the start of it
+            const numRepeats = parseInt(this.num) || 1;
+
+            for (let i = 0; i < numRepeats; i++) {
+                this.moveToEndOfLine();
+                let [startXCoord, startYCoord] = docs.getCoords();
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
+                let [endXCoord, endYCoord] = docs.getCoords();
+
+                // Let's check if we're at the end of the file just for optimization purposes
+                if (startXCoord === endXCoord && startYCoord === endYCoord) {
+                    // If we're on the last line we must go to the start of it for consistency
+                    this.moveToStartOfLine();
+                    break;
+                }
+            }
+
+            this.clearData();
+            return true;
+        }
         case(keyMapN.de[0] === this.currentSequence && (keyMapN.de[1] === true || keyMapN.de[2] === modifierInput)):
         case(keyMapN.ce[0] === this.currentSequence && (keyMapN.ce[1] === true || keyMapN.ce[2] === modifierInput)):
         {
