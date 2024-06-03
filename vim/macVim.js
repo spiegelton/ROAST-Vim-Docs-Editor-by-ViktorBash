@@ -2531,8 +2531,12 @@ macVim.visual_keydown = function (e) {
                 return true;
             }
         case (keyMapV.c[0] === this.currentSequence && (keyMapV.c[1] === true || keyMapV.c[2] === modifierInput)):
+        case (keyMapV.s[0] === this.currentSequence && (keyMapV.s[1] === true || keyMapV.s[2] === modifierInput)):
             {
                 let shouldWeCut = keyMapV.c[4];
+                if (keyMapV.s[0] === this.currentSequence && (keyMapV.s[1] === true || keyMapV.s[2] === modifierInput)) {
+                    shouldWeCut = keyMapV.s[4];
+                }
                 this.deleteOrCut(shouldWeCut);
                 macVim.clearData();
                 macVim.switchToInsertMode();
@@ -2540,6 +2544,7 @@ macVim.visual_keydown = function (e) {
             }
         case (keyMapV.D[0] === this.currentSequence && (keyMapV.D[1] === true || keyMapV.D[2] === modifierInput)):
         case (keyMapV.C[0] === this.currentSequence && (keyMapV.C[1] === true || keyMapV.C[2] === modifierInput)):
+        case (keyMapV.S[0] === this.currentSequence && (keyMapV.S[1] === true || keyMapV.S[2] === modifierInput)):
             {
                 // Delete the whole line(s) that we partially selected
                 docs.pressKey(docs.codeFromKey("Backspace"));
@@ -2574,7 +2579,8 @@ macVim.visual_keydown = function (e) {
                     macVim.switchToNormalMode();
                     return true;
                 }
-                else if (keyMapV.C[0] === this.currentSequence && (keyMapV.C[1] === true || keyMapV.C[2] === modifierInput)) {
+                else {
+                    // This covers the case for both C and S
                     macVim.moveToEndOfLine();
                     let [startXCoord, startYCoord] = docs.getCoords();
                     docs.pressKey(docs.codeFromKey("ArrowLeft"));
