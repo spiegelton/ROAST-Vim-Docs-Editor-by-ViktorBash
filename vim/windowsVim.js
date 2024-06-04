@@ -2129,6 +2129,80 @@ windowsVim.normal_keydown = function (e) {
 
             return true;
         }
+        case(keyMapN.de[0] === this.currentSequence && (keyMapN.de[1] === true || keyMapN.de[2] === modifierInput)):
+        case(keyMapN.ce[0] === this.currentSequence && (keyMapN.ce[1] === true || keyMapN.ce[2] === modifierInput)):
+        {
+            let enterInsertMode = false;
+            if (keyMapN.ce[0] === this.currentSequence && (keyMapN.ce[1] === true || keyMapN.ce[2] === modifierInput)) {
+                // "ce" keybinding
+                enterInsertMode = true;
+            }
+
+            const numRepeats = parseInt(windowsVim.num) || 1;
+
+            // First step: Check if we're at the end of the file or not
+            let [initialXCoord, initialYCoord] = docs.getCoords();
+            docs.pressKey(docs.codeFromKey("ArrowRight"));
+            let [endXCoord, endYCoord] = docs.getCoords();
+            if (initialXCoord === endXCoord && initialYCoord === endYCoord) {
+                // We are at the end of the file
+                // Do nothing
+                this.clearData();
+                if (enterInsertMode) {
+                    this.switchToInsertMode();
+                }
+                return true;
+            }
+            else {
+                // Move back to original position
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+
+                // Now actually start the normal base case process
+                docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+
+                // Now we must check if text is highlighted or not, this will
+                // indicate whether we were on the last character or not
+                // (which impacts whether we delete normally or go further out)
+                let textHighlighted = docs.isTextSelected();
+                if (textHighlighted) {
+                    // The normal case, let's undo 1 arrow left
+                    // the other arrow left is still useful because it makes us avoid
+                    // deleting the space between a word.
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                }
+                else {
+                    // The edge case
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                    // TODO: Handle the case of the arrow left here not being good because
+                    // we're at the end
+                }
+
+                // For the rest of the iterations if there are any
+                for (let i = 1; i < numRepeats; i++) {
+                    console.log("hi");
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
+                    docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
+                    docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
+                }
+
+                // Delete or cut the selection at this point
+                if (!enterInsertMode) {
+                    this.deleteOrCut(keyMapN.de[4]);
+                    this.clearData();
+                } else {
+                    this.deleteOrCut(keyMapN.ce[4]);
+                    this.clearData();
+                    this.switchToInsertMode();
+                }
+
+            }
+
+            return true;
+        }
         case(keyMapN.enter[0] === this.currentSequence && (keyMapN.enter[1] === true || keyMapN.enter[2] === modifierInput)):
         {
             // Move to the start of the next line
