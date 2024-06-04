@@ -2183,7 +2183,6 @@ windowsVim.normal_keydown = function (e) {
 
                 // For the rest of the iterations if there are any
                 for (let i = 1; i < numRepeats; i++) {
-                    console.log("hi");
                     docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
