@@ -2146,12 +2146,8 @@ windowsVim.normal_keydown = function (e) {
             let [endXCoord, endYCoord] = docs.getCoords();
             if (initialXCoord === endXCoord && initialYCoord === endYCoord) {
                 // We are at the end of the file
-                // Do nothing
-                this.clearData();
-                if (enterInsertMode) {
-                    this.switchToInsertMode();
-                }
-                return true;
+                // Do nothing except delete one character
+                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
             }
             else {
                 // Move back to original position
@@ -2160,44 +2156,34 @@ windowsVim.normal_keydown = function (e) {
                 // Now actually start the normal base case process
                 docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                 docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-
-                // Now we must check if text is highlighted or not, this will
-                // indicate whether we were on the last character or not
-                // (which impacts whether we delete normally or go further out)
-                let textHighlighted = docs.isTextSelected();
-                if (textHighlighted) {
-                    // The normal case, let's undo 1 arrow left
-                    // the other arrow left is still useful because it makes us avoid
-                    // deleting the space between a word.
-                    docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                }
-                else {
-                    // The edge case
+                let isTextHighlighted = docs.isTextSelected();
+                if (!isTextHighlighted) {
+                    // This means we are on a space or something because nothing is highlighted,
+                    // and we need to correct this
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                    // TODO: Handle the case of the arrow left here not being good because
-                    // we're at the end
+
                 }
 
                 // For the rest of the iterations if there are any
                 for (let i = 1; i < numRepeats; i++) {
+                    // We need to get past the space we are on first of all and then we can keep going
                     docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
                 }
 
-                // Delete or cut the selection at this point
-                if (!enterInsertMode) {
-                    this.deleteOrCut(keyMapN.de[4]);
-                    this.clearData();
-                } else {
-                    this.deleteOrCut(keyMapN.ce[4]);
-                    this.clearData();
-                    this.switchToInsertMode();
-                }
+            }
 
+            // Delete or cut the selection at this point
+            if (!enterInsertMode) {
+                this.deleteOrCut(keyMapN.de[4]);
+                this.clearData();
+            } else {
+                this.deleteOrCut(keyMapN.ce[4]);
+                this.clearData();
+                this.switchToInsertMode();
             }
 
             return true;
