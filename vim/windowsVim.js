@@ -2192,12 +2192,17 @@ windowsVim.normal_keydown = function (e) {
         {
             // Move to the start of the next line
             const numRepeats = parseInt(windowsVim.num) || 1;
+
             for (let i = 0; i < numRepeats; i++) {
+                this.moveToEndOfLine();
                 let [startXCoord, startYCoord] = docs.getCoords();
-                docs.pressKey(docs.codeFromKey("ArrowDown"), true);
+                docs.pressKey(docs.codeFromKey("ArrowRight"));
                 let [endXCoord, endYCoord] = docs.getCoords();
+
+                // Let's check if we're at the end of the file just for optimization purposes
                 if (startXCoord === endXCoord && startYCoord === endYCoord) {
-                    // We are at the end of the file, do nothing
+                    // If we're on the last line we must go to the start of it for consistency
+                    this.moveToStartOfLine();
                     break;
                 }
             }

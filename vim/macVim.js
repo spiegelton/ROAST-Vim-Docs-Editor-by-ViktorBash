@@ -2187,7 +2187,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
                 let [endXCoord, endYCoord] = docs.getCoords();
 
-                // Let's check if we're at the end of the file just for optimization purposes
+                // Let's check if we're at the end of the file
                 if (startXCoord === endXCoord && startYCoord === endYCoord) {
                     // If we're on the last line we must go to the start of it for consistency
                     this.moveToStartOfLine();
