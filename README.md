@@ -60,5 +60,9 @@ decides logic on whether the user has paid or not, and then runs the appropriate
 - `popup.js` runs on the popup page for the extension that shows user info and paying/etc
 - `toggleUpdate.js` runs on the changelog page and just handles whether the user has notifications for updates selected or not
 
-### CSS Libraries Used:
-- 
+### How To Use/Release On FireFox
+- To be able to use the extension on FireFox, one line needs to change in `manifest.json`.
+  - Change the `background` line to:
+```json
+"scripts": ["background.js"]
+```
