@@ -679,7 +679,7 @@ docs.reactivateAfterPopupButton = function () {
     let waitingForMenuClose = setInterval(() => {
         // This element is hidden when the word count menu is open, so we'll detect when we close the word count menu
         // By seeing when this element is not hidden anymore
-        let element = document.querySelector('meta[itemprop="name"]');
+        let element = document.querySelector('meta[itemprop="faviconUrl"]');
         let elementHidden = element.getAttribute("aria-hidden");
 
         if (elementHidden === null) {
