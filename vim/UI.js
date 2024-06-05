@@ -4,7 +4,7 @@ let UI = {}
 
 UI.setUp = function() {
 	// UISequenceContainer goes on the right and shows the current command if it's multiple characters
-	this.UIDocHead = document.querySelector("#kix-appview");
+	this.UISequenceContainerParent = document.querySelector("#kix-appview");
 	this.UISequenceContainer = document.createElement("div");
 	this.UISequenceContainer.style.position = "absolute";
 	this.UISequenceContainer.style.right = "30px";
@@ -16,10 +16,14 @@ UI.setUp = function() {
 	this.UISequenceContainer.style.fontFamily = "Google Sans, Roboto, sans-serif";
 	this.UISequenceContainer.style.fontSize = "16px";
 	this.UISequenceContainer.innerHTML = "<span></span>";
-	this.UIDocHead.appendChild(this.UISequenceContainer);
+	this.UISequenceContainerParent.appendChild(this.UISequenceContainer);
 
 	// UIModeContainer goes on the left and shows the current mode (insert, normal, etc.), or even if
 	// the user needs to activate their free trial, it expired, etc
+
+	// The parent was chosen so that the UI is shown with or without the sidebar on the left
+	this.UIModeContainerParent = document.querySelector(".left-sidebar-container.docs-ui-unprintable.left-sidebar-container-animation");
+
 	this.UIModeContainer = document.createElement("div");
 	this.UIModeContainer.style.position = "absolute";
 	this.UIModeContainer.style.left = "30px";
@@ -31,7 +35,7 @@ UI.setUp = function() {
 	this.UIModeContainer.style.fontFamily = "Google Sans, Roboto, sans-serif";
 	this.UIModeContainer.style.fontSize = "16px";
 	this.UIModeContainer.innerHTML = "<span>-- INSERT --</span>";
-	this.UIDocHead.appendChild(this.UIModeContainer);
+	this.UIModeContainerParent.appendChild(this.UIModeContainer);
 }
 
 
