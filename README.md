@@ -61,8 +61,16 @@ decides logic on whether the user has paid or not, and then runs the appropriate
 - `toggleUpdate.js` runs on the changelog page and just handles whether the user has notifications for updates selected or not
 
 ### How To Use/Release On FireFox
-- To be able to use the extension on FireFox, one line needs to change in `manifest.json`.
+- To be able to use the extension on FireFox, `manifest.json` needs a couple of changes.
   - Change the `background` line to:
 ```json
 "scripts": ["background.js"]
+```
+  - Add this code segment also
+```json
+"browser_specific_settings": {
+  "gecko": {
+    "id": "support@vimfordocs.com"
+  }
+}
 ```
