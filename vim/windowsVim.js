@@ -996,21 +996,9 @@ windowsVim.normal_keydown = function (e) {
                 this.clearData();
                 return true;
             }
-        case (keyMapN.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteNoFormatting[1] === true || keyMapN.pasteNoFormatting[2] === modifierInput)):
-            {
-                docs.pasteNoFormatting(this.moveToEndOfLine, this.moveRightToPasteAfterCursor);
-                this.clearData();
-                return true;
-            }
         case (keyMapN.pasteBeforeCursor[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursor[1] === true || keyMapN.pasteBeforeCursor[2] === modifierInput)):
             {
                 docs.pasteBeforeCursor(this.moveToStartOfLine);
-                this.clearData();
-                return true;
-            }
-        case (keyMapN.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapN.pasteBeforeCursorNoFormatting[1] === true || keyMapN.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                docs.pasteBeforeCursorNoFormatting(this.moveToStartOfLine);
                 this.clearData();
                 return true;
             }
@@ -2424,21 +2412,6 @@ windowsVim.visual_keydown = function (e) {
                 this.switchToNormalMode();
                 return true;
             }
-        case (keyMapV.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteNoFormatting[1] === true || keyMapV.pasteNoFormatting[2] === modifierInput)):
-        case (keyMapV.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                // We have to first delete the highlighted text, then paste in the clipboard
-                if (docs.isTextSelected()) {
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-
-                this.moveRightToPasteAfterCursor();
-                docs.pastePlainText();
-
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
-                return true;
-            }
         case (keyMapV.insertStartOfHighlight[0] === windowsVim.currentSequence && (keyMapV.insertStartOfHighlight[1] === true || keyMapV.insertStartOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -2925,20 +2898,6 @@ windowsVim.visual_line_keydown = function (e) {
                 }, 1)
                 this.clearData();
                 this.switchToNormalMode();
-                return true;
-            }
-        case (keyMapVLine.pasteNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
-        case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === windowsVim.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                // We have to first delete the highlighted text, then paste in the clipboard
-                if (docs.isTextSelected()) {
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-
-                docs.pastePlainText();
-
-                windowsVim.clearData();
-                windowsVim.switchToNormalMode();
                 return true;
             }
         case (keyMapVLine.insertStartOfHighlight[0] === windowsVim.currentSequence && (keyMapVLine.insertStartOfHighlight[1] === true || keyMapVLine.insertStartOfHighlight[2] === modifierInput)):

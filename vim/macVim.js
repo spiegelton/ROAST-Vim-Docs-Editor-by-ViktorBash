@@ -998,21 +998,9 @@ macVim.normal_keydown = function (e) {
                 this.clearData();
                 return true;
             }
-        case (keyMapN.pasteNoFormatting[0] === this.currentSequence && (keyMapN.pasteNoFormatting[1] === true || keyMapN.pasteNoFormatting[2] === modifierInput)):
-            {
-                docs.pasteNoFormatting(this.moveToEndOfLine, this.moveRightToPasteAfterCursor);
-                this.clearData();
-                return true;
-            }
         case (keyMapN.pasteBeforeCursor[0] === this.currentSequence && (keyMapN.pasteBeforeCursor[1] === true || keyMapN.pasteBeforeCursor[2] === modifierInput)):
             {
                 docs.pasteBeforeCursor(this.moveToStartOfLine);
-                this.clearData();
-                return true;
-            }
-        case (keyMapN.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapN.pasteBeforeCursorNoFormatting[1] === true || keyMapN.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                docs.pasteBeforeCursorNoFormatting(this.moveToStartOfLine);
                 this.clearData();
                 return true;
             }
@@ -2463,20 +2451,6 @@ macVim.visual_keydown = function (e) {
                 return true;
 
             }
-        case (keyMapV.pasteNoFormatting[0] === this.currentSequence && (keyMapV.pasteNoFormatting[1] === true || keyMapV.pasteNoFormatting[2] === modifierInput)):
-        case (keyMapV.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                // We have to first delete the highlighted text, then paste in the clipboard
-                if (docs.isTextSelected()) {
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-
-                docs.pastePlainText();
-
-                this.clearData();
-                this.switchToNormalMode();
-                return true;
-            }
         case (keyMapV.insertStartOfHighlight[0] === this.currentSequence && (keyMapV.insertStartOfHighlight[1] === true || keyMapV.insertStartOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -2994,19 +2968,6 @@ macVim.visual_line_keydown = function (e) {
                 setTimeout(() => {
                     docs.pasteRegular();
                 }, 1)
-
-                macVim.clearData();
-                macVim.switchToNormalMode();
-                return true;
-            }
-        case (keyMapVLine.pasteNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
-        case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
-            {
-                if (docs.isTextSelected()) {
-                    docs.pressKey(docs.codeFromKey("Backspace"));
-                }
-
-                docs.pastePlainText();
 
                 macVim.clearData();
                 macVim.switchToNormalMode();
