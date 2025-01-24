@@ -874,6 +874,7 @@ docs.toolbarMenuButtonOptions = {
     bulletedList: ["addBulletButton", docs._clickMainToolBarButton],
     numberedList: ["addNumberedBulletButton", docs._clickMainToolBarButton],
     outdent: ["outdentButton", docs._clickMainToolBarButton],
+    undoButton: ["undoButton", docs._clickMainToolBarButton],
     indent: ["indentButton", docs._clickMainToolBarButton],
     alignLeft: ["alignLeftButton", docs._clickMainToolBarButton],
     alignCenter: ["alignCenterButton", docs._clickMainToolBarButton],
@@ -910,6 +911,8 @@ docs.toolbarMenuButtonOptions = {
     dictionary: ["Dictionary d", docs._clickToolsButton],
     voiceTyping: ["Voice typing v", docs._clickToolsButton],
     searchTheMenus: ["Search the menus m", docs._clickHelpButton], // Clicking via main toolbar doesn't work
+    cut: ["Cut t", docs._clickEditButton], // Cut button
+
 };
 
 docs.moveToCoords = function(xCoord, yCoord) {

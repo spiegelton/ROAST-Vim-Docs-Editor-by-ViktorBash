@@ -225,24 +225,11 @@ macVim.moveToStartOfLine = function () {
 // shouldWeCut is boolean
 macVim.deleteOrCut = function(shouldWeCut) {
     if (shouldWeCut === true) {
-        docs.contentDocument.execCommand("cut");
+        console.log("Menu cut");
+        docs.clickButton(docs.toolbarMenuButtonOptions.cut);
     }
     else {
         docs.pressKey(docs.codeFromKey("Backspace"));
-    }
-}
-
-// shouldWeCut is boolean
-// There are 2 ways to undo and which one is the correct one to do depends on whether you deleted (Backspaceed) or cut the text
-// Consequently this function does both since undo depends on how you deleted/cut the text
-macVim.deleteOrCutAndUndo = function(shouldWeCut) {
-    if (shouldWeCut === true) {
-        docs.contentDocument.execCommand("cut");
-        docs.contentDocument.execCommand("undo")
-    }
-    else {
-        docs.pressKey(docs.codeFromKey("Backspace"));
-        docs.pressKey(docs.codeFromKey("Z"), true);
     }
 }
 
@@ -1139,26 +1126,29 @@ macVim.normal_keydown = function (e) {
             // "x" and "s" commands
             let numRepeats = parseInt(this.num) || 1;
 
-            if (e.repeat === false && numRepeats === 1 && docs.isTextSelected()) {
-                // If the user presses "Undo", we still have text highlighted in normal mode to delete
-                this.deleteOrCut(keyMapN.x[4]);
-                numRepeats = 0; // Skip the logic and go straight to the bottom
-            }
-
             // We can only delete stuff on the current line
-            // We will move right as much as possible, and then move left if we still need to delete more
-            let [startXCoord, startYCoord] = docs.getCoords();
-
+            // We will move right as much as possible, and then move left while highlighting to delete
             let counter = numRepeats;
             let rightCounter = 0; // How many characters to move to the right
 
+            if (e.repeat === false && numRepeats === 1 && docs.isTextSelected()) {
+                // If the user presses "Undo", we still have text highlighted in normal mode to delete
+                this.deleteOrCut(shouldWeCut);
+
+                // Set these vars to skip straight to the bottom & exit
+                numRepeats = -1;
+                counter = -1;
+                rightCounter = -1;
+            }
+
+            // This while loop counts how many chars to del and moves to the end of the line (or towards it)
             while (counter > 0) {
                 let [curXCoord, curYCoord] = docs.getCoords();
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
                 let [newXCoord, newYCoord] = docs.getCoords();
                 if (curXCoord === newXCoord && curYCoord === newYCoord) {
                     // At the end of the file, do nothing
-                    break; // Don't change counters or anything since we didn't actually move
+                    break;
                 }
                 else if (newYCoord !== curYCoord) {
                     // We are on a new line (potentially), so we need to test and take appropriate action
@@ -1184,26 +1174,22 @@ macVim.normal_keydown = function (e) {
             }
 
             if (rightCounter > 0) {
+                let newCounter = 0;
                 // Characters to delete that we can,
                 // We will highlight going to the left
                 while (rightCounter > 0) {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
                     rightCounter--;
+                    newCounter++;
                 }
-                // Only delete based whether or not text is selected
-                if (docs.isTextSelected() && numRepeats > 1) {
-                    this.deleteOrCutAndUndo(shouldWeCut);
-                    // Undo our delete, and then we are going to press "Space" and delete the space (this is to prevent docs from deleting spaces after the word)
-                    docs.pressKey(docs.codeFromKey(docs.placeHolderKey)); // Placeholder
-                    docs.pressKey(docs.codeFromKey("Backspace"));
+                if (shouldWeCut) {
+                    docs.contentDocument.execCommand("copy");
                 }
-                else if (docs.isTextSelected() && numRepeats === 1) {
-                    if (shouldWeCut) {
-                        docs.contentDocument.execCommand("copy");
-                    }
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                docs.pressKey(docs.codeFromKey("ArrowLeft"));
+                for (let i = 0; i < newCounter; i++) {
                     docs.pressKey(docs.codeFromKey("Delete"));
                 }
+                rightCounter = -1;
             }
             else if (rightCounter === 0) {
                 // We're at the end of the line and need to cut/delete 1 character left (unless we're on an empty line)
@@ -1211,35 +1197,15 @@ macVim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 let [newXCoord, newYCoord] = docs.getCoords();
                 if (startXCoord === newXCoord && startYCoord === newYCoord) {
-                    // We're on an empty line
-                    // We don't copy emptiness to the clipboard (if we're cutting)
+                    // We're on an empty line at the top of the file, do nothing
                 }
                 else if (newYCoord !== startYCoord) {
+                    // Still an empty line, so just go back
                     docs.pressKey(docs.codeFromKey("ArrowRight"));
-                    docs.pressKey(docs.codeFromKey("ArrowLeft"), true);
-                    let [finalXCoord, finalYCoord] = docs.getCoords();
-                    if (finalXCoord === newXCoord && finalYCoord === newYCoord) {
-                        // We're on a new line, so go back and do nothing
-                        docs.pressKey(docs.codeFromKey("ArrowRight"));
-                        // We don't copy emptiness to the clipboard (if we're cutting)
-                    }
-                    else {
-                        // Multiline
-                        docs.pressKey(docs.codeFromKey("ArrowRight"), true);
-                        docs.pressKey(docs.codeFromKey("ArrowRight"));
-                        if (shouldWeCut) {
-                            docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                            docs.contentDocument.execCommand("copy")
-                            docs.pressKey(docs.codeFromKey("Backspace"));
-                        }
-                        else {
-                            docs.pressKey(docs.codeFromKey("Backspace"))
-                        }
-                    }
                 }
                 else {
                     if (shouldWeCut) {
-                        docs.pressKey(docs.codeFromKey("ArrowRight"));
+                        docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
                         docs.contentDocument.execCommand("copy");
                         docs.pressKey(docs.codeFromKey("ArrowLeft"));
                         docs.pressKey(docs.codeFromKey("Delete"));
@@ -1248,7 +1214,6 @@ macVim.normal_keydown = function (e) {
                         docs.pressKey(docs.codeFromKey("Delete"));
                     }
                 }
-
             }
 
 

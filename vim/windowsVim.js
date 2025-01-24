@@ -130,7 +130,7 @@ windowsVim.switchToInsertMode = function () {
 // shouldWeCut is boolean
 windowsVim.deleteOrCut = function(shouldWeCut) {
     if (shouldWeCut === true) {
-        docs.contentDocument.execCommand("cut");
+        docs.clickButton(docs.toolbarMenuButtonOptions.cut);
     }
     else {
         docs.pressKey(docs.codeFromKey("Backspace"));
@@ -142,8 +142,8 @@ windowsVim.deleteOrCut = function(shouldWeCut) {
 // Consequently this function does both since undo depends on how you deleted/cut the text
 windowsVim.deleteOrCutAndUndo = function(shouldWeCut) {
     if (shouldWeCut === true) {
-        docs.contentDocument.execCommand("cut");
-        docs.contentDocument.execCommand("undo")
+        docs.clickButton(docs.toolbarMenuButtonOptions.cut);
+        docs.pressKey(docs.codeFromKey("Z"), true);
     }
     else {
         docs.pressKey(docs.codeFromKey("Backspace"));
