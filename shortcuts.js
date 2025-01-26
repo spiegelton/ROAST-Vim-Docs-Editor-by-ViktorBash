@@ -577,3 +577,26 @@ function handlePasteCheckboxChange(event) {
 }
 
 togglePasteModeCheckBox.addEventListener("change", handlePasteCheckboxChange);
+
+// Handle line numbers change
+let toggleLineModeCheckBox = document.getElementById("toggleLineNumbers");
+
+// The default if the user has nothing saved is true
+chrome.storage.sync.get("toggleLineNumbers", function(result) {
+    if (result.toggleLineNumbers === "true") {
+        toggleLineModeCheckBox.checked = true;
+    } else {
+        toggleLineModeCheckBox.checked = false;
+    }
+});
+
+// Handle checkbox change
+function handleLineModeCheckBoxChange(event) {
+    if (event.target.checked) {
+        chrome.storage.sync.set({"toggleLineNumbers": "true"});
+    } else {
+        chrome.storage.sync.set({"toggleLineNumbers": "false"});
+    }
+}
+
+toggleLineModeCheckBox.addEventListener("change", handleLineModeCheckBoxChange);

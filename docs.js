@@ -35,9 +35,21 @@ docs.setUp = function () {
     docs.paragraphStylesMenuLoaded = false;
 
     docs.pasteInstalled = true;
+
+    // This determines whether we can use the "Paste" button in the toolbar or just plain text paste for all pastes
     chrome.storage.sync.get("togglePasteMode", function(result) {
         if (result.togglePasteMode === "false") {
             docs.pasteInstalled = false;
+        }
+    });
+
+    // This determines whether we ensure that line numbers are on whenever we go in the doc
+    chrome.storage.sync.get("toggleLineNumbers", function(result) {
+        if (result.toggleLineNumbers === "true") {
+            // Give a little bit of time to load it in
+            setTimeout(() => {
+                docs._activateLineNumbers();
+            }, 30); // Works with 1ms actually
         }
     });
 
@@ -757,6 +769,26 @@ docs._simulateClick = function (el, mouseout= false) {
 
 docs.clickButton = function (buttonOption) {
     buttonOption[1](buttonOption[0]);
+}
+
+docs._activateLineNumbers = function() {
+    // First we must click the button in the toolbar menu
+    docs._clickToolsButton("Line numbers f1");
+
+    // Next we must get the checkbox (first get the parent)
+    let checkBoxElem = document.querySelector(".kix-linenumbers-checkbox-container").firstChild.firstChild;
+    // Check whether the checkbox is checked or not
+    let checked = checkBoxElem.getAttribute("aria-checked");
+
+    // If line numbers are not on, activate them
+    if (checked === "false") {
+        docs._simulateClick(checkBoxElem);
+    }
+
+    // Now we must close the window
+    let closeButton = document.querySelector("div.docs-material[aria-label='Close line numbers sidebar']");
+    docs._simulateClick(closeButton);
+
 }
 
 docs._handleAfterSearchCapital = function (coords, searchLineOption) {

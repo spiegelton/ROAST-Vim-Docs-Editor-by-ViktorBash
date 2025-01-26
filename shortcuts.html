@@ -155,6 +155,13 @@
         .question-mark-svg:hover {
             cursor: pointer;
         }
+
+        #toggleLineNumbersLabel {
+            font-size: 14px;
+            font-weight: normal;
+            text-align: center;
+            display: block;
+        }
     </style>
 
     <body>
@@ -185,6 +192,14 @@
                 <span><b>Use Pasting with Formatting? (Requires <a target="_blank" href="https://chromewebstore.google.com/detail/google-docs-offline/ghbmnnjooekpmoecnnnilnnbdlolhkhi">Google Docs Offline</a> extension):</b></span>
                 <input type="checkbox" id="togglePasteMode">
             </div>
+
+            <div>
+                <span><b>Show Line Numbers:</b></span>
+                <input type="checkbox" id="toggleLineNumbers">
+                <span id="toggleLineNumbersLabel" for="toggleLineNumbers"><b>NOTE:</b> Line Numbers Will Be Visible To Collaborators On Shared Docs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+            <br>
+
 
             <button id="cut-btn">Make All Possible Keybindings Cut To Clipboard</button>
             <div></div>
