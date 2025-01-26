@@ -32,6 +32,26 @@ export function saveKeyInKeyMap(keyMapStr, keyNameStr, keyValue, bitMask, cutTex
 	});
 }
 
+export function makeAllPossibleKeysCut(callback) {
+	// Get the current keyMap
+	getUltimateKeyMapInCallback(function (ultimateKeyMap) {
+		// Go through each keybinding and set cutText to true
+		for (let keyMap in ultimateKeyMap) {
+			for (let keyName in ultimateKeyMap[keyMap]) {
+				// For all valid keybindings, set cutText to true
+				if (ultimateKeyMap[keyMap][keyName][4] != null) {
+					ultimateKeyMap[keyMap][keyName][4] = true;
+				}
+			}
+		}
+
+		// Now we must save the keymap
+		chrome.storage.local.set({
+			"ultimateKeyMap": JSON.stringify(ultimateKeyMap)
+		}, callback);
+	});
+}
+
 export function resetToDefaultKeyMap(callback) {
 
 	// Clear local storage completely and then call the callback when done

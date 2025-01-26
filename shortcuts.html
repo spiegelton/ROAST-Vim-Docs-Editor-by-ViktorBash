@@ -87,7 +87,7 @@
             margin-right: 2px;
             margin-bottom: 2px;
             margin-top: 0;
-            vertical-align: topdd;
+            vertical-align: top;
         }
 
         #reset-modal {
@@ -137,7 +137,7 @@
             padding-left: 16px;
         }
 
-        #reset-btn {
+        #reset-btn, #cut-btn {
             margin-top: 10px;
             padding: 8px;
             padding-right: 16px;
@@ -174,16 +174,20 @@
             <p>Native Google Docs Shortcuts refer to built-in Google Docs commands. Changing these keybindings affects normal, visual and visual line mode.</p>
             <p>It is recommended that any keybindings to escape/exit (ex: <kbd>Ctrl-c</kbd>, <kbd>Esc</kbd>), you keep at most 1 character long</p>
 
+            <h2>Misc Settings:</h2>
+
             <div>
                 <span><b>Start In Normal Mode:</b></span>
                 <input type="checkbox" id="toggleStartMode">
             </div>
 
             <div>
-                <span><b>Use Pasting with Formatting? (Requires <a target="_blank" href="https://chromewebstore.google.com/detail/google-docs-offline/ghbmnnjooekpmoecnnnilnnbdlolhkhi">Google Docs Offline</a> extension)</b></span>
+                <span><b>Use Pasting with Formatting? (Requires <a target="_blank" href="https://chromewebstore.google.com/detail/google-docs-offline/ghbmnnjooekpmoecnnnilnnbdlolhkhi">Google Docs Offline</a> extension):</b></span>
                 <input type="checkbox" id="togglePasteMode">
             </div>
 
+            <button id="cut-btn">Make All Possible Keybindings Cut To Clipboard</button>
+            <div></div>
             <button id="reset-btn">Reset All Keybindings</button>
         </header>
 

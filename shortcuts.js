@@ -11,7 +11,8 @@ import {
     getDefaultKeyBindings,
     saveKeyInKeyMap,
     resetToDefaultKeyMap,
-    getModifierInput
+    getModifierInput,
+    makeAllPossibleKeysCut
 } from "./vim/keybindings.js";
 
 // If we are in the middle of recording a new keybinding, any clicks to other keybindings will be ignored until the 
@@ -514,6 +515,13 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 
             }); // in keybindings.js
         }
+    }
+
+    // Mass cut to clipboard functionality
+    let cutButton = document.getElementById("cut-btn");
+    cutButton.onclick = function (e) {
+        // Once the func runs, our callback (to reload the window) will run
+        makeAllPossibleKeysCut(() => {location.reload()});
     }
 
 
