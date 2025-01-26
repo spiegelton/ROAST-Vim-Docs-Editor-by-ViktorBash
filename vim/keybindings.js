@@ -75,8 +75,10 @@ export function getDefaultKeyBindings() {
 		ctrlDPageDown: ["d", false, 0b1000, "Move cursor down several lines", null],
 		ctrlUPageUp: ["u", false, 0b1000, "Move cursor up several lines", null],
 		redo: ["r", false, 0b1000, "Redo", null],
-		paste: ["p", false, 0b0000, "Paste after cursor", null],
+		paste: ["p", false, 0b0000, "Paste after cursor", null], // TODO: Change into 2 functions on the other side
+		pasteNoFormatting: ["p", false, 0b1000, "Paste after cursor with no formatting", null],
 		pasteBeforeCursor: ["P", false, 0b0100, "Paste before cursor", null],
+		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste before cursor with no formatting", null],
 		insert: ["i", false, 0b0000, "Enter insert mode before the cursor", null],
 		enterVisual: ["v", false, 0b0000, "Enter visual mode", null],
 		enterVisualLine: ["V", false, 0b0100, "Enter visual line mode", null],
@@ -171,8 +173,10 @@ export function getDefaultKeyBindings() {
 		U: ["U", false, 0b0100, "Convert text to uppercase", null],
 		redo: ["r", false, 0b1000, "Exit to normal to redo", null],
 		slashSearch: ["/", false, 0b0000, "Search for text", null],
-		paste: ["p", false, 0b0000, "Paste", null],
+		paste: ["p", false, 0b0000, "Paste", null], // TODO: Change into 2 functions on the other side
+		pasteNoFormatting: ["p", false, 0b1000, "Paste with no formatting", null],
 		pasteBeforeCursor: ["P", false, 0b0100, "Paste", null],
+		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste with no formatting", null],
 		insertStartOfHighlight: ["I", false, 0b0100, "Insert at start of highlight", null],
 		exitVisualMode: ["v", false, 0b0000, "Exit to normal mode", null],
 		exitToVisualLineMode: ["V", false, 0b0100, "Exit to visual line mode", null],
@@ -213,8 +217,10 @@ export function getDefaultKeyBindings() {
 		U: ["U", false, 0b0100, "Convert text to uppercase", null],
 		redo: ["r", false, 0b1000, "Exit to normal to redo", null],
 		slashSearch: ["/", false, 0b0000, "Search for text", null],
-		paste: ["p", false, 0b0000, "Paste", null],
+		paste: ["p", false, 0b0000, "Paste", null], // TODO: Change into 2 functions on the other side
+		pasteNoFormatting: ["p", false, 0b1000, "Paste with no formatting", null],
 		pasteBeforeCursor: ["P", false, 0b0100, "Paste", null],
+		pasteBeforeCursorNoFormatting: ["P", false, 0b1100, "Paste with no formatting", null],
 		insertStartOfHighlight: ["I", false, 0b0100, "Insert at start of highlight", null],
 		exitToVisualMode: ["v", false, 0b0000, "Exit to visual mode", null],
 		exitVisualLineMode: ["V", false, 0b0100, "Exit to normal mode", null],
@@ -408,7 +414,7 @@ export function getUltimateKeyMapInCallback(callback) {
 		}
 
 		// We are going to loop through each keyMap (keyMapN, keyMapI, keyMapV, keyMapVLine)
-		// In each keyMap, we will loop through each key entry and either populate outputKeyMap with the 
+		// In each keyMap, we will loop through each key entry and either populate outputKeyMap with the
 		// saved keybinding if it exists or the default keybinding
 
 		// keyMapN
@@ -439,7 +445,7 @@ export function getUltimateKeyMapInCallback(callback) {
 			if (key === "replaceCharacter" || key === "f" || key === "t" || key === "F" || key === "T") {
 				outputKeyMap.incompleteKeyMapN.push(keyVal);
 			}
-			
+
 		});
 
 		// keyMapI

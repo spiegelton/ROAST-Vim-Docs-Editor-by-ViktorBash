@@ -34,6 +34,13 @@ docs.setUp = function () {
     docs.capitalizationMenuLoaded = false;
     docs.paragraphStylesMenuLoaded = false;
 
+    docs.pasteInstalled = true;
+    chrome.storage.sync.get("togglePasteMode", function(result) {
+        if (result.togglePasteMode === "false") {
+            docs.pasteInstalled = false;
+        }
+    });
+
 }
 
 // Function keys (F1-F32), modifier keys (Ctrl, Alt, Shift, Meta), and "Escape" are not included
@@ -362,6 +369,16 @@ docs.isTextSelected = function () {
 
 docs.lastPasteTime = Date.now();
 
+// The paste functions:
+// - pastePlainText() --> No args
+// - pasteRegular() --> No args
+//
+// - pasteNoFormatting(moveLineFunc, moveRightToPasteAfterCursor)
+// - paste(moveLineFunc, moveRightToPasteAfterCursor)
+//
+// - pasteBeforeCursor(moveLineFunc)
+// - pasteBeforeCursorNoFormatting(moveLineFunc)
+
 docs.paste = async function (moveToEndOfLineFunc, moveRightToPasteAfterCursor) {
     let text = await navigator.clipboard.readText();
     let containsNewLine = false;
@@ -371,7 +388,9 @@ docs.paste = async function (moveToEndOfLineFunc, moveRightToPasteAfterCursor) {
 
     // Pasting line(s) (contains new line)
     if (containsNewLine) {
-        if (Date.now() - docs.lastPasteTime < 50) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
+        if (Date.now() - docs.lastPasteTime < 225) {
             // We have pasted too recently, and pasting again will break stuff
             return;
         }
@@ -381,7 +400,8 @@ docs.paste = async function (moveToEndOfLineFunc, moveRightToPasteAfterCursor) {
         docs.pressKey(docs.codeFromKey("Enter"));
 
         setTimeout(() => {
-            docs._pastePlainText();
+            docs.pasteRegular();
+
             setTimeout(() => {
                 docs.pressKey(docs.codeFromKey("Backspace"));
             }, 10)
@@ -393,7 +413,46 @@ docs.paste = async function (moveToEndOfLineFunc, moveRightToPasteAfterCursor) {
     else {
         moveRightToPasteAfterCursor();
         setTimeout(() => {
-            docs._pastePlainText();
+            docs.pasteRegular();
+        }, 1)
+    }
+}
+
+docs.pasteNoFormatting = async function (moveToEndOfLineFunc, moveRightToPasteAfterCursor) {
+    let text = await navigator.clipboard.readText();
+    let containsNewLine = false;
+    if (text.indexOf("\n") !== -1) {
+        containsNewLine = true;
+    }
+
+    // Pasting line(s) (contains new line)
+    if (containsNewLine) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
+        if (Date.now() - docs.lastPasteTime < 50) {
+            // We have pasted too recently, and pasting again will break stuff
+            return;
+        }
+        docs.lastPasteTime = Date.now();
+
+        moveToEndOfLineFunc();
+        docs.pressKey(docs.codeFromKey("Enter"));
+
+        setTimeout(() => {
+            docs.pastePlainText();
+
+            setTimeout(() => {
+                docs.pressKey(docs.codeFromKey("Backspace"));
+            }, 10)
+        }, 10)
+
+    }
+
+    // Pasting inline (no new line)
+    else {
+        moveRightToPasteAfterCursor();
+        setTimeout(() => {
+            docs.pastePlainText();
         }, 1)
     }
 }
@@ -407,6 +466,37 @@ docs.pasteBeforeCursor = async function (moveToStartOfLineFunc) {
 
     // Pasting line(s) (contains new line)
     if (containsNewLine) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
+        if (Date.now() - docs.lastPasteTime < 225) {
+            // We have pasted too recently, and pasting again will break stuff
+            return;
+        }
+        docs.lastPasteTime = Date.now();
+
+        moveToStartOfLineFunc();
+        docs.pasteRegular();
+    }
+
+    // Pasting inline (no new line)
+    else {
+        setTimeout(() => {
+            docs.pasteRegular();
+        }, 1)
+    }
+}
+
+docs.pasteBeforeCursorNoFormatting = async function (moveToStartOfLineFunc) {
+    let text = await navigator.clipboard.readText();
+    let containsNewLine = false;
+    if (text.indexOf("\n") !== -1) {
+        containsNewLine = true;
+    }
+
+    // Pasting line(s) (contains new line)
+    if (containsNewLine) {
+        // 225ms --> Very rarely breaks
+        // 175ms --> Breaks frequently
         if (Date.now() - docs.lastPasteTime < 50) {
             // We have pasted too recently, and pasting again will break stuff
             return;
@@ -414,25 +504,27 @@ docs.pasteBeforeCursor = async function (moveToStartOfLineFunc) {
         docs.lastPasteTime = Date.now();
 
         moveToStartOfLineFunc();
-        docs._pastePlainText();
+        docs.pastePlainText();
     }
 
     // Pasting inline (no new line)
     else {
-        setTimeout(() => {
-            docs._pastePlainText();
-        }, 1)
+        docs.pastePlainText();
     }
 }
 
-// For visual and visual line mode use only, pasting without caring about
-// newlines and stuff like that
+// Paste with formatting if possible, or just paste plain text then
 docs.pasteRegular = function () {
-    docs._pastePlainText();
+    if (docs.pasteInstalled) {
+        docs.clickButton(docs.toolbarMenuButtonOptions.paste);
+    }
+    else {
+        docs.pastePlainText();
+    }
 }
 
 // Pastes plain text into the document using the navigator.clipboard API
-docs._pastePlainText = async function () {
+docs.pastePlainText = async function () {
     let data = new DataTransfer();
     data.setData("text/plain", await navigator.clipboard.readText());
     let paste = new ClipboardEvent("paste", {
@@ -912,7 +1004,8 @@ docs.toolbarMenuButtonOptions = {
     voiceTyping: ["Voice typing v", docs._clickToolsButton],
     searchTheMenus: ["Search the menus m", docs._clickHelpButton], // Clicking via main toolbar doesn't work
     cut: ["Cut t", docs._clickEditButton], // Cut button
-
+    paste: ["Paste p", docs._clickEditButton], // Paste button
+    // "Paste without formatting o" is the identifier for the other paste button
 };
 
 docs.moveToCoords = function(xCoord, yCoord) {
@@ -1044,7 +1137,6 @@ docs.moveToYCoordQuitEarly = function (yCoord) {
 
     while (newYCoord !== yCoord) {
         if ((newYCoord < yCoord && lastMoveUp === true) || (newYCoord > yCoord && lastMoveUp === false)) {
-            console.log("DONE");
             break;
         }
         if (newYCoord < yCoord) {
@@ -1077,7 +1169,7 @@ docs.scrollDownWithCursor = function () {
     let wantedCursorPosition = wantedVisualHeight + linesOfBuffer * lineHeight;
 
     // Step 2: Move the cursor as needed
-    console.log(wantedVisualHeight, wantedCursorPosition);
+    // console.log(wantedVisualHeight, wantedCursorPosition);
     docs.moveToYCoordQuitEarly(wantedCursorPosition); // TODO: Ensure that this works properly
 
     // Step 3: Scroll to the new position
@@ -1123,4 +1215,39 @@ docs.scrollDownWithCursor = function () {
 
 // };
 
+docs.monitorForPastePopup = function() {
+    const target = document.body;
+    let subtitle_1 = "To paste with formatting via <b>Vim for Docs</b>, either install the Google Docs Offline Chrome extension, or turn off paste with formatting in the remapping menu.";
+    let subtitle_2 = "Alternatively, you can always use your keyboard shortcuts in insert mode:";
+
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.type === "childList") {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.hasChildNodes() && node.textContent.includes("Enable copy, cut, and paste?")) {
+                        setTimeout(() => {
+
+                        let rootDiv = node.childNodes[0].childNodes[0].childNodes[2];
+                        let subtitle_1_elem = rootDiv.childNodes[0];
+                        let subtitle_2_elem = rootDiv.childNodes[1];
+
+                        subtitle_1_elem.innerHTML = subtitle_1;
+                        subtitle_2_elem.textContent = subtitle_2;
+                        }, 1);
+                    }
+                });
+            }
+        });
+    });
+
+    const config = {
+
+        childList: true,
+        subtree: false, // Big performance savings by not observing the subtrees
+    };
+
+    observer.observe(target, config);
+}
+
 export {docs};
+

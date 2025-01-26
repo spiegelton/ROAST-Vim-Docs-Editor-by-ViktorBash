@@ -221,4 +221,9 @@ function continueRunVim(vimVariant) {
 			
 		}
 	);
+
+	// 	We put a little bit of delay because we don't want the mutation observer to interfere with Google Doc loading in
+	setTimeout(() => {
+		docs.monitorForPastePopup()
+	}, 2000);
 }

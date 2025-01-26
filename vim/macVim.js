@@ -225,7 +225,6 @@ macVim.moveToStartOfLine = function () {
 // shouldWeCut is boolean
 macVim.deleteOrCut = function(shouldWeCut) {
     if (shouldWeCut === true) {
-        console.log("Menu cut");
         docs.clickButton(docs.toolbarMenuButtonOptions.cut);
     }
     else {
@@ -985,9 +984,21 @@ macVim.normal_keydown = function (e) {
                 this.clearData();
                 return true;
             }
+        case (keyMapN.pasteNoFormatting[0] === this.currentSequence && (keyMapN.pasteNoFormatting[1] === true || keyMapN.pasteNoFormatting[2] === modifierInput)):
+            {
+                docs.pasteNoFormatting(this.moveToEndOfLine, this.moveRightToPasteAfterCursor);
+                this.clearData();
+                return true;
+            }
         case (keyMapN.pasteBeforeCursor[0] === this.currentSequence && (keyMapN.pasteBeforeCursor[1] === true || keyMapN.pasteBeforeCursor[2] === modifierInput)):
             {
                 docs.pasteBeforeCursor(this.moveToStartOfLine);
+                this.clearData();
+                return true;
+            }
+        case (keyMapN.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapN.pasteBeforeCursorNoFormatting[1] === true || keyMapN.pasteBeforeCursorNoFormatting[2] === modifierInput)):
+            {
+                docs.pasteBeforeCursorNoFormatting(this.moveToStartOfLine);
                 this.clearData();
                 return true;
             }
@@ -1009,7 +1020,7 @@ macVim.normal_keydown = function (e) {
                 macVim.switchToVisualLineMode();
                 return true;
             }
-        case (keyMapN.append[0] === this.currentSequence && (keyMapN.append[1] === true || keyMapN.append[2] === modifierInput)): 
+        case (keyMapN.append[0] === this.currentSequence && (keyMapN.append[1] === true || keyMapN.append[2] === modifierInput)):
             {
                 let [startXCoord, startYCoord] = docs.getCoords();
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
@@ -1035,14 +1046,14 @@ macVim.normal_keydown = function (e) {
                 macVim.switchToInsertMode();
                 return true;
             }
-        case (keyMapN.appendEndOfLine[0] === this.currentSequence && (keyMapN.appendEndOfLine[1] === true || keyMapN.appendEndOfLine[2] === modifierInput)): 
+        case (keyMapN.appendEndOfLine[0] === this.currentSequence && (keyMapN.appendEndOfLine[1] === true || keyMapN.appendEndOfLine[2] === modifierInput)):
         {
             macVim.moveToEndOfLine();
             macVim.clearData();
             macVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.newLineAbove[0] === this.currentSequence && (keyMapN.newLineAbove[1] === true || keyMapN.newLineAbove[2] === modifierInput)): 
+        case (keyMapN.newLineAbove[0] === this.currentSequence && (keyMapN.newLineAbove[1] === true || keyMapN.newLineAbove[2] === modifierInput)):
         {
             const numRepeats = parseInt(macVim.num) || 1;
             macVim.moveToStartOfLine();
@@ -1056,7 +1067,7 @@ macVim.normal_keydown = function (e) {
             macVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.newLineBelow[0] === this.currentSequence && (keyMapN.newLineBelow[1] === true || keyMapN.newLineBelow[2] === modifierInput)): 
+        case (keyMapN.newLineBelow[0] === this.currentSequence && (keyMapN.newLineBelow[1] === true || keyMapN.newLineBelow[2] === modifierInput)):
         {
             // Get to the bottom of the current line, then press enter
             const numRepeats = parseInt(macVim.num) || 1;
@@ -1070,7 +1081,7 @@ macVim.normal_keydown = function (e) {
             macVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.insertStartOfLine[0] === this.currentSequence && (keyMapN.insertStartOfLine[1] === true || keyMapN.insertStartOfLine[2] === modifierInput)): 
+        case (keyMapN.insertStartOfLine[0] === this.currentSequence && (keyMapN.insertStartOfLine[1] === true || keyMapN.insertStartOfLine[2] === modifierInput)):
         {
             macVim.moveToStartOfLine();
 
@@ -1078,8 +1089,8 @@ macVim.normal_keydown = function (e) {
             macVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.e[0] === this.currentSequence && (keyMapN.e[1] === true || keyMapN.e[2] === modifierInput)): 
-        case (keyMapN.E[0] === this.currentSequence && (keyMapN.E[1] === true || keyMapN.E[2] === modifierInput)): 
+        case (keyMapN.e[0] === this.currentSequence && (keyMapN.e[1] === true || keyMapN.e[2] === modifierInput)):
+        case (keyMapN.E[0] === this.currentSequence && (keyMapN.E[1] === true || keyMapN.E[2] === modifierInput)):
         {
             const numRepeats = parseInt(macVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
@@ -1098,14 +1109,14 @@ macVim.normal_keydown = function (e) {
             macVim.clearData();
             return true;
         }
-        case (keyMapN.endOfLine[0] === this.currentSequence && (keyMapN.endOfLine[1] === true || keyMapN.endOfLine[2] === modifierInput)): 
+        case (keyMapN.endOfLine[0] === this.currentSequence && (keyMapN.endOfLine[1] === true || keyMapN.endOfLine[2] === modifierInput)):
         {
             macVim.moveToEndOfLine();
             macVim.clearData();
             return true;
         }
-        case (keyMapN.w[0] === this.currentSequence && (keyMapN.w[1] === true || keyMapN.w[2] === modifierInput)): 
-        case (keyMapN.W[0] === this.currentSequence && (keyMapN.W[1] === true || keyMapN.W[2] === modifierInput)): 
+        case (keyMapN.w[0] === this.currentSequence && (keyMapN.w[1] === true || keyMapN.w[2] === modifierInput)):
+        case (keyMapN.W[0] === this.currentSequence && (keyMapN.W[1] === true || keyMapN.W[2] === modifierInput)):
         {
             const numRepeats = parseInt(macVim.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
@@ -1115,8 +1126,8 @@ macVim.normal_keydown = function (e) {
             macVim.clearData();
             return true;
         }
-        case (keyMapN.x[0] === this.currentSequence && (keyMapN.x[1] === true || keyMapN.x[2] === modifierInput)): 
-        case (keyMapN.s[0] === this.currentSequence && (keyMapN.s[1] === true || keyMapN.s[2] === modifierInput)): 
+        case (keyMapN.x[0] === this.currentSequence && (keyMapN.x[1] === true || keyMapN.x[2] === modifierInput)):
+        case (keyMapN.s[0] === this.currentSequence && (keyMapN.s[1] === true || keyMapN.s[2] === modifierInput)):
         {
             let shouldWeCut = keyMapN.x[4];
             if (keyMapN.s[0] === this.currentSequence && (keyMapN.s[1] === true || keyMapN.s[2] === modifierInput)) {
@@ -1227,10 +1238,10 @@ macVim.normal_keydown = function (e) {
             }
             return true;
         }
-        case (keyMapN.deleteToEndOfLine[0] === this.currentSequence && (keyMapN.deleteToEndOfLine[1] === true || keyMapN.deleteToEndOfLine[2] === modifierInput)): 
-        case (keyMapN.deleteToEndOfLine2[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2[1] === true || keyMapN.deleteToEndOfLine2[2] === modifierInput)): 
-        case (keyMapN.deleteToEndOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)): 
-        case (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)): 
+        case (keyMapN.deleteToEndOfLine[0] === this.currentSequence && (keyMapN.deleteToEndOfLine[1] === true || keyMapN.deleteToEndOfLine[2] === modifierInput)):
+        case (keyMapN.deleteToEndOfLine2[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2[1] === true || keyMapN.deleteToEndOfLine2[2] === modifierInput)):
+        case (keyMapN.deleteToEndOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)):
+        case (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)):
         {
             // Get the value for shouldWeCut
             let shouldWeCut;
@@ -1276,8 +1287,8 @@ macVim.normal_keydown = function (e) {
 
             // Insert case
             if (
-            (keyMapN.deleteToEndOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)) || 
-            (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput)) 
+            (keyMapN.deleteToEndOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToEndOfLineInsert[1] === true || keyMapN.deleteToEndOfLineInsert[2] === modifierInput)) ||
+            (keyMapN.deleteToEndOfLine2Insert[0] === this.currentSequence && (keyMapN.deleteToEndOfLine2Insert[1] === true || keyMapN.deleteToEndOfLine2Insert[2] === modifierInput))
                 )
                 {
                     macVim.num = "";
@@ -1290,8 +1301,8 @@ macVim.normal_keydown = function (e) {
             macVim.clearData();
             return true;
         }
-        case (keyMapN.deleteToStartOfLine[0] === this.currentSequence && (keyMapN.deleteToStartOfLine[1] === true || keyMapN.deleteToStartOfLine[2] === modifierInput)): 
-        case (keyMapN.deleteToStartOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToStartOfLineInsert[1] === true || keyMapN.deleteToStartOfLineInsert[2] === modifierInput)): 
+        case (keyMapN.deleteToStartOfLine[0] === this.currentSequence && (keyMapN.deleteToStartOfLine[1] === true || keyMapN.deleteToStartOfLine[2] === modifierInput)):
+        case (keyMapN.deleteToStartOfLineInsert[0] === this.currentSequence && (keyMapN.deleteToStartOfLineInsert[1] === true || keyMapN.deleteToStartOfLineInsert[2] === modifierInput)):
         {
 	    // d0, c0
 		let [startXCoord, startYCoord] = docs.getCoords();
@@ -1354,8 +1365,8 @@ macVim.normal_keydown = function (e) {
 
             return true;
         }
-        case (keyMapN.dw[0] === this.currentSequence && (keyMapN.dw[1] === true || keyMapN.dw[2] === modifierInput)): 
-        case (keyMapN.dW[0] === this.currentSequence && (keyMapN.dW[1] === true || keyMapN.dW[2] === modifierInput)): 
+        case (keyMapN.dw[0] === this.currentSequence && (keyMapN.dw[1] === true || keyMapN.dw[2] === modifierInput)):
+        case (keyMapN.dW[0] === this.currentSequence && (keyMapN.dW[1] === true || keyMapN.dW[2] === modifierInput)):
         {
             // "dw", "dW"
             // 2 potential choices/scenarios:
@@ -1364,7 +1375,7 @@ macVim.normal_keydown = function (e) {
             // Determine if we are at the end of a line
             // If we are at the end of a line, delete one character (or none if we are on an empty line)
 
-            // 2: 
+            // 2:
             // If we are not at the end of a line, proceed normally (highlight to the right, then hit delete)
             // After: If we are not at the end of a line, arrow left back one to be on the right character
 
@@ -1440,8 +1451,8 @@ macVim.normal_keydown = function (e) {
             macVim.clearData();
             return true;
         }
-        case (keyMapN.cw[0] === this.currentSequence && (keyMapN.cw[1] === true || keyMapN.cw[2] === modifierInput)): 
-        case (keyMapN.cW[0] === this.currentSequence && (keyMapN.cW[1] === true || keyMapN.cW[2] === modifierInput)): 
+        case (keyMapN.cw[0] === this.currentSequence && (keyMapN.cw[1] === true || keyMapN.cw[2] === modifierInput)):
+        case (keyMapN.cW[0] === this.currentSequence && (keyMapN.cW[1] === true || keyMapN.cW[2] === modifierInput)):
         {
 	        // "cw", "cW"
             // 2 potential choices/scenarios:
@@ -1546,7 +1557,7 @@ macVim.normal_keydown = function (e) {
             macVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.deleteLine[0] === this.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)): 
+        case (keyMapN.deleteLine[0] === this.currentSequence && (keyMapN.deleteLine[1] === true || keyMapN.deleteLine[2] === modifierInput)):
         {
             let shouldWeCut = keyMapN.deleteLine[4];
             this.moveToEndOfLine();
@@ -1617,8 +1628,8 @@ macVim.normal_keydown = function (e) {
             macVim.clearData();
             return true;
         }
-        case (keyMapN.deleteLineInsert[0] === this.currentSequence && (keyMapN.deleteLineInsert[1] === true || keyMapN.deleteLineInsert[2] === modifierInput)): 
-        case (keyMapN.deleteLine2Insert[0] === this.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)): 
+        case (keyMapN.deleteLineInsert[0] === this.currentSequence && (keyMapN.deleteLineInsert[1] === true || keyMapN.deleteLineInsert[2] === modifierInput)):
+        case (keyMapN.deleteLine2Insert[0] === this.currentSequence && (keyMapN.deleteLine2Insert[1] === true || keyMapN.deleteLine2Insert[2] === modifierInput)):
         {
             // cc
             let shouldWeCut = keyMapN.deleteLineInsert[4];
@@ -1698,8 +1709,8 @@ macVim.normal_keydown = function (e) {
             macVim.switchToInsertMode();
             return true;
         }
-        case (keyMapN.deleteInnerWord[0] === this.currentSequence && (keyMapN.deleteInnerWord[1] === true || keyMapN.deleteInnerWord[2] === modifierInput)): 
-        case (keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)): 
+        case (keyMapN.deleteInnerWord[0] === this.currentSequence && (keyMapN.deleteInnerWord[1] === true || keyMapN.deleteInnerWord[2] === modifierInput)):
+        case (keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInnerWordInsert[1] === true || keyMapN.deleteInnerWordInsert[2] === modifierInput)):
         {
 	        // diw, ciw (don't delete spaces + other differences)
             let numRepeats = parseInt(macVim.num) || 1;
@@ -1775,7 +1786,7 @@ macVim.normal_keydown = function (e) {
                             docs.pressKey(docs.codeFromKey("Backspace"));
                         }
                     }
-                    
+
                 }
             }
 
@@ -1792,8 +1803,8 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
             }
             return true;
         }
-        case (keyMapN.deleteWord[0] === this.currentSequence && (keyMapN.deleteWord[1] === true || keyMapN.deleteWord[2] === modifierInput)): 
-        case (keyMapN.deleteWordInsert[0] === this.currentSequence && (keyMapN.deleteWordInsert[1] === true || keyMapN.deleteWordInsert[2] === modifierInput)): 
+        case (keyMapN.deleteWord[0] === this.currentSequence && (keyMapN.deleteWord[1] === true || keyMapN.deleteWord[2] === modifierInput)):
+        case (keyMapN.deleteWordInsert[0] === this.currentSequence && (keyMapN.deleteWordInsert[1] === true || keyMapN.deleteWordInsert[2] === modifierInput)):
         {
 	        // daw, caw
 		const numRepeats = parseInt(macVim.num) || 1;
@@ -1903,7 +1914,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 		}
 		return true;
         }
-        case (keyMapN.copyToEndOfLine[0] === this.currentSequence && (keyMapN.copyToEndOfLine[1] === true || keyMapN.copyToEndOfLine[2] === modifierInput)): 
+        case (keyMapN.copyToEndOfLine[0] === this.currentSequence && (keyMapN.copyToEndOfLine[1] === true || keyMapN.copyToEndOfLine[2] === modifierInput)):
         {
 	        // y$
 		let [startXCoord, startYCoord] = docs.getCoords();
@@ -1941,7 +1952,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 		macVim.clearData();
 		return true;
         }
-        case (keyMapN.copyToStartOfLine[0] === this.currentSequence && (keyMapN.copyToStartOfLine[1] === true || keyMapN.copyToStartOfLine[2] === modifierInput)): 
+        case (keyMapN.copyToStartOfLine[0] === this.currentSequence && (keyMapN.copyToStartOfLine[1] === true || keyMapN.copyToStartOfLine[2] === modifierInput)):
         {
 	        // y0
 		let [startXCoord, startYCoord] = docs.getCoords();
@@ -1998,10 +2009,10 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
 		macVim.clearData();
 		return true;
-    
+
         }
-        case (keyMapN.copyWholeLine[0] === this.currentSequence && (keyMapN.copyWholeLine[1] === true || keyMapN.copyWholeLine[2] === modifierInput)): 
-        case (keyMapN.copyWholeLine2[0] === this.currentSequence && (keyMapN.copyWholeLine2[1] === true || keyMapN.copyWholeLine2[2] === modifierInput)): 
+        case (keyMapN.copyWholeLine[0] === this.currentSequence && (keyMapN.copyWholeLine[1] === true || keyMapN.copyWholeLine[2] === modifierInput)):
+        case (keyMapN.copyWholeLine2[0] === this.currentSequence && (keyMapN.copyWholeLine2[1] === true || keyMapN.copyWholeLine2[2] === modifierInput)):
         {
             // yy or Y (copy the whole line)
             const numRepeats = parseInt(this.num) || 1;
@@ -2053,8 +2064,8 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
             macVim.clearData();
             return true;
         }
-        case (keyMapN.u[0] === this.currentSequence && (keyMapN.u[1] === true || keyMapN.u[2] === modifierInput)): 
-        case (keyMapN.U[0] === this.currentSequence && (keyMapN.U[1] === true || keyMapN.U[2] === modifierInput)): 
+        case (keyMapN.u[0] === this.currentSequence && (keyMapN.u[1] === true || keyMapN.u[2] === modifierInput)):
+        case (keyMapN.U[0] === this.currentSequence && (keyMapN.U[1] === true || keyMapN.U[2] === modifierInput)):
 		{
             const numRepeats = parseInt(this.num) || 1;
             for (let i = 0; i < numRepeats; i++) {
@@ -2416,6 +2427,20 @@ macVim.visual_keydown = function (e) {
                 return true;
 
             }
+        case (keyMapV.pasteNoFormatting[0] === this.currentSequence && (keyMapV.pasteNoFormatting[1] === true || keyMapV.pasteNoFormatting[2] === modifierInput)):
+        case (keyMapV.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapV.pasteBeforeCursorNoFormatting[1] === true || keyMapV.pasteBeforeCursorNoFormatting[2] === modifierInput)):
+            {
+                // We have to first delete the highlighted text, then paste in the clipboard
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+
+                docs.pastePlainText();
+
+                this.clearData();
+                this.switchToNormalMode();
+                return true;
+            }
         case (keyMapV.insertStartOfHighlight[0] === this.currentSequence && (keyMapV.insertStartOfHighlight[1] === true || keyMapV.insertStartOfHighlight[2] === modifierInput)):
             {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -2774,7 +2799,7 @@ macVim.visual_line_keydown = function (e) {
             return true;
         }
         case (keyMapVLine.arrowUp[0] === this.currentSequence && (keyMapVLine.arrowUp[1] === true || keyMapVLine.arrowUp[2] === modifierInput)):
-        case (keyMapVLine.arrowUpCtrl[0] === this.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)): 
+        case (keyMapVLine.arrowUpCtrl[0] === this.currentSequence && (keyMapVLine.arrowUpCtrl[1] === true || keyMapVLine.arrowUpCtrl[2] === modifierInput)):
         case (keyMapVLine.k[0] === this.currentSequence && (keyMapVLine.k[1] === true || keyMapVLine.k[2] === modifierInput)):
         {
 			const numRepeats = parseInt(macVim.num) || 1;
@@ -2788,8 +2813,8 @@ macVim.visual_line_keydown = function (e) {
 			macVim.clearData();
 			return true;
         }
-        case (keyMapVLine.arrowDown[0] === this.currentSequence && (keyMapVLine.arrowDown[1] === true || keyMapVLine.arrowDown[2] === modifierInput)): 
-        case (keyMapVLine.arrowDownCtrl[0] === this.currentSequence && (keyMapVLine.arrowDownCtrl[1] === true || keyMapVLine.arrowDownCtrl[2] === modifierInput)): 
+        case (keyMapVLine.arrowDown[0] === this.currentSequence && (keyMapVLine.arrowDown[1] === true || keyMapVLine.arrowDown[2] === modifierInput)):
+        case (keyMapVLine.arrowDownCtrl[0] === this.currentSequence && (keyMapVLine.arrowDownCtrl[1] === true || keyMapVLine.arrowDownCtrl[2] === modifierInput)):
         case (keyMapVLine.j[0] === this.currentSequence && (keyMapVLine.j[1] === true || keyMapVLine.j[2] === modifierInput)):
         {
 			// We need to handle j differently on Mac because of Apple's weird behavior around empty lines
@@ -2812,7 +2837,7 @@ macVim.visual_line_keydown = function (e) {
 			macVim.clearData();
 			return true;
         }
-        case (keyMapVLine.ctrlDPageDown[0] === this.currentSequence && (keyMapVLine.ctrlDPageDown[1] === true || keyMapVLine.ctrlDPageDown[2] === modifierInput)): 
+        case (keyMapVLine.ctrlDPageDown[0] === this.currentSequence && (keyMapVLine.ctrlDPageDown[1] === true || keyMapVLine.ctrlDPageDown[2] === modifierInput)):
         {
             // Ctrl-d is page-down, so move down and then ensure we are still line-based
             let iterations = 6;
@@ -2841,7 +2866,7 @@ macVim.visual_line_keydown = function (e) {
 			macVim.clearData();
 			return true;
         }
-        case (keyMapVLine.ctrlUPageUp[0] === this.currentSequence && (keyMapVLine.ctrlUPageUp[1] === true || keyMapVLine.ctrlUPageUp[2] === modifierInput)): 
+        case (keyMapVLine.ctrlUPageUp[0] === this.currentSequence && (keyMapVLine.ctrlUPageUp[1] === true || keyMapVLine.ctrlUPageUp[2] === modifierInput)):
         {
             // Ctrl-u is page-up, so move up and then ensure we are still line-based
             let iterations = 6
@@ -2933,6 +2958,19 @@ macVim.visual_line_keydown = function (e) {
                 setTimeout(() => {
                     docs.pasteRegular();
                 }, 1)
+
+                macVim.clearData();
+                macVim.switchToNormalMode();
+                return true;
+            }
+        case (keyMapVLine.pasteNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteNoFormatting[1] === true || keyMapVLine.pasteNoFormatting[2] === modifierInput)):
+        case (keyMapVLine.pasteBeforeCursorNoFormatting[0] === this.currentSequence && (keyMapVLine.pasteBeforeCursorNoFormatting[1] === true || keyMapVLine.pasteBeforeCursorNoFormatting[2] === modifierInput)):
+            {
+                if (docs.isTextSelected()) {
+                    docs.pressKey(docs.codeFromKey("Backspace"));
+                }
+
+                docs.pastePlainText();
 
                 macVim.clearData();
                 macVim.switchToNormalMode();

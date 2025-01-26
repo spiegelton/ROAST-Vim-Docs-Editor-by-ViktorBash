@@ -525,7 +525,6 @@ getUltimateKeyMapInCallback(function (ultimateKeyMap) {
 // This script sets the "Show Updates" checkbox to the correct value, and also stores if the user changes the value by toggling the checkbox
 let toggleStartModeCheckBox = document.getElementById("toggleStartMode");
 
-
 // Set the value of the checkbox
 chrome.storage.sync.get("toggleStartMode", function(result) {
     if (result.toggleStartMode === "false") {
@@ -548,3 +547,25 @@ function handleCheckboxChange(event) {
 }
 
 toggleStartModeCheckBox.addEventListener("change", handleCheckboxChange);
+
+let togglePasteModeCheckBox = document.getElementById("togglePasteMode");
+
+// The default if the user has nothing saved is true
+chrome.storage.sync.get("togglePasteMode", function(result) {
+    if (result.togglePasteMode === "false") {
+        togglePasteModeCheckBox.checked = false;
+    } else {
+        togglePasteModeCheckBox.checked = true;
+    }
+});
+
+// Handle checkbox change
+function handlePasteCheckboxChange(event) {
+    if (event.target.checked) {
+        chrome.storage.sync.set({"togglePasteMode": "true"});
+    } else {
+        chrome.storage.sync.set({"togglePasteMode": "false"});
+    }
+}
+
+togglePasteModeCheckBox.addEventListener("change", handlePasteCheckboxChange);
