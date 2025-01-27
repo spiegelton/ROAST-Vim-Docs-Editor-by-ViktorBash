@@ -390,6 +390,12 @@ docs.isTextSelected = function () {
 
 }
 
+// Copy the selected text
+docs.copy = function() {
+    docs.contentDocument.execCommand("copy");
+}
+
+
 docs.lastPasteTime = Date.now();
 
 // The paste functions:

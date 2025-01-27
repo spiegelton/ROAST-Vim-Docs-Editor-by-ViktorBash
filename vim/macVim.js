@@ -1194,7 +1194,7 @@ macVim.normal_keydown = function (e) {
                     newCounter++;
                 }
                 if (shouldWeCut) {
-                    docs.contentDocument.execCommand("copy");
+                    docs.copy();
                 }
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 for (let i = 0; i < newCounter; i++) {
@@ -1217,7 +1217,7 @@ macVim.normal_keydown = function (e) {
                 else {
                     if (shouldWeCut) {
                         docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                        docs.contentDocument.execCommand("copy");
+                        docs.copy();
                         docs.pressKey(docs.codeFromKey("ArrowLeft"));
                         docs.pressKey(docs.codeFromKey("Delete"));
                     }
@@ -1664,7 +1664,7 @@ macVim.normal_keydown = function (e) {
                 // At start of file on an empty line
                 if (shouldWeCut) {
                     docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                    docs.contentDocument.execCommand("copy");
+                    docs.copy();
                     docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 }
                 macVim.currentSequence = "";
@@ -1680,7 +1680,7 @@ macVim.normal_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("ArrowRight"));
                     if (shouldWeCut) {
                         docs.pressKey(docs.codeFromKey("ArrowRight"), true, true);
-                        docs.contentDocument.execCommand("copy");
+                        docs.copy();
                         docs.pressKey(docs.codeFromKey("ArrowLeft"));
                     }
                     macVim.currentSequence = "";
@@ -1927,7 +1927,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 			// We're in the middle of a line
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-			docs.contentDocument.execCommand("copy");
+			docs.copy();
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		} else {
 			// We are on the end of a multiline or line
@@ -1944,7 +1944,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 
 				// Highlight, copy, deselect
 				docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
-				docs.contentDocument.execCommand("copy");
+				docs.copy();
 				docs.pressKey(docs.codeFromKey("ArrowLeft"));
 			}
 		}
@@ -1966,7 +1966,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 			// In the middle of a line
 			docs.pressKey(docs.codeFromKey("ArrowRight"));
 			docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-			docs.contentDocument.execCommand("copy");
+			docs.copy();
 			docs.pressKey(docs.codeFromKey("ArrowLeft"));
 		}
 		else {
@@ -2001,7 +2001,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
 					docs.pressKey(docs.codeFromKey("ArrowRight"), true);
 					docs.pressKey(docs.codeFromKey("ArrowRight"));
 					docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-					docs.contentDocument.execCommand("copy");
+					docs.copy();
 					docs.pressKey(docs.codeFromKey("ArrowLeft"));
 				}
 			}
@@ -2055,7 +2055,7 @@ keyMapN.deleteInnerWordInsert[0] === this.currentSequence && (keyMapN.deleteInne
                 upCounter -= 1;
             }
 
-            docs.contentDocument.execCommand("copy");
+            docs.copy();
 
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
 
@@ -2574,7 +2574,7 @@ macVim.visual_keydown = function (e) {
             }
         case (keyMapV.y[0] === this.currentSequence && (keyMapV.y[1] === true || keyMapV.y[2] === modifierInput)):
             {
-                docs.contentDocument.execCommand("copy");
+                docs.copy();
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 macVim.clearData();
                 macVim.switchToNormalMode();
@@ -3040,7 +3040,7 @@ macVim.visual_line_keydown = function (e) {
             }
         case (keyMapVLine.y[0] === this.currentSequence && (keyMapVLine.y[1] === true || keyMapVLine.y[2] === modifierInput)):
 			{
-                docs.contentDocument.execCommand("copy");
+                docs.copy();
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 macVim.clearData();
                 macVim.switchToNormalMode();

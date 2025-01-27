@@ -1195,7 +1195,7 @@ windowsVim.normal_keydown = function (e) {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
                 }
                 if (shouldWeCut) {
-                    docs.contentDocument.execCommand("copy");
+                    docs.copy();
                 }
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
 
@@ -1221,7 +1221,7 @@ windowsVim.normal_keydown = function (e) {
                 else {
                     if (shouldWeCut) {
                         docs.pressKey(docs.codeFromKey("ArrowRight"), false, true);
-                        docs.contentDocument.execCommand("copy");
+                        docs.copy();
                         docs.pressKey(docs.codeFromKey("ArrowLeft"));
                         docs.pressKey(docs.codeFromKey("Delete"));
                     }
@@ -1641,7 +1641,7 @@ windowsVim.normal_keydown = function (e) {
                 numRepeats--;
             }
             if (shouldWeCut) {
-                docs.contentDocument.execCommand("copy");
+                docs.copy();
                 setTimeout(() => {
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
                     if (docs.isTextSelected()) {
@@ -1910,7 +1910,7 @@ windowsVim.normal_keydown = function (e) {
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
                 docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                docs.contentDocument.execCommand("copy");
+                docs.copy();
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
             } else {
                 // We are on the end of a multiline or line
@@ -1929,7 +1929,7 @@ windowsVim.normal_keydown = function (e) {
                     // Copy
                     docs.pressKey(docs.codeFromKey("ArrowDown"), true, true);
                     docs.pressKey(docs.codeFromKey("ArrowLeft"), false, true);
-                    docs.contentDocument.execCommand("copy");
+                    docs.copy();
 
                     // Put cursor back at original position
                     docs.pressKey(docs.codeFromKey("ArrowLeft"));
@@ -1954,7 +1954,7 @@ windowsVim.normal_keydown = function (e) {
                 // In the middle of a line
                 docs.pressKey(docs.codeFromKey("ArrowRight"));
                 docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                docs.contentDocument.execCommand("copy");
+                docs.copy();
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
             } else {
                 // At the start of a line or multiline, figure out which one and then act accordingly
@@ -1980,7 +1980,7 @@ windowsVim.normal_keydown = function (e) {
                     ) {
                         // We were at the start of a multiline, so copy
                         docs.pressKey(docs.codeFromKey("ArrowUp"), true, true);
-                        docs.contentDocument.execCommand("copy");
+                        docs.copy();
                         docs.pressKey(docs.codeFromKey("ArrowLeft"));
                     } else {
                         // We are at the start of a line, so just go back
@@ -2010,7 +2010,7 @@ windowsVim.normal_keydown = function (e) {
             }
 
             // Copy the text
-            docs.contentDocument.execCommand("copy");
+            docs.copy();
             docs.pressKey(docs.codeFromKey("ArrowLeft"));
 
             // Move back to our original position
@@ -2519,7 +2519,7 @@ windowsVim.visual_keydown = function (e) {
             }
         case (keyMapV.y[0] === windowsVim.currentSequence && (keyMapV.y[1] === true || keyMapV.y[2] === modifierInput)):
             {
-                docs.contentDocument.execCommand("copy");
+                docs.copy();
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 windowsVim.clearData();
                 windowsVim.switchToNormalMode();
@@ -2954,7 +2954,7 @@ windowsVim.visual_line_keydown = function (e) {
             }
         case (keyMapVLine.y[0] === windowsVim.currentSequence && (keyMapVLine.y[1] === true || keyMapVLine.y[2] === modifierInput)):
             {
-                docs.contentDocument.execCommand("copy");
+                docs.copy();
                 docs.pressKey(docs.codeFromKey("ArrowLeft"));
                 windowsVim.clearData();
                 windowsVim.switchToNormalMode();
