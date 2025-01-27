@@ -9,6 +9,8 @@ const MAC_PLATFORMS = ["MacIntel", "MacPPC", "Mac68K", "iPhone", "iPad"]; // Rea
 docs.isMac = MAC_PLATFORMS.includes(navigator.platform)
 
 docs.setUp = function () {
+    const CURSOR_CARET_CLASS = ".kix-cursor-caret"
+
     docs.contentDocument = document.querySelector(
         ".docs-texteventtarget-iframe"
     ).contentDocument;
@@ -24,7 +26,7 @@ docs.setUp = function () {
     docs.placeHolderKey = "_";  // Can't be a special character/key
 
     docs.userCursor = document.querySelector(".kix-cursor");
-    docs.cursorCaret = document.querySelector(".kix-cursor-caret");
+    docs.cursorCaret = document.querySelector(CURSOR_CARET_CLASS);
 
     docs.fontSizeInput = document.querySelector(
         '.jfk-textinput.goog-toolbar-combo-button-input[aria-label="Font size"]'
@@ -34,9 +36,16 @@ docs.setUp = function () {
     docs.capitalizationMenuLoaded = false;
     docs.paragraphStylesMenuLoaded = false;
 
-    docs.pasteInstalled = true;
+
+    // Used for updating the cursor when switching between document tabs
+    docs.documentTabWidget = document.querySelector(".outlines-widget");
+    docs.documentTabWidget.addEventListener("click", (e) => {
+        docs.cursorCaret = document.querySelector(CURSOR_CARET_CLASS);
+        docs.setCursorWidth(docs._lastMode);
+    });
 
     // This determines whether we can use the "Paste" button in the toolbar or just plain text paste for all pastes
+    docs.pasteInstalled = true;
     chrome.storage.sync.get("togglePasteMode", function(result) {
         if (result.togglePasteMode === "false") {
             docs.pasteInstalled = false;
@@ -273,6 +282,7 @@ docs.pressSpecialKey = function (key) {
 
 // Sets the width of the user's insertion point marker. @width should be a
 // width value compatible with CSS border-width: @width;
+docs._lastMode = "";
 docs.setCursorWidth = function (modeType) {
     // Possible inputs are "normal", "visual", "visual_line", "insert"
     if (modeType === "normal") {
@@ -286,6 +296,7 @@ docs.setCursorWidth = function (modeType) {
         // The cursor is regularly styled (for insert mode, visual, visual line modes)
         docs.cursorCaret.style.borderWidth = "2px";
     }
+    docs._lastMode = modeType;
 };
 
 
