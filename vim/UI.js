@@ -53,7 +53,7 @@ function getCleanedSequence(sequence) {
 	// This function takes in a sequence (ex: "d•w") and returns a cleaned version (ex: "dw")
 	// This is used to check if a keybinding is already taken or not
 	let cleanedSequence;
-	cleanedSequence = sequence.replace(KEY_SEPARATOR, "");
+	cleanedSequence = sequence.replaceAll(KEY_SEPARATOR, "");
 	return cleanedSequence;
 }
 
