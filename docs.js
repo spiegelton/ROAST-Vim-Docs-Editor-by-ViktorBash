@@ -39,9 +39,13 @@ docs.setUp = function () {
 
     // Used for updating the cursor when switching between document tabs
     docs.documentTabWidget = document.querySelector(".outlines-widget");
-    docs.documentTabWidget.addEventListener("click", (e) => {
+    docs.documentTabWidget.addEventListener("click", function eventHandler(e) {
         docs.cursorCaret = document.querySelector(CURSOR_CARET_CLASS);
         docs.setCursorWidth(docs._lastMode);
+
+        // Since we're calling setUp() again we gotta clean up the event listener we just added
+        docs.documentTabWidget.removeEventListener("click", eventHandler);
+        docs.setUp();
     });
 
     // This determines whether we can use the "Paste" button in the toolbar or just plain text paste for all pastes
