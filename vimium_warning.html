@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Vimium Warning</title>
+		<meta name="description" content="Change Vimium" />
+		<link rel="stylesheet" href="mvp.css" />
+	</head>
+	<style>
+		body {
+			font-size: 15px;
+		}
+		kbd {
+			background-color: #eeeeee;
+			padding: 4px;
+		}
+		li {
+			text-align: center;
+		}
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+	</style>
+	<body>
+		<header>
+			<h1>Vimium and Vim for Google Docs Collision</h1>
+            <p>We've detected you also have the Vimium extension installed. To have Vim for Google Docs work as well, make sure you disable Vimium on Google Docs with the below exclusion patterns:</p>
+            <ul>
+                <li><kbd>about:blank*</kbd></li>
+                <li><kbd>https?://docs.google.com/*</kbd></li>
+            </ul>
+            <br>
+			<img src="vimium_image.png" alt="Vimium" />
+			<p><b>Support, Feature Requests:</b> support@vimfordocs.com</p>
+		</header>
+	</body>
+</html>

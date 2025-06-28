@@ -1,0 +1,13 @@
+# IDE Files
+.vscode/
+.idea/
+
+# Addicted to seeing lines of code
+.VSCodeCounter/
+
+node_modules/
+
+dist/bundle.js
+
+# Mac
+.DS_STORE

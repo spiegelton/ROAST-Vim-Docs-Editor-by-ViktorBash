@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Changelog</title>
+		<meta name="description" content="Changelog" />
+		<link rel="stylesheet" href="mvp.css" />
+	</head>
+	<style>
+		body {
+			font-size: 15px;
+		}
+		kbd {
+			background-color: #eeeeee;
+			padding: 4px;
+		}
+		li {
+			text-align: left;
+		}
+	</style>
+	<body>
+		<header>
+			<h1>Changelog</h1>
+			<div>
+				<span><b>Show Updates:</b></span>
+				<input type="checkbox" id="toggleUpdate">
+				<p style="color: rgb(66, 66, 66); font-style: italic; margin-top: 0;">Uncheck this box if you don't want this page to pop up whenever the extension gets updated.</p>
+				<br>
+				<p><b>Support, Feature Requests:</b> support@vimfordocs.com</p>
+			</div>
+			<h2>Version 1.19 Changes</h2>
+			<ul>
+				<li>Added support for line numbering enabled on all documents as an option</li>
+				<li>Added button in remap page to make all possible keybindings cut text</li>
+				<li>Fixed bug with cursor not displaying properly when switching between document tabs</li>
+			</ul>
+			<h2>Version 1.18 Changes</h2>
+			<ul>
+				<li>Fixed pasting (due to code-breaking changes from Google Docs)</li>
+				<li>Fixed cutting (due to code-breaking changes from Google Docs)</li>
+			</ul>
+			<h2>Version 1.17 Changes (Major Update)</h2>
+			<ul>
+				<li>Added in <kbd>db</kbd> and <kbd>cb</kbd></li>
+				<li>Added in <kbd>de</kbd> and <kbd>ce</kbd></li>
+				<li>Redid <kbd>{</kbd> and <kbd>}</kbd> in normal mode to work properly</li>
+				<li>Revamp pasting (various bugfixes)</li>
+				<li>Various bugfixes</li>
+				<li>Fixed bugs with Replace Mode</li>
+				<li>Fixed bugs with Visual Line Mode</li>
+				<li>Fixed bugs with <kbd>J</kbd></li>
+				<li>Added <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> shortcut to toggle hiding the menus (Native Google Docs shortcut)</li>
+				<li>Fixed bugs with shortcut for displaying word count</li>
+				<li>Added <kbd>s</kbd> and <kbd>S</kbd> in visual mode</li>
+				<li>Added <kbd>s</kbd> and <kbd>S</kbd> in visual line mode</li>
+				<li>Added <kbd>Enter</kbd> in normal mode</li>
+				<li>Fixed bug with UI for what mode you're in being covered by sidebar</li>
+			</ul>
+			<h2>Version 1.16 Changes</h2>
+			<ul>
+				<li>Added <kbd>zz</kbd>, <kbd>zt</kbd> and <kbd>zb</kbd> commands</li>
+				<li>Pricing change (for better)</li>
+			</ul>
+			<h2>Version 1.15 Changes (Major Update)</h2>
+			<ul>
+				<li><b>Added <kbd>f</kbd>, <kbd>t</kbd>, <kbd>F</kbd> and <kbd>T</kbd> keybindings</b> to normal mode (searching for characters)</li>
+				<li>Added <b>replace mode</b> (use <kbd>R</kbd> in normal mode to access)</li>
+				<li><b>Overhauled visual line mode</b> to work better</li>
+				<li>Added <kbd>J</kbd> for joining lines together</li>
+				<li>Added num support for yanking in normal mode (<kbd>yy</kbd> and <kbd>Y</kbd>)</li>
+				<li>Added improvements/bug-fixes for switching to visual mode using the mouse in normal mode</li>
+				<li>Added improvements/bug-fixes for <kbd>r</kbd> command</li>
+				<li>Added <kbd>Spacebar</kbd> keybinding in normal and visual mode</li>
+				<li>Pricing change</li>
+				<li>Other various bugfixes</li>
+			</ul>
+
+			<h2>Version 1.14 Changes</h2>
+			<ul>
+				<li>Added indent/outdent keybindings for normal, visual and visual line modes</li>
+				<li>Implement uppercase/lowercase keybindings for visual and visual line modes</li>
+				<li>Hotfix for bug with 'r' (replace command)</li>
+				<li>Minor improvement for visual mode cursor logic</li>
+			</ul>
+
+			<h2>Version 1.13 Changes (Major Update)</h2>
+			<ul>
+				<li>Added <b>remapping support</b> for all keybindings</li>
+				<li>Added support for a lot more native Google Docs shortcuts to work in normal/visual/visual line modes (increase/decrease font, superscript, subscript, etc)</li>
+				<li>Added remapping support for native Google Docs shortcuts</li>
+				<li>Minor improvements to pasting keybindings</li>
+				<li>Added option for many keybindings to cut to clipboard (dd, x, cc, etc) in normal, visual and visual line modes</li>
+				<li>Speed up and fix bugs with "x" keybinding</li>
+				<li>Fix bug with mouse detection to go to normal mode</li>
+				<li>Generally refactored codebase, making it easier to add more features in the future</li>
+
+			</ul>
+			<h2>Version 1.12 Changes</h2>
+			<ul>
+				<li>Added <kbd>s</kbd> in normal mode (same as pressing <kbd>xi</kbd>)</li>
+				<li>Added <kbd>S</kbd> in normal mode (same shortcut as <kbd>cc</kbd>)</li>
+				<li>Fixed bug with <kbd>{</kbd> not working in Mac visual mode</li>
+				<li>Fixed bugs with <kbd>diw</kbd> , <kbd>ciw</kbd> , <kbd>daw</kbd> and <kbd>caw</kbd> on Windows when on the last character in a line</li>
+				<li>Fixed bugs with <kbd>dw</kbd> and <kbd>cw</kbd> deleting improperly when on a space</li>
+				<li>Fixed bugs with <kbd>dd</kbd> and <kbd>cc</kbd> on Mac</li>
+				<li>Fixed bug with <kbd>$</kbd> in visual mode on Mac</li>
+				<li>Let <kbd>Ctrl</kbd> + <kbd>1</kbd> to <kbd>9</kbd> pass through as shortcut (<kbd>Cmd</kbd> +<kbd>1</kbd> to <kbd>9</kbd> on Mac)</li>
+				<li>Let Google Docs native shortcuts for bullet points and text style (Normal text, heading 1, heading 2, etc) pass through in normal and visual mode</li>
+				<li>Added <kbd>Backspace</kbd> as shortcut</li>
+			</ul>
+
+			<h2>Version 1.11 Changes</h2>
+			<ul>
+				<li>Added support for <kbd>cw</kbd></li>
+				<li>Added support for <kbd>daw</kbd> and <kbd>caw</kbd></li>
+				<li>Revamped <kbd>diw</kbd> and <kbd>ciw</kbd> to be more accurate (specifically in handling whitespace)</li>
+			</ul>
+
+			<h2>Version 1.10 Changes</h2>
+			<ul>
+				<li>Added support for arrow keys for navigation</li>
+				<li>Added support for left, center and right align text in either normal or visual modes (and also justify text)
+					<ul>
+						<li><kbd>Ctrl</kbd> or <kbd>Command</kbd> (Mac) + <kbd>Shift</kbd> + <kbd>L</kbd> - Left align text </li>
+						<li><kbd>Ctrl</kbd> or <kbd>Command</kbd> (Mac) + <kbd>Shift</kbd> + <kbd>E</kbd> - Center align text </li>
+						<li><kbd>Ctrl</kbd> or <kbd>Command</kbd> (Mac) + <kbd>Shift</kbd> + <kbd>R</kbd> - Right align text </li>
+						<li><kbd>Ctrl</kbd> or <kbd>Command</kbd> (Mac) + <kbd>Shift</kbd> + <kbd>J</kbd> - Justify text </li>
+					</ul>
+				</li>
+				<li>Added support for <kbd>Ctrl</kbd> + <kbd>a</kbd> for Windows and <kbd>Command</kbd> + <kbd>a</kbd> on Mac for selecting all the text</li>
+				<li>Fixed bugs with <kbd>dw</kbd> and made it more robust</li>
+			</ul>
+			<h2>Version 1.9 Changes</h2>
+			<ul>
+				<li>Added <kbd>dw</kbd> support</li>
+				<li>Made better system for changing Vim modes based on mouse movements</li>
+				<li>Fixed bug with <kbd>o</kbd> being used near the end of a file on windows</li>
+				<li>Fixed small bug with <kbd>A</kbd> when used on second-to-last line in a file</li>
+				<li>Fixed bug with <kbd>r</kbd> not working with some special keys like "$", "%", "*", etc</li>
+				<li>Fixed bug with <kbd>dd</kbd> on Mac</li>
+				<li>Added number support for <kbd>O</kbd> and <kbd>o</kbd></li>
+				<li>Added number support for <kbd>x</kbd></li>
+			</ul>
+			<h2>Version 1.8 Changes</h2>
+			<ul>
+				<li>Added <kbd>{</kbd> and <kbd>}</kbd> for traversing paragraphs at a time (visual and normal mode)</li>
+				<li>When you click and drag with your mouse in normal mode, Vim automatically changes to visual mode.</li>
+				<li>When you click once somewhere with your mouse in visual mode, Vim automatically changes to normal mode.</li>
+				<li>Added search shortcuts with <kbd>Ctrl</kbd> + <kbd>f</kbd> on Windows and <kbd>Cmd</kbd> + <kbd>f</kbd> on Mac.</li>
+				<li>Added search shortcut with <kbd>/</kbd> (all devices)</li>
+			</ul>
+			<h2>Version 1.7 Changes</h2>
+			<ul>
+				<li>Changed pricing options (for the better!): Purchasing options are now yearly or lifetime license (instead of just having a monthly option)</li>
+			</ul>
+			<h2>Version 1.6 Changes</h2>
+			<ul>
+				<li>A lot of bug fixes for a lot of keybindings in normal and visual mode. In coming updates there's going to be minimal bug fixes now (since the large majority are gone), and focus will be put more on shipping out new keybindings.</li>
+				<li>Redo functionality with <kbd>Ctrl</kbd> + <kbd>r</kbd></li>
+				<li>Page up and Down functionality with <kbd>Ctrl</kbd> + <kbd>u</kbd> and <kbd>Ctrl</kbd> + <kbd>d</kbd></li>
+				<li>In visual mode you can now bold, italicize, and strike through text with the regular Google Docs shortcuts.</li>
+			</ul>
+			<h2>Version 1.5 Changes</h2>
+			<ul>
+				<li><kbd>Ctrl</kbd> + <kbd>c</kbd> also can be used to return to normal mode</li>
+			</ul>
+			<h2>Version 1.4 Changes</h2>
+			<ul>
+				<li>In general, a lot of bugs were fixed for the cursor movement, entering insert mode, and editing keybindings. Next update will be focused on solving bugs in visual mode.</li>
+				<li><kbd>P</kbd> and <kbd>p</kbd> now paste with formatting. (Pasting without formatting is possible by doing <kbd>Ctrl</kbd> + <kbd>P/p</kbd>)</li>
+			</ul>
+
+		</header>
+	</body>
+
+	<script src="toggleUpdate.js"></script>
+</html>
